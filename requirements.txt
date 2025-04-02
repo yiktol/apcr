@@ -1,0 +1,5 @@
+streamlit
+botocore
+boto3
+numpy
+pandas
