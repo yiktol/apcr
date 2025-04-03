@@ -19,5 +19,5 @@ streamlit run Home.py --server.port 8094 &
 cd /home/ubuntu/environment/apcr/aip/session2
 streamlit run Home.py --server.port 8082 &
 
-cd /home/ubuntu/environment/genaionaws/05-Chatbot
-streamlit run Home.py --server.port 8083 &
+cd /home/ubuntu/environment/genaionaws/04-Embedding
+streamlit run Home.py --server.port 8084 &

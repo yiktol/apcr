@@ -260,31 +260,120 @@ categories = {
 }
 
 # Prompt definitions with additional metadata
-prompt1 = """Meet Carbon Maps, a new French startup that raised $4.3 million (€4 million) just a few weeks after its inception. The company is building a software-as-a-service platform for the food industry so that they can track the environmental impact of each of their products in their lineup. The platform can be used as a basis for eco ratings. \
-While there are quite a few carbon accounting startups like Greenly, Sweep, Persefoni and Watershed, Carbon Maps isn't an exact competitor as it doesn't calculate a company's carbon emissions as a whole. It doesn't focus on carbon emissions exclusively either. Carbon Maps focuses on the food industry and evaluates the environmental impact of products — not companies. \
-Co-founded by Patrick Asdaghi, Jérémie Wainstain and Estelle Huynh, the company managed to raise a seed round with Breega and Samaipata — these two VC firms already invested in Asdaghi's previous startup, FoodChéri. \
-FoodChéri is a full-stack food delivery company that designs its own meals and sells them directly to end customers with an important focus on healthy food. It also operates Seazon, a sister company for batch deliveries. The startup was acquired by Sodexo a few years ago. \
-"On the day that I left, I started working on food and health projects again," Asdaghi told me. "I wanted to make an impact, so I started moving up the supply chain and looking at agriculture." \
-And the good news is that Asdaghi isn't the only one looking at the supply chain of the food industry. In France, some companies started working on an eco-score with a public agency (ADEME) overseeing the project. It's a life cycle assessment that leads to a letter rating from A to E. \
-While very few brands put these letters on their labels, chances are companies that have good ratings will use the eco-score as a selling point in the coming years. \
-But these ratings could become even more widespread as regulation is still evolving. The European Union is even working on a standard — the Product Environmental Footprint (PEF). European countries can then create their own scoring systems based on these European criteria, meaning that food companies will need good data on their supply chains. \
-"The key element in the new eco-score that's coming up is that there will be some differences within a product category because ingredients and farming methods are different," Asdaghi said. "It's going to take into consideration the carbon impact, but also biodiversity, water consumption and animal welfare." \
-For instance, when you look at ground beef, it's extremely important to know whether farmers are using soy from Brazil or grass to feed cattle. \
-"We don't want to create the ratings. We want to create the tools that help with calculations — a sort of SAP," Asdaghi said. \
-So far, Carbon Maps is working with two companies on pilot programs as it's going to require a ton of work to cover each vertical in the food industry. The startup creates models with as many criteria as possible to calculate the impact of each criteria. It uses data from standardized sources like GHG Protocol, IPCC, ISO 14040 and 14044. \
-The company targets food brands because they design the recipes and select their suppliers. Eventually, Carbon Maps hopes that everybody across the supply chain is going to use its platform in one way or another. \
-"You can't have a true climate strategy if you don't have some collaboration across the chain," Asdaghi said. \
+prompt1 = """The Rise of Quantum Computing and Its Implications for Cybersecurity
 
-## 
+In recent years, quantum computing has emerged as one of the most promising and potentially disruptive technologies of the 21st century. Unlike classical computers that use bits to represent either 0 or 1, quantum computers leverage quantum bits or "qubits" that can exist in multiple states simultaneously due to the principle of superposition. This fundamental difference gives quantum computers the theoretical ability to solve certain problems exponentially faster than even the most powerful classical supercomputers.
 
-Summarize the above text in 5 bullets."""
+The field of quantum computing traces back to 1981, when physicist Richard Feynman proposed the concept of quantum simulators. However, practical development accelerated in the 1990s with Peter Shor's algorithm demonstrating that quantum computers could efficiently factor large numbers—a capability that directly threatens modern cryptographic systems. By the early 2000s, companies like IBM, Google, and D-Wave began investing heavily in quantum hardware, leading to significant breakthroughs over the past decade.
 
-prompt2 = """Please precisely copy any email addresses from the following text and then write them in a table with index number.. Only write an email address if it's precisely spelled out in the input text. If there are no email addresses in the text, write "N/A". Do not say anything else.\n
-"Phone Directory:
-John Latrabe, 800-232-1995, john909709@geemail.com
-Josie Lana, 800-759-2905, josie@josielananier.com
-Keven Stevens, 800-980-7000, drkevin22@geemail.com 
-Phone directory will be kept up to date by the HR manager." 
+Today's quantum computers still face substantial challenges. Quantum coherence—maintaining the delicate quantum state of qubits—remains difficult, requiring temperatures near absolute zero and elaborate isolation from environmental noise. Current quantum systems typically contain between 50-100 qubits, with error rates that limit their practical applications. Despite these limitations, in 2019, Google claimed to have achieved "quantum supremacy" by performing a specific calculation that would be infeasible for classical computers, though this claim has been contested.
+
+The implications of mature quantum computing for cybersecurity are profound. Many of today's encryption methods, particularly RSA and ECC (Elliptic Curve Cryptography), rely on mathematical problems that classical computers cannot solve efficiently but that quantum computers could potentially crack using Shor's algorithm. This vulnerability affects everything from secure websites and financial transactions to government communications and blockchain technologies. Experts estimate that a quantum computer with 4,000 stable, logical qubits could break RSA-2048 encryption in a matter of hours.
+
+In response to this looming "crypto-apocalypse," researchers are developing quantum-resistant cryptographic algorithms, collectively known as post-quantum cryptography (PQC). These new approaches use mathematical problems believed to be difficult even for quantum computers. In 2016, the National Institute of Standards and Technology (NIST) initiated a process to standardize post-quantum cryptographic algorithms, with final standards expected by 2024. Major technology companies and governments worldwide are now preparing for a complex transition to these new cryptographic standards.
+
+Beyond its threat to existing cryptography, quantum computing also promises revolutionary advances in multiple fields. In drug discovery and materials science, quantum computers could simulate molecular interactions with unprecedented accuracy, potentially accelerating the development of new medications and materials. In optimization problems—from supply chain logistics to financial portfolio management—quantum algorithms might find superior solutions to problems that have countless possible combinations. Quantum machine learning algorithms could potentially analyze patterns in data that remain invisible to classical approaches.
+
+Despite the hype surrounding quantum computing, experts caution that many proposed applications remain speculative. The technology is still in its early stages, comparable perhaps to classical computers in the 1950s. The path to fault-tolerant, general-purpose quantum computers will likely require decades of further research and engineering. Furthermore, quantum computers will not replace classical computers but will serve as specialized accelerators for specific problems where quantum algorithms offer an advantage.
+
+The economic impact of quantum computing is projected to be substantial, with estimates suggesting a market value exceeding $65 billion by 2030. Governments worldwide have recognized the strategic importance of quantum technologies, with the US, China, EU, UK, and others committing billions in funding. The race for "quantum advantage" in both commercial and military applications has been compared to the space race of the Cold War era, with significant geopolitical implications.
+
+As quantum computing continues to advance, society faces both unprecedented opportunities and serious security challenges. The coming decades will require thoughtful policy approaches, international cooperation on standards, significant investment in both quantum and post-quantum technologies, and extensive education initiatives to prepare the workforce for this new computational paradigm. Perhaps most importantly, organizations must begin preparing now for the post-quantum transition, as retrofitting quantum-resistant security after quantum computers become practical may prove impossible for many systems.
+
+1. "Please summarize this article in 2-3 sentences."
+2. "Provide a concise summary of the main points in this text."
+3. "Summarize this text, focusing specifically on the cybersecurity implications."
+4. "Create a bullet-point summary of this article highlighting the key challenges and opportunities."
+5. "Generate a one-paragraph executive summary of this content."
+6. "Summarize this text for a non-technical audience."
+"""
+
+prompt2 = """Meeting Minutes: Q3 Strategic Planning Session
+Date: September 15, 2023
+Location: Conference Room A, HQ Building
+Time: 10:00 AM - 3:30 PM EST
+Attendees: Sarah Johnson (CEO), Michael Chen (CTO), Priya Patel (CFO), Thomas Rodriguez (COO), Aisha Wilson (CMO), David Kim (Head of Product)
+Absent: Jennifer Smith (HR Director) - maternity leave
+
+AGENDA ITEMS DISCUSSED:
+
+1. Financial Performance Review
+Priya Patel presented the Q2 financial results, highlighting that revenue reached $24.7 million, exceeding projections by 12%. Operating margins improved to 18.3% from 15.9% in Q1, primarily due to the successful implementation of the cost optimization initiative led by Thomas Rodriguez. However, the European market underperformed with sales of €3.2 million against a target of €4.5 million. Priya noted cash reserves currently stand at $18.3 million, sufficient for planned Q4 expansion activities.
+
+Action Items:
+- Thomas to develop a European market recovery plan by October 1st
+- Priya to prepare updated Q3 forecasts incorporating new product launch estimates
+- All department heads to submit Q4 budget requests by September 30th
+
+2. Product Development Roadmap
+Michael Chen reported that Project Falcon is currently 2 weeks behind schedule due to unexpected technical challenges in the API integration layer. The revised launch date is now November 15th, 2023. Early user testing has shown 89% satisfaction rates, with particular praise for the new user interface. Development costs have remained within budget at $1.2 million to date.
+
+David Kim outlined the 2024 product roadmap, focusing on three key initiatives:
+- Mercury platform upgrade (Q1 2024): Estimated development cost $2.3-2.8 million
+- Mobile application redesign (Q2 2024): Estimated development cost $950,000
+- Enterprise solution expansion (Q3-Q4 2024): Estimated development cost $3.5 million
+
+The committee unanimously approved the proposed roadmap, with the condition that each initiative be subject to final budget approval on a quarterly basis.
+
+3. Marketing Strategy
+Aisha Wilson presented the new integrated marketing campaign scheduled to launch on October 10th, 2023. The campaign will focus on our differentiation in the healthcare and finance verticals, with a total budget allocation of $3.75 million spread across digital channels (60%), industry events (25%), and strategic partnerships (15%).
+
+Key performance targets include:
+- Increase qualified leads by 35% by end of Q4 2023
+- Achieve 22% conversion rate from free trial to paid subscription
+- Reduce customer acquisition cost from $550 to $475
+
+Aisha also noted that our Net Promoter Score has improved from 42 to 58 over the past two quarters, placing us above the industry average of 45.
+
+4. Organizational Restructuring
+Sarah Johnson introduced a proposal to reorganize the customer success department into industry-specific teams. The restructuring would require hiring 3 new team leads at an estimated annual cost of $450,000 in additional salaries, but is projected to improve renewal rates by 7-10% based on pilot program results. After discussion, the executive team voted 4-1 in favor of the proposal, with Thomas Rodriguez voting against due to concerns about implementation timing.
+
+The reorganization will be implemented in phases:
+- Phase 1 (Oct-Nov 2023): Healthcare and Finance verticals
+- Phase 2 (Jan-Feb 2024): Technology and Manufacturing verticals
+- Phase 3 (Mar-Apr 2024): Retail and Other sectors
+
+5. Competitive Analysis
+Michael Chen shared recent intelligence about competitor MoveFast's upcoming product launch, scheduled for December 2023. Based on available information, their new offering will include AI-powered analytics and improved integration capabilities, potentially challenging our market position in the financial services sector where we currently hold 23% market share. 
+
+The team discussed potential responses, including:
+- Accelerating select features from our Q2 2024 roadmap
+- Developing targeted retention offers for high-value financial services clients
+- Creating a competitive response taskforce led by David Kim and Aisha Wilson
+
+DECISIONS MADE:
+
+1. Approved 2024 product roadmap with quarterly budget reviews
+2. Approved customer success department reorganization with phased implementation
+3. Established competitive response taskforce with first report due October 15th
+4. Authorized additional $250,000 for accelerated development of AI analytics features
+5. Approved European recovery plan development with implementation pending CFO review
+
+UPCOMING IMPORTANT DATES:
+
+- September 30, 2023: Department Q4 budget submissions due
+- October 1, 2023: European market recovery plan due
+- October 10, 2023: New marketing campaign launch
+- October 15, 2023: Competitive response taskforce initial report
+- November 15, 2023: Project Falcon launch date
+- December 20, 2023: End-of-year company meeting and Q4 review
+
+Notes compiled by: Robert Martinez, Executive Assistant
+Contact: r.martinez@company.com | Ext. 4567
+
+
+1. "Who attended the meeting on September 15, 2023?"
+2. "What was the Q2 revenue mentioned in the document?"
+3. "When is Project Falcon scheduled to launch?"
+4. "Extract all action items from the meeting minutes."
+5. "What is the budget allocation for the new marketing campaign, and how is it distributed?"
+6. "List all upcoming important dates mentioned in the document."
+7. "What was the voting result for the organizational restructuring proposal, and who voted against it?"
+8. "Extract all financial figures mentioned in the document."
+9. "What are the three key initiatives in the 2024 product roadmap?"
+10. "What is our current market share in the financial services sector according to the document?"
+11. "What is the company's current Net Promoter Score, and how has it changed?"
+12. "Identify all percentages mentioned in this document."
 """
 
 prompt3 = """I'd like you to translate this paragraph into English:
