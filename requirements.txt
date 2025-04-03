@@ -3,3 +3,10 @@ botocore
 boto3
 numpy
 pandas
+torch 
+transformers 
+matplotlib 
+seaborn 
+plotly 
+scikit-learn 
+pillow
