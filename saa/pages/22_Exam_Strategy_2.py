@@ -17,6 +17,8 @@ if 'user_id' not in st.session_state:
     st.session_state.user_id = str(uuid.uuid4())
 if 'current_question' not in st.session_state:
     st.session_state.current_question = 0
+if 'current_question_index' not in st.session_state:
+    st.session_state.current_question_index = 0
 if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'answers' not in st.session_state:
