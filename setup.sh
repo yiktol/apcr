@@ -7,8 +7,8 @@ cd /home/ubuntu/environment/apcr
 
 pip install -U -r /home/ubuntu/environment/apcr/requirements.txt
 
-# cd /home/ubuntu/environment/apcr/saa
-# streamlit run Home.py --server.port 8080 &
+cd /home/ubuntu/environment/apcr/saa
+streamlit run Home.py --server.port 8095 &
 
 cd /home/ubuntu/environment/genaionaws/01-BedrockAPI
 streamlit run Home.py --server.port 8080 &
