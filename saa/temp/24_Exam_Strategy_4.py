@@ -344,7 +344,7 @@ def main():
         display_stats()
     
     # Footer
-    st.markdown("<div class='footer'>© 2023 AWS Certification Practice. Created for learning purposes.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='footer'>© 2025 AWS Certification Practice. Created for learning purposes.</div>", unsafe_allow_html=True)
 
 # Display a question
 def display_question(q_index):
