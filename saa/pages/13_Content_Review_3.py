@@ -783,7 +783,7 @@ def placement_groups_page():
         - Applications requiring low-latency node-to-node communication
         """)
         
-        st.image("https://d1.awsstatic.com/product-marketing/EC2/Cluster%20placement%20group.b8d5681f46e1825c2a9336ef2ab3adc64d382db5.PNG", use_column_width=True)
+        st.image("https://d1.awsstatic.com/product-marketing/EC2/Cluster%20placement%20group.b8d5681f46e1825c2a9336ef2ab3adc64d382db5.PNG", use_container_width=True)
     
     with col2:
         st.subheader("Spread Placement Group")
@@ -797,7 +797,7 @@ def placement_groups_page():
         - Applications that need to minimize correlated failures
         """)
         
-        st.image("https://d1.awsstatic.com/product-marketing/EC2/Spread%20placement%20group.1c74c4a77af093c607e319aa3fc3e18860c9871e.PNG", use_column_width=True)
+        st.image("https://d1.awsstatic.com/product-marketing/EC2/Spread%20placement%20group.1c74c4a77af093c607e319aa3fc3e18860c9871e.PNG", use_container_width=True)
     
     with col3:
         st.subheader("Partition Placement Group")
@@ -812,7 +812,7 @@ def placement_groups_page():
         - Hadoop, Cassandra, and Kafka clusters
         """)
         
-        st.image("https://d1.awsstatic.com/product-marketing/EC2/Partition%20placement%20group.0dc869e45dedab443a6706764c71053c5cc9ceff.PNG", use_column_width=True)
+        st.image("https://d1.awsstatic.com/product-marketing/EC2/Partition%20placement%20group.0dc869e45dedab443a6706764c71053c5cc9ceff.PNG", use_container_width=True)
     
     st.info("""
     **Key Takeaway**: Choose your placement group strategy based on your application needs:
