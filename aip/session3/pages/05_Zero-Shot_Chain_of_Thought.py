@@ -1,115 +1,208 @@
 from langchain_community.llms import Bedrock
-from langchain_community.chat_models import BedrockChat
 import streamlit as st
+import boto3
 import utils.helpers as helpers
 import threading
-# from streamlit.runtime.scriptrunner import add_script_run_ctx
-# from streamlit.runtime.scriptrunner.script_run_context import get_script_run_ctx
+import uuid
 
+# Page configuration with custom styling
+st.set_page_config(
+    page_title="AI Prompt Engineering",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-helpers.set_page_config()
-bedrock_runtime = helpers.runtime_client()
+# Apply custom CSS for modern look
+st.markdown("""
+<style>
+    .main {
+        background-color: #f8f9fa;
+    }
+    .stButton > button {
+        width: 100%;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stTextArea textarea {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    .header-text {
+        font-size: 40px;
+        font-weight: bold;
+        color: #1E88E5;
+        margin-bottom: 20px;
+    }
+    .subheader-text {
+        font-size: 20px;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    .response-container {
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        background-color: #f1f8ff;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-def form_callback():
-    for key in st.session_state.keys():
-        del st.session_state[key]
+# Initialize session state for first-time visitors
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
     
-st.sidebar.button(label='Clear Session Data', on_click=form_callback)
-        
-prompt1 = """Q: A juggler can juggle 16 balls. \
+    # Default prompts
+    st.session_state.prompt1 = """Q: A juggler can juggle 16 balls. \
 Half of the balls are golf balls, and half of the golf balls are blue. \
 How many blue golf balls are there?\n 
 A:
 """
 
-prompt2 = """Q: A juggler can juggle 16 balls. \
+    st.session_state.prompt2 = """Q: A juggler can juggle 16 balls. \
 Half of the balls are golf balls, and half of the golf balls are blue. \
 How many blue golf balls are there?
 (Think Step-by-Step)\n
 A:"""
+    
+    st.session_state.response1 = ""
+    st.session_state.response2 = ""
+    st.session_state.provider = "Anthropic"
+    st.session_state.submitted = False
 
+# Sidebar
+with st.sidebar:
+    st.title("⚙️ Configuration")
+    
+    # Provider selection
+    st.session_state.provider = st.selectbox(
+        'Select Provider:',
+        helpers.list_providers, 
+        index=helpers.list_providers.index(st.session_state.provider)
+    )
+    
+    # Model selection based on provider
+    models = helpers.getmodelIds(st.session_state.provider)
+    model_id = st.selectbox(
+        'Select Model:', 
+        models, 
+        index=models.index(helpers.getmodelId(st.session_state.provider))
+    )
+    
+    # Reset session button
+    if st.button("Reset Session", type="secondary"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
+    
+    # Information box
+    with st.expander("About Chain-of-Thought Prompting"):
+        st.info("""
+        Chain-of-Thought (CoT) prompting is a technique that enhances reasoning in AI models by 
+        encouraging them to generate step-by-step explanations before providing the final answer.
+        This approach has been shown to significantly improve performance on complex reasoning tasks.
+        """)
 
-if "prompt" not in st.session_state:
-    st.session_state.prompt = prompt1
-if "height" not in st.session_state:
-    st.session_state.height = 100
-if "prompt_type" not in st.session_state:
-    st.session_state.prompt_type = "Zero-shot"
-if "image" not in st.session_state:
-    st.session_state.image = "images/zero_shot.png"
+# Create Bedrock client
+@st.cache_resource
+def get_bedrock_client():
+    return boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
 
-row1_col1, row1_col2 = st.columns([0.7,0.3])
+bedrock_runtime = get_bedrock_client()
 
-t = '''- Improves reasoning abilities in foundation models
-- Addresses multi-step problem-solving challenges in arithmetic and commonsense reasoning task
-- Generates intermediate reasoning steps, mimicking human train of thought, before providing the final answer.
-- Enhances model performance on average compared to standard methods.
-- Works better with larger models (>100B) and can be fine-tuned on CoT reasoning datasets for better interpretability.
+# Main function to call LLM
+def call_llm(prompt, model_id):
+    try:
+        llm = Bedrock(
+            model_id=model_id,
+            client=bedrock_runtime,
+            model_kwargs=helpers.getmodelparams(st.session_state.provider)
+        )
+        return llm.invoke(prompt)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-'''
+# Main page content
+st.markdown("<h1 class='header-text'>Chain-of-thought (CoT) Prompting</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subheader-text'>Explore how different prompting techniques affect AI reasoning capabilities</p>", unsafe_allow_html=True)
+
+# Information cards
 with st.container():
-    col1, col2 = st.columns([0.7, 0.3])
+    col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.title("Chain-of-thought (CoT) Prompting")
-        st.markdown(t)
+        st.markdown("""
+        ### Key Benefits of Chain-of-Thought:
+        - ✅ Improves reasoning abilities in foundation models
+        - ✅ Addresses multi-step problem-solving challenges
+        - ✅ Generates intermediate reasoning steps, mimicking human thought
+        - ✅ Enhances model performance compared to standard methods
+        - ✅ Works particularly well with larger models (>100B parameters)
+        """)
+    
     with col2:
-        with st.container(border=True):
-            provider = st.selectbox('Provider',helpers.list_providers, index=0)
-            models = helpers.getmodelIds(provider)
-            model_id = st.selectbox(
-                'model', models, index=models.index(helpers.getmodelId(provider)))     
+        st.image("images/zero-shot-cot.png", caption="CoT Illustration", use_container_width=True)
 
-with st.expander("Zero Shot - Chain-of-thought (CoT)"):
-    st.image("images/zero-shot-cot.png")
+# Prompt input section
+st.markdown("### 🔍 Compare Zero-Shot vs. Zero-Shot-CoT")
 
-#Create the connection to Bedrock
-def call_llm(prompt):
-    llm = Bedrock(model_id=model_id,client=bedrock_runtime,model_kwargs=helpers.getmodelparams(provider))
-    response = llm.invoke(prompt)
-    # Print results
-    return st.info(response)
-
-def call_llm_chat(prompt):
-    params = helpers.getmodelparams(provider)
-    params.update({'messages':[{"role": "user", "content": prompt}]})
-    
-    llm = BedrockChat(model_id=model_id, client=bedrock_runtime, model_kwargs=params)
-    response = llm.invoke(prompt)
-    
-    return st.info(response.content)
-
-options = [{"prompt_type":"Zero-shot-CoT", "prompt": prompt2, "height":150,},
-            {"prompt_type":"Zero-shot", "prompt": prompt1, "height":100}]
-
-
-col1, col2 = st.columns(2)
-
-with st.container(border=True):
+with st.container():
     col1, col2 = st.columns(2)
-    with col1:
-        prompt_data1 = st.text_area(f":orange[Zero-Shot:]", height = 150, value=prompt1 )
-        submit = st.button("Submit", type="primary", key=1)
-
-    with col2:
-        prompt_data2 = st.text_area(f":orange[Zero-Shot-CoT:]", height = 150, value=prompt2 )
     
+    with col1:
+        st.markdown("#### Standard Zero-Shot")
+        st.session_state.prompt1 = st.text_area(
+            "Enter your zero-shot prompt:",
+            value=st.session_state.prompt1,
+            height=150,
+            key="zero_shot_input"
+        )
+    
+    with col2:
+        st.markdown("#### Zero-Shot with Chain-of-Thought")
+        st.session_state.prompt2 = st.text_area(
+            "Enter your zero-shot-CoT prompt:",
+            value=st.session_state.prompt2,
+            height=150,
+            key="zero_shot_cot_input"
+        )
 
+# Submit button
+submit_col1, submit_col2, submit_col3 = st.columns([1, 2, 1])
+with submit_col2:
+    if st.button("📝 Generate Responses", type="primary"):
+        st.session_state.submitted = True
+        with st.spinner("Processing prompts..."):
+            # Run both prompts concurrently
+            st.session_state.response1 = call_llm(st.session_state.prompt1, model_id)
+            st.session_state.response2 = call_llm(st.session_state.prompt2, model_id)
 
-if submit:
-    with st.spinner("Thinking..."):
-        col1, col2 = st.columns(2)
-        
-        # ctx = get_script_run_ctx()
-        with col1:
-            if provider == "Claude 3":
-                call_llm_chat(prompt_data1)
-            else:
-                # call_llm_chat(text_prompt)
-                call_llm(prompt_data1)
-        with col2:
-            if provider == "Claude 3":
-                call_llm_chat(prompt_data2)
-            else:
-                # call_llm_chat(text_prompt)
-                call_llm(prompt_data2)
+# Display responses
+if st.session_state.submitted:
+    st.markdown("### 🤖 Model Responses")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### Zero-Shot Results")
+        st.markdown(f"""<div class="response-container">
+                    <pre>{st.session_state.response1}</pre>
+                    </div>""", unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("#### Zero-Shot-CoT Results")
+        st.markdown(f"""<div class="response-container">
+                    <pre>{st.session_state.response2}</pre>
+                    </div>""", unsafe_allow_html=True)
+    
+    # Analysis section
+    st.markdown("### 📊 Analysis")
+    st.info("Compare the responses above to see how the Chain-of-Thought approach affects the model's reasoning process and final answer.")
+
+# Footer
+st.markdown("---")
+st.markdown("*This tool demonstrates the impact of different prompting techniques on AI reasoning capabilities.*")

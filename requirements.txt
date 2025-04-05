@@ -10,3 +10,6 @@ seaborn
 plotly 
 scikit-learn 
 pillow
+streamlit_drawable_canvas
+xgboost
+imblearn

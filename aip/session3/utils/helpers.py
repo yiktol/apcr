@@ -1,6 +1,7 @@
 import streamlit as st
 import jsonlines  
 import boto3
+import json
 
 
 def set_page_config():
@@ -181,15 +182,14 @@ def getmodelparams(providername):
 
     return model_mapping[providername]
 
-list_providers = ['Amazon', 'Anthropic',
-                  'Claude 3', 'Cohere', 'Meta', 'Mistral']
+list_providers = ['Amazon', 'Anthropic', 'Cohere', 'Meta', 'Mistral']
 
 def getmodelId(providername):
     model_mapping = {
         "Amazon": "amazon.titan-tg1-large",
         "Titan Image": "amazon.titan-image-generator-v1",
         "Anthropic": "anthropic.claude-v2:1",
-        "Claude 3": "anthropic.claude-3-sonnet-20240229-v1:0",
+        # "Claude 3": "anthropic.claude-3-sonnet-20240229-v1:0",
         'Cohere': "cohere.command-text-v14",
         'Meta': "meta.llama2-70b-chat-v1",
         "Mistral": "mistral.mixtral-8x7b-instruct-v0:1",
@@ -221,3 +221,108 @@ def client(region='us-east-1'):
         service_name='bedrock',
         region_name=region
     )
+
+
+def claude_generic(input_prompt):
+    prompt = f"""Human: {input_prompt}\n\nAssistant:"""
+    return prompt
+
+def titan_generic(input_prompt):
+    prompt = f"""User: {input_prompt}\n\nAssistant:"""
+    return prompt
+
+def llama2_generic(input_prompt, system_prompt):
+    prompt = f"""<s>[INST] <<SYS>>
+    {system_prompt}
+    <</SYS>>
+
+    {input_prompt} [/INST]
+    """
+    return prompt
+
+
+
+def invoke_model(client, prompt, model, 
+    accept = 'application/json', content_type = 'application/json',
+    max_tokens  = 512, temperature = 1.0, top_p = 1.0, top_k = 250, stop_sequences = [],
+    count_penalty = 0, presence_penalty = 0, frequency_penalty = 0, return_likelihoods = 'NONE'):
+    # default response
+    output = ''
+    # identify the model provider
+    provider = model.split('.')[0] 
+    # InvokeModel
+    if (provider == 'anthropic'): 
+        input = {
+            'prompt': claude_generic(prompt),
+            'max_tokens_to_sample': max_tokens, 
+            'temperature': temperature,
+            'top_k': top_k,
+            'top_p': top_p,
+            'stop_sequences': stop_sequences
+        }
+        body=json.dumps(input)
+        response = client.invoke_model(body=body, modelId=model, accept=accept,contentType=content_type)
+        response_body = json.loads(response.get('body').read())
+        output = response_body['completion']
+    elif (provider == 'ai21'): 
+        input = {
+            'prompt': prompt, 
+            'maxTokens': max_tokens,
+            'temperature': temperature,
+            'topP': top_p,
+            'stopSequences': stop_sequences,
+            'countPenalty': {'scale': count_penalty},
+            'presencePenalty': {'scale': presence_penalty},
+            'frequencyPenalty': {'scale': frequency_penalty}
+        }
+        body=json.dumps(input)
+        response = client.invoke_model(body=body, modelId=model, accept=accept,contentType=content_type)
+        response_body = json.loads(response.get('body').read())
+        completions = response_body['completions']
+        for part in completions:
+            output = output + part['data']['text']
+    elif (provider == 'amazon'): 
+        input = {
+            'inputText': prompt,
+            'textGenerationConfig': {
+                  'maxTokenCount': max_tokens,
+                  'stopSequences': stop_sequences,
+                  'temperature': temperature,
+                  'topP': top_p
+            }
+        }
+        body=json.dumps(input)
+        response = client.invoke_model(body=body, modelId=model, accept=accept,contentType=content_type)
+        response_body = json.loads(response.get('body').read())
+        results = response_body['results']
+        for result in results:
+            output = output + result['outputText']
+    elif (provider == 'cohere'): 
+        input = {
+            'prompt': prompt, 
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'k': top_k,
+            'p': top_p,
+            'stop_sequences': stop_sequences,
+            'return_likelihoods': return_likelihoods
+        }
+        body=json.dumps(input)
+        response = client.invoke_model(body=body, modelId=model, accept=accept,contentType=content_type)
+        response_body = json.loads(response.get('body').read())
+        results = response_body['generations']
+        for result in results:
+            output = output + result['text']
+    elif (provider == 'meta'): 
+        input = {
+            'prompt': prompt,
+            'max_gen_len': max_tokens,
+            'temperature': temperature,
+            'top_p': top_p
+        }
+        body=json.dumps(input)
+        response = client.invoke_model(body=body, modelId=model, accept=accept,contentType=content_type)
+        response_body = json.loads(response.get('body').read())
+        output = response_body['generation']
+    # return
+    return output
