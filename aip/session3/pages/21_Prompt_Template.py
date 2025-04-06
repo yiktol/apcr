@@ -1,877 +1,637 @@
-# Langchain Prompt Template Demonstrator
+# Amazon Bedrock Converse API with LangChain Prompt Templates
 
 import streamlit as st
-import uuid
+import logging
+import sys
 import boto3
-from langchain.prompts import PromptTemplate, FewShotPromptTemplate
-from langchain.chains import LLMChain
-from langchain_community.llms import Bedrock
-import pandas as pd
+from botocore.exceptions import ClientError
+import os
+from io import BytesIO
+from PIL import Image
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+import json
+import uuid
 import time
 
-# Page configuration with custom styling
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+# Page configuration with improved styling
 st.set_page_config(
-    page_title="LangChain Prompt Templates",
-    page_icon="🔗",
+    page_title="LangChain + Amazon Bedrock",
+    page_icon="🪨",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Apply custom CSS for modern UI
+# Apply custom CSS for modern appearance
 st.markdown("""
-<style>
-    .main {
-        background-color: #f8f9fa;
+    <style>
+    .stApp {
+        margin: 0 auto;
     }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+    .main-header {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #1E3A8A;
+        text-align: center;
     }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #f1f3f5;
-        border-radius: 5px 5px 0px 0px;
-        padding: 10px 16px;
-        font-weight: 500;
+    .sub-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2563EB;
     }
-    .stTabs [aria-selected="true"] {
-        background-color: #e7f5ff !important;
-        color: #1971c2 !important;
-        border-bottom: 2px solid #1971c2;
-    }
-    .stButton > button {
-        width: 100%;
-        border-radius: 5px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .sidebar-header {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        color: #1971c2;
-    }
-    .stTextArea textarea {
-        border-radius: 5px;
-        border: 1px solid #dee2e6;
-        font-family: 'Courier New', monospace;
-    }
-    .card-container {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px;
-    }
-    .header-text {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        border-left: 4px solid #1971c2;
-        padding-left: 10px;
-        margin-bottom: 15px;
-    }
-    .info-box {
-        background-color: #e7f5ff;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-left: 4px solid #339af0;
-    }
-    .code-box {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 15px;
-        font-family: 'Courier New', monospace;
-        margin-bottom: 15px;
-        border: 1px solid #dee2e6;
-        overflow-x: auto;
+    .card {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        background-color: #FFFFFF;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1rem;
     }
     .output-container {
-        background-color: #f1f8ff;
-        border-radius: 5px;
-        padding: 15px;
-        border: 1px solid #d0ebff;
-        margin-top: 15px;
+        background-color: #F3F4F6;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
     }
-    .variable-pill {
-        background-color: #e7f5ff;
-        border-radius: 15px;
-        padding: 2px 10px;
-        margin-right: 5px;
-        color: #1971c2;
-        font-weight: 500;
-        display: inline-block;
+    .stButton>button {
+        background-color: #2563EB;
+        color: white;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border: none;
+        width: 100%;
     }
-    .template-preview {
-        background-color: #f1f3f5;
-        border-radius: 5px;
-        padding: 15px;
-        margin: 10px 0;
-        border: 1px solid #dee2e6;
-        font-family: 'Courier New', monospace;
+    .stButton>button:hover {
+        background-color: #1D4ED8;
     }
-    .prompt-builder {
-        background-color: white;
-        border-radius: 5px;
-        padding: 15px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 15px;
+    .response-block {
+        background-color: #F8FAFC;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #2563EB;
+        margin-top: 1rem;
     }
-    .example-container {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #e9ecef;
+    .token-metrics {
+        display: flex;
+        justify-content: space-between;
+        background-color: #F0F4F8;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        margin-top: 0.5rem;
     }
-    footer {
-        font-size: 14px;
-        color: #6c757d;
+    .metric-item {
         text-align: center;
-        margin-top: 30px;
-        padding: 10px;
     }
-    .generated-template {
-        background-color: #fff9db;
-        border-left: 4px solid #ffd43b;
-        padding: 15px;
-        border-radius: 5px;
-        margin: 15px 0;
+    .metric-value {
+        font-weight: bold;
+        font-size: 1.2rem;
     }
-</style>
+    .metric-label {
+        font-size: 0.8rem;
+        color: #4B5563;
+    }
+    .chat-message {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.5rem;
+        animation: fadeIn 0.5s;
+    }
+    .user-message {
+        background-color: #EBF5FF;
+        border-left: 3px solid #2563EB;
+    }
+    .assistant-message {
+        background-color: #F0FDF4;
+        border-left: 3px solid #10B981;
+    }
+    .template-card {
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .template-card:hover {
+        background-color: #EFF6FF;
+        border-color: #BFDBFE;
+        transform: translateY(-2px);
+    }
+    .template-card h4 {
+        margin: 0 0 0.5rem 0;
+        color: #2563EB;
+    }
+    .template-card p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #4B5563;
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    .session-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    .pill-button {
+        background-color: #F3F4F6;
+        color: #4B5563;
+        border-radius: 1rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        border: 1px solid #E5E7EB;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .pill-button:hover {
+        background-color: #E5E7EB;
+        color: #1F2937;
+    }
+    .input-area {
+        background-color: #F9FAFB;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state for new connections
-if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
-    st.session_state.provider = "Anthropic"
-    st.session_state.temperature = 0.7
-    st.session_state.max_tokens = 500
-    st.session_state.top_p = 0.95
-    st.session_state.current_tab = 0
-    st.session_state.simple_template = "{product} features:\n{features}"
-    st.session_state.output = None
-    st.session_state.variables = {"product": "", "features": ""}
-    st.session_state.formatted_prompt = ""
+# ------- INITIALIZE SESSION STATE -------
+def init_session_state():
+    if "conversation_history" not in st.session_state:
+        st.session_state.conversation_history = []
     
-    # For few-shot templates
-    st.session_state.few_shot_examples = [
-        {"input": "Smartphone", "output": "- High resolution display\n- Long battery life\n- Fast processor\n- Multiple cameras"},
-        {"input": "Laptop", "output": "- Lightweight design\n- Powerful graphics card\n- Large SSD storage\n- Backlit keyboard"}
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    
+    if "templates" not in st.session_state:
+        st.session_state.templates = get_sample_templates()
+    
+    if "selected_template" not in st.session_state:
+        st.session_state.selected_template = None
+
+# ------- SAMPLE PROMPT TEMPLATES -------
+def get_sample_templates():
+    return [
+        {
+            "name": "Professional Email Writer",
+            "description": "Creates professional emails based on your requirements",
+            "template": """
+Write a professional email with the following details:
+- Subject: {subject}
+- Purpose: {purpose}
+- Tone: {tone}
+- Key points: {key_points}
+- Call to action: {call_to_action}
+- Closing remarks: {closing}
+
+Please format this properly as an email with subject line, greeting, body, and signature.
+            """,
+            "variables": {
+                "subject": "Proposal for Marketing Campaign Collaboration",
+                "purpose": "To propose a joint marketing campaign with a partner company",
+                "tone": "professional yet friendly",
+                "key_points": "Previous success metrics, timeline for the campaign, resource requirements",
+                "call_to_action": "Schedule a meeting next week to discuss details",
+                "closing": "Emphasize mutual benefits and long-term partnership potential"
+            }
+        },
+        {
+            "name": "Product Description Generator",
+            "description": "Creates compelling product descriptions for e-commerce",
+            "template": """
+Write a compelling product description for an e-commerce website using the following details:
+- Product name: {product_name}
+- Category: {category}
+- Key features: {features}
+- Target audience: {audience}
+- Unique selling points: {selling_points}
+- Price point: {price_point}
+
+The description should be engaging, highlight benefits, and include a strong call to action.
+            """,
+            "variables": {
+                "product_name": "UltraGlide Pro Wireless Mouse",
+                "category": "Computer Peripherals",
+                "features": "Ergonomic design, 12 programmable buttons, 4000 DPI precision, 6-month battery life",
+                "audience": "Gamers and professional designers",
+                "selling_points": "Zero lag technology, customizable RGB lighting, compatible with all operating systems",
+                "price_point": "Premium ($85-95)"
+            }
+        },
+        {
+            "name": "Technical Documentation Writer",
+            "description": "Creates clear and concise technical documentation",
+            "template": """
+Create a technical documentation section for the following:
+- Feature/Function name: {feature_name}
+- Purpose: {purpose}
+- Technical requirements: {requirements}
+- Implementation steps: {implementation_steps}
+- Code examples (if applicable): {code_examples}
+- Potential issues and solutions: {issues_solutions}
+- Related features/functions: {related_features}
+
+The documentation should be clear, concise, and follow best practices for technical writing.
+            """,
+            "variables": {
+                "feature_name": "Data Synchronization API",
+                "purpose": "To enable real-time data synchronization between mobile and cloud databases",
+                "requirements": "SDK version 3.2+, API key, secure connection, 5MB/s minimum bandwidth",
+                "implementation_steps": "1. Initialize client, 2. Configure sync parameters, 3. Set up error handling, 4. Implement retry logic",
+                "code_examples": "client.initSync(config); client.startSync();",
+                "issues_solutions": "Connection timeout: Implement exponential backoff; Data conflict: Use version control strategy",
+                "related_features": "Offline storage, Conflict resolution, Data compression"
+            }
+        },
+        {
+            "name": "Social Media Post Generator",
+            "description": "Creates engaging social media content for multiple platforms",
+            "template": """
+Generate social media post content for the following:
+- Platform: {platform}
+- Brand voice: {brand_voice}
+- Target audience: {audience}
+- Campaign theme: {campaign_theme}
+- Key message: {key_message}
+- Call to action: {call_to_action}
+- Hashtags style: {hashtags}
+
+Provide a caption that's optimized for the selected platform and audience. Include emojis where appropriate.
+            """,
+            "variables": {
+                "platform": "Instagram",
+                "brand_voice": "Friendly, inspiring, health-conscious",
+                "audience": "Fitness enthusiasts aged 25-40",
+                "campaign_theme": "Summer Fitness Challenge",
+                "key_message": "Achieve your summer fitness goals with our 30-day program",
+                "call_to_action": "Sign up for the challenge through the link in bio",
+                "hashtags": "Mix of trending and branded (5-8 hashtags)"
+            }
+        },
+        {
+            "name": "Customer Support Response",
+            "description": "Generates helpful customer service responses",
+            "template": """
+Create a customer support response with the following details:
+- Customer issue: {customer_issue}
+- Product/Service involved: {product}
+- Tone: {tone}
+- Solution to offer: {solution}
+- Additional help resources: {resources}
+- Follow-up actions: {follow_up}
+
+The response should acknowledge the customer's issue, provide a clear solution, and maintain a supportive tone throughout.
+            """,
+            "variables": {
+                "customer_issue": "Unable to access premium features after payment was processed",
+                "product": "StreamFlix Premium Subscription",
+                "tone": "Empathetic and helpful",
+                "solution": "Account activation steps and manual override of restrictions",
+                "resources": "FAQ link, video tutorial for account settings",
+                "follow_up": "Offer to check back in 24 hours, provide direct contact information"
+            }
+        }
     ]
-    st.session_state.few_shot_prefix = "List product features in bullet points:\n\n"
-    st.session_state.few_shot_suffix = "\nInput: {input}\nOutput:"
-    st.session_state.few_shot_input_variable = ""
-    st.session_state.fewshot_formatted_prompt = ""
-    
-    # For chain templates
-    st.session_state.chain_result = ""
-    st.session_state.chain_query = "What makes a good smartphone?"
 
-# Initialize Bedrock client
-@st.cache_resource
-def get_bedrock_client():
-    return boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
+# ------- API FUNCTIONS -------
 
-bedrock_runtime = get_bedrock_client()
-
-# Provider and model mappings
-def get_model_id(provider_name):
-    model_mapping = {
-        "Amazon": "amazon.titan-tg1-large",
-        "Anthropic": "anthropic.claude-v2:1",
-        "AI21": "ai21.j2-ultra-v1",
-        "Cohere": "cohere.command-text-v14",
-        "Meta": "meta.llama2-70b-chat-v1",
-        "Mistral": "mistral.mixtral-8x7b-instruct-v0:1",
-        "Anthropic Claude 3": "anthropic.claude-3-sonnet-20240229-v1:0"
-    }
-    return model_mapping.get(provider_name, "anthropic.claude-v2:1")
-
-def get_model_ids(provider_name):
-    models = []
-    bedrock = boto3.client(service_name='bedrock', region_name='us-east-1')
+def stream_conversation(bedrock_client, model_id, messages, system_prompts, inference_config):
+    """Sends messages to a model and streams the response."""
+    logger.info(f"Streaming messages with model {model_id}")
     
     try:
-        available_models = bedrock.list_foundation_models()
-        for model in available_models['modelSummaries']:
-            if provider_name in model['providerName']:
-                models.append(model['modelId'])
-    except Exception:
-        # Fallback if API call fails
-        if provider_name == "Anthropic":
-            models = ["anthropic.claude-v2:1", "anthropic.claude-3-sonnet-20240229-v1:0"]
-        elif provider_name == "Amazon":
-            models = ["amazon.titan-tg1-large"]
-        else:
-            models = ["anthropic.claude-v2:1"]  # Default fallback
-    
-    return models if models else ["No models available"]
-
-# Function to get model parameters based on provider
-def get_model_params(provider_name):
-    if provider_name == "Anthropic" or provider_name == "Anthropic Claude 3":
-        return {
-            "temperature": st.session_state.temperature,
-            "max_tokens_to_sample": st.session_state.max_tokens,
-            "top_p": st.session_state.top_p
-        }
-    elif provider_name == "Amazon":
-        return {
-            "temperature": st.session_state.temperature,
-            "maxTokenCount": st.session_state.max_tokens,
-            "topP": st.session_state.top_p
-        }
-    else:
-        # Default parameters
-        return {
-            "temperature": st.session_state.temperature,
-            "max_tokens": st.session_state.max_tokens,
-            "top_p": st.session_state.top_p
-        }
-
-# Create LLM instance with Bedrock
-def create_llm(model_id, provider_name):
-    try:
-        return Bedrock(
-            model_id=model_id,
-            client=bedrock_runtime,
-            model_kwargs=get_model_params(provider_name)
-        )
-    except Exception as e:
-        st.error(f"Error creating LLM instance: {str(e)}")
-        return None
-
-# Sidebar
-with st.sidebar:
-    st.markdown("<div class='sidebar-header'>🔗 LangChain Prompt Templates</div>", unsafe_allow_html=True)
-    
-    # Model configuration
-    with st.container():
-        st.markdown("### Model Configuration")
-        
-        provider_options = ['Anthropic', 'Amazon', 'AI21', 'Cohere', 'Meta', 'Mistral', 'Anthropic Claude 3']
-        st.session_state.provider = st.selectbox(
-            'Select Provider:',
-            provider_options,
-            index=provider_options.index(st.session_state.provider) if st.session_state.provider in provider_options else 0
+        response = bedrock_client.converse_stream(
+            modelId=model_id,
+            messages=messages,
+            system=system_prompts,
+            inferenceConfig=inference_config,
+            additionalModelRequestFields={}
         )
         
-        models = get_model_ids(st.session_state.provider)
-        default_model = get_model_id(st.session_state.provider)
-        model_index = models.index(default_model) if default_model in models else 0
-        
-        model = st.selectbox(
-            'Select Model:', 
-            models,
-            index=model_index
-        )
-    
-    # Parameter tuning
-    with st.expander("Model Parameters", expanded=False):
-        st.session_state.temperature = st.slider(
-            'Temperature', 
-            min_value=0.0, 
-            max_value=1.0, 
-            value=st.session_state.temperature, 
-            step=0.05,
-            help="Higher values = more random, lower values = more deterministic"
-        )
-        
-        st.session_state.top_p = st.slider(
-            'Top P', 
-            min_value=0.0, 
-            max_value=1.0, 
-            value=st.session_state.top_p, 
-            step=0.05,
-            help="Controls diversity of generated text"
-        )
-        
-        st.session_state.max_tokens = st.number_input(
-            'Max Tokens', 
-            min_value=50, 
-            max_value=4096, 
-            value=st.session_state.max_tokens, 
-            step=50,
-            help="Maximum length of generated response"
-        )
-    
-    # Session management
-    st.markdown("---")
-    st.markdown("### Session Management")
-    
-    if st.button('🔄 Reset Session', key='reset_session'):
-        for key in list(st.session_state.keys()):
-            if key != "session_id":  # Keep the same session ID but reset everything else
-                del st.session_state[key]
-        st.rerun()
-    
-    # Session info
-    st.markdown(f"**Session ID:** {st.session_state.session_id[:8]}...")
-    
-    # Help section
-    with st.expander("ℹ️ About Prompt Templates", expanded=False):
-        st.markdown("""
-        **LangChain Prompt Templates** provide a powerful system for:
-        
-        - Creating reusable prompt structures
-        - Dynamically inserting variables into prompts
-        - Building complex prompts from examples (few-shot learning)
-        - Chaining prompts together for multi-step reasoning
-        
-        This tool helps you explore different template types and see how they work with LLMs.
-        """)
-
-# Main content area
-st.markdown("<h1 style='text-align: center;'>LangChain Prompt Template Explorer</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #6c757d; margin-bottom: 30px;'>Master the art of creating effective prompts with LangChain</p>", unsafe_allow_html=True)
-
-# Create tabs
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Simple Templates", 
-    "Few-Shot Templates", 
-    "Template Chains",
-    "Template Best Practices"
-])
-
-# Simple Templates Tab
-with tab1:
-    st.markdown("<div class='header-text'>Simple Prompt Templates</div>", unsafe_allow_html=True)
-    
-    st.markdown("<div class='info-box'>", unsafe_allow_html=True)
-    st.markdown("""
-    **Simple prompt templates** allow you to create reusable prompt structures with variable placeholders.
-    These templates make it easy to:
-    - Insert dynamic content into standardized prompts
-    - Maintain consistent prompt structure across multiple requests
-    - Quickly iterate on prompt designs
-    """)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Template builder
-    st.markdown("### 🛠️ Template Builder")
-    
-    col1, col2 = st.columns([3, 2])
-    
-    with col1:
-        st.session_state.simple_template = st.text_area(
-            "Create your prompt template (use {variable_name} for placeholders):",
-            value=st.session_state.simple_template,
-            height=150,
-            help="Example: 'Summarize this {text} in {language}'"
-        )
-        
-        # Extract variables from template
-        import re
-        variables = re.findall(r'{(\w+)}', st.session_state.simple_template)
-        
-        if variables:
-            st.markdown("### 📝 Fill in your variables")
+        stream = response.get('stream')
+        if stream:
+            placeholder = st.empty()
+            full_response = ''
+            token_info = {'input': 0, 'output': 0, 'total': 0}
+            latency_ms = 0
             
-            # Create input fields for each variable
-            cols = st.columns(min(3, len(variables)))
-            for i, var in enumerate(variables):
-                with cols[i % min(3, len(variables))]:
-                    if var not in st.session_state.variables:
-                        st.session_state.variables[var] = ""
-                    st.session_state.variables[var] = st.text_area(
-                        f"{var}:",
-                        value=st.session_state.variables.get(var, ""),
-                        height=100
-                    )
+            for event in stream:
+                if 'messageStart' in event:
+                    role = event['messageStart']['role']
+                
+                if 'contentBlockDelta' in event:
+                    chunk = event['contentBlockDelta']
+                    part = chunk['delta']['text']
+                    full_response += part
+                    with placeholder.container():
+                        st.markdown(full_response)
+                
+                if 'messageStop' in event:
+                    stop_reason = event['messageStop']['stopReason']
+                
+                if 'metadata' in event:
+                    metadata = event['metadata']
+                    if 'usage' in metadata:
+                        usage = metadata['usage']
+                        token_info = {
+                            'input': usage['inputTokens'],
+                            'output': usage['outputTokens'],
+                            'total': usage['totalTokens']
+                        }
+                    
+                    if 'metrics' in event.get('metadata', {}):
+                        latency_ms = metadata['metrics']['latencyMs']
             
-            # Format the template with variables
+            # Return the generated response and metrics
+            return {
+                "response": full_response,
+                "metrics": {
+                    "tokens": token_info,
+                    "latency_ms": latency_ms,
+                    "stop_reason": stop_reason if 'stop_reason' in locals() else "Unknown"
+                }
+            }
+        
+        return {"response": "", "metrics": {}}
+    except ClientError as err:
+        st.error(f"Error: {err.response['Error']['Message']}")
+        logger.error(f"A client error occurred: {err.response['Error']['Message']}")
+        return {"response": "", "error": str(err)}
+
+# ------- UI COMPONENTS -------
+
+def parameter_sidebar():
+    """Sidebar with model selection and parameter tuning."""
+    with st.sidebar:
+        st.markdown("<div class='sub-header'>Model Settings</div>", unsafe_allow_html=True)
+        
+        MODEL_CATEGORIES = {
+            "Amazon": ["amazon.nova-micro-v1:0", "amazon.nova-lite-v1:0", "amazon.nova-pro-v1:0"],
+            "Anthropic": ["anthropic.claude-v2:1", "anthropic.claude-3-sonnet-20240229-v1:0", "anthropic.claude-3-haiku-20240307-v1:0"],
+            "Cohere": ["cohere.command-text-v14:0", "cohere.command-r-plus-v1:0", "cohere.command-r-v1:0"],
+            "Meta": ["meta.llama3-70b-instruct-v1:0", "meta.llama3-8b-instruct-v1:0"],
+            "Mistral": ["mistral.mistral-large-2402-v1:0", "mistral.mixtral-8x7b-instruct-v0:1", 
+                       "mistral.mistral-7b-instruct-v0:2", "mistral.mistral-small-2402-v1:0"],
+            "AI21": ["ai21.jamba-1-5-large-v1:0", "ai21.jamba-1-5-mini-v1:0"]
+        }
+        
+        # Create selectbox for provider first
+        provider = st.selectbox("Provider", options=list(MODEL_CATEGORIES.keys()))
+        
+        # Then create selectbox for models from that provider
+        model_id = st.selectbox("Model", options=MODEL_CATEGORIES[provider])
+        
+        st.markdown("<div class='sub-header'>Parameters</div>", unsafe_allow_html=True)
+        
+        with st.expander("Model Parameters", expanded=True):
+            temperature = st.slider("Temperature", min_value=0.0, max_value=1.0, value=0.2, step=0.05, 
+                                help="Higher values make output more random, lower values more deterministic")
+            
+            top_p = st.slider("Top P", min_value=0.0, max_value=1.0, value=0.9, step=0.05,
+                             help="Controls diversity via nucleus sampling")
+            
+            max_tokens = st.number_input("Max Tokens", min_value=50, max_value=4096, value=1024, step=50,
+                                       help="Maximum number of tokens in the response")
+            
+        params = {
+            "temperature": temperature,
+            "topP": top_p,
+            "maxTokens": max_tokens
+        }
+        
+        # Session controls
+        st.markdown("<div class='sub-header'>Session</div>", unsafe_allow_html=True)
+        
+        session_col1, session_col2 = st.columns(2)
+        
+        with session_col1:
+            if st.button("Reset Session", key="reset_session"):
+                st.session_state.conversation_history = []
+                st.session_state.session_id = str(uuid.uuid4())
+                st.rerun()
+        
+        with session_col2:
+            if st.button("Clear Output", key="clear_output"):
+                st.session_state.conversation_history = []
+                st.rerun()
+        
+        with st.expander("About", expanded=False):
+            st.markdown("""
+            ### LangChain + Amazon Bedrock
+            
+            This app demonstrates how to use LangChain Prompt Templates with Amazon Bedrock's foundation models.
+            
+            Using prompt templates allows you to:
+            - Structure your prompts consistently
+            - Reuse common prompt patterns
+            - Separate prompt logic from application logic
+            
+            For more information, visit:
+            - [LangChain Documentation](https://python.langchain.com/docs/modules/model_io/prompts/prompt_templates/)
+            - [Amazon Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+            """)
+        
+    return model_id, params
+
+def display_templates():
+    """Display sample prompt templates in a user-friendly way."""
+    st.markdown("<div class='sub-header'>Choose a Template</div>", unsafe_allow_html=True)
+    
+    # Display templates in a grid
+    cols = st.columns(3)
+    
+    for idx, template in enumerate(st.session_state.templates):
+        col = cols[idx % 3]
+        with col:
+            card_html = f"""
+            <div class='template-card' onclick="alert('Selected template: {template['name']}')">
+                <h4>{template['name']}</h4>
+                <p>{template['description']}</p>
+            </div>
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+            
+            # We need a button since HTML onclick doesn't work with Streamlit
+            if st.button(f"Use Template", key=f"template_{idx}"):
+                st.session_state.selected_template = idx
+                st.rerun()
+
+def prompt_template_interface(model_id, params):
+    """Interface using LangChain prompt templates."""
+    
+    # Display template selection
+    display_templates()
+    
+    # Check if a template is selected
+    if st.session_state.selected_template is not None:
+        template_data = st.session_state.templates[st.session_state.selected_template]
+        
+        st.markdown(f"<div class='sub-header'>{template_data['name']}</div>", unsafe_allow_html=True)
+        
+        # Show template and allow for editing
+        with st.expander("View/Edit Template", expanded=True):
+            template_content = st.text_area(
+                "Template", 
+                value=template_data['template'].strip(), 
+                height=200,
+                key="template_content"
+            )
+        
+        # Input form for template variables
+        st.markdown("<div class='input-area'>", unsafe_allow_html=True)
+        
+        st.markdown("#### Template Variables")
+        
+        # Dynamically create input fields for each variable
+        variable_values = {}
+        cols = st.columns(2)
+        
+        for idx, (var_name, default_value) in enumerate(template_data['variables'].items()):
+            col = cols[idx % 2]
+            with col:
+                variable_values[var_name] = st.text_area(
+                    f"{var_name.replace('_', ' ').title()}", 
+                    value=default_value,
+                    height=100,
+                    key=f"var_{var_name}"
+                )
+        
+        # Create LangChain prompt template
+        prompt_template = PromptTemplate.from_template(template_content)
+        
+        # Preview formatted prompt
+        if st.checkbox("Preview formatted prompt", value=False):
             try:
-                st.session_state.formatted_prompt = st.session_state.simple_template.format(**{k: v for k, v in st.session_state.variables.items() if k in variables})
+                formatted_prompt = prompt_template.format(**variable_values)
+                st.markdown("#### Formatted Prompt")
+                st.markdown(f"```\n{formatted_prompt}\n```")
             except KeyError as e:
-                st.warning(f"Missing variable: {e}")
-                st.session_state.formatted_prompt = "Error: Missing variables"
-            
-            # Display formatted template
-            st.markdown("### 🔍 Preview")
-            st.markdown("<div class='generated-template'>", unsafe_allow_html=True)
-            st.text(st.session_state.formatted_prompt)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-            # Generate response
-            if st.button("🚀 Generate Response", key="simple_generate"):
-                with st.spinner("Generating response..."):
-                    try:
-                        llm = create_llm(model, st.session_state.provider)
-                        if llm:
-                            st.session_state.output = llm.invoke(st.session_state.formatted_prompt)
-                            
-                            st.markdown("### 💬 Model Response")
-                            st.markdown("<div class='output-container'>", unsafe_allow_html=True)
-                            st.write(st.session_state.output)
-                            st.markdown("</div>", unsafe_allow_html=True)
-                    except Exception as e:
-                        st.error(f"Error generating response: {str(e)}")
-    
-    with col2:
-        st.markdown("### 💡 Code Example")
-        st.markdown("<div class='code-box'>", unsafe_allow_html=True)
-        st.code("""
-from langchain.prompts import PromptTemplate
-
-# Define the template
-template = "{product} features:\\n{features}"
-
-# Create a PromptTemplate
-prompt = PromptTemplate(
-    input_variables=["product", "features"],
-    template=template,
-)
-
-# Format the prompt
-formatted = prompt.format(
-    product="Smartphone",
-    features="Please list 5 key features"
-)
-
-# Send to LLM
-response = llm.invoke(formatted)
-        """, language="python")
+                st.error(f"Missing variable in template: {e}")
+        
+        # Submit button
+        submit = st.button("Generate Response", type="primary", key="template_submit")
+        
         st.markdown("</div>", unsafe_allow_html=True)
         
-        st.markdown("### 🧩 Variable Placeholders")
-        for var in variables:
-            st.markdown(f"<span class='variable-pill'>{{{var}}}</span>", unsafe_allow_html=True)
-        
-        st.markdown("### 📋 Tips")
-        st.info("• Keep templates reusable by using descriptive variable names\n• Use clear formatting to help the model understand structure\n• Consider adding system instructions at the beginning")
-
-# Few-Shot Templates Tab
-with tab2:
-    st.markdown("<div class='header-text'>Few-Shot Prompt Templates</div>", unsafe_allow_html=True)
-    
-    st.markdown("<div class='info-box'>", unsafe_allow_html=True)
-    st.markdown("""
-    **Few-shot templates** provide examples to the model before asking it to perform a task.
-    This approach can significantly improve performance by:
-    - Demonstrating the expected format and style
-    - Showing reasoning patterns for complex tasks
-    - Reducing ambiguity in the instructions
-    """)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Few-shot template builder
-    col1, col2 = st.columns([3, 2])
-    
-    with col1:
-        st.markdown("### 📚 Example Builder")
-        
-        # Display existing examples
-        for i, example in enumerate(st.session_state.few_shot_examples):
-            with st.expander(f"Example {i+1}: {example['input']}", expanded=False):
-                col_a, col_b = st.columns(2)
-                with col_a:
-                    st.session_state.few_shot_examples[i]['input'] = st.text_area(
-                        "Input:",
-                        value=example['input'],
-                        key=f"input_{i}",
-                        height=100
-                    )
-                with col_b:
-                    st.session_state.few_shot_examples[i]['output'] = st.text_area(
-                        "Output:",
-                        value=example['output'],
-                        key=f"output_{i}",
-                        height=100
-                    )
-                
-                if st.button("Delete Example", key=f"del_{i}"):
-                    st.session_state.few_shot_examples.pop(i)
-                    st.rerun()
-        
-        # Add new example
-        with st.expander("➕ Add New Example", expanded=False):
-            col_a, col_b = st.columns(2)
-            with col_a:
-                new_input = st.text_area("Input:", key="new_input", height=100)
-            with col_b:
-                new_output = st.text_area("Output:", key="new_output", height=100)
-            
-            if st.button("Add Example", key="add_example"):
-                if new_input and new_output:
-                    st.session_state.few_shot_examples.append({
-                        "input": new_input,
-                        "output": new_output
-                    })
-                    st.rerun()
-                else:
-                    st.warning("Both input and output must be provided")
-        
-        # Template configuration
-        st.markdown("### 🔧 Template Configuration")
-        
-        st.session_state.few_shot_prefix = st.text_area(
-            "Prefix (instructions before examples):",
-            value=st.session_state.few_shot_prefix,
-            height=100
-        )
-        
-        st.session_state.few_shot_suffix = st.text_area(
-            "Suffix (format after examples, with {input} placeholder):",
-            value=st.session_state.few_shot_suffix,
-            height=100
-        )
-        
-        st.session_state.few_shot_input_variable = st.text_input(
-            "Your query for the model:",
-            value=st.session_state.few_shot_input_variable
-        )
-        
-        # Generate the few-shot template preview
-        if st.session_state.few_shot_examples:
+        # Process submission
+        if submit:
             try:
-                # Create example template
-                example_template = "Input: {input}\nOutput: {output}"
-                example_prompt = PromptTemplate(
-                    input_variables=["input", "output"],
-                    template=example_template
-                )
+                # Format prompt using template
+                formatted_prompt = prompt_template.format(**variable_values)
                 
-                # Create few-shot template
-                few_shot_prompt = FewShotPromptTemplate(
-                    examples=st.session_state.few_shot_examples,
-                    example_prompt=example_prompt,
-                    prefix=st.session_state.few_shot_prefix,
-                    suffix=st.session_state.few_shot_suffix,
-                    input_variables=["input"],
-                    example_separator="\n\n"
-                )
+                # Add to conversation history (user message)
+                st.session_state.conversation_history.append({
+                    "role": "user",
+                    "content": formatted_prompt
+                })
                 
-                # Format the prompt
-                if st.session_state.few_shot_input_variable:
-                    st.session_state.fewshot_formatted_prompt = few_shot_prompt.format(
-                        input=st.session_state.few_shot_input_variable
-                    )
+                # Prepare for API call
+                system_prompts = [{"text": "You are a helpful assistant that follows instructions carefully."}]
+                
+                message = {
+                    "role": "user",
+                    "content": [{"text": formatted_prompt}]
+                }
+                messages = [message]
+                
+                # Get Bedrock client
+                bedrock_client = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
+                
+                # Display response area with a placeholder for streaming
+                st.markdown("<div class='response-block'>", unsafe_allow_html=True)
+                st.markdown("### Response")
+                
+                # Stream the response
+                with st.status("Generating response...") as status:
+                    result = stream_conversation(bedrock_client, model_id, messages, system_prompts, params)
                     
-                    st.markdown("### 🔍 Preview")
-                    st.markdown("<div class='generated-template'>", unsafe_allow_html=True)
-                    st.text(st.session_state.fewshot_formatted_prompt)
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    if result and "response" in result:
+                        status.update(label="Response generated!", state="complete")
+                        
+                        # Add to conversation history (assistant message)
+                        st.session_state.conversation_history.append({
+                            "role": "assistant",
+                            "content": result["response"]
+                        })
+                        
+                        # Display metrics if available
+                        if "metrics" in result and result["metrics"]:
+                            st.markdown("### Response Details")
+                            
+                            metrics = result["metrics"]
+                            if "tokens" in metrics:
+                                token_info = metrics["tokens"]
+                                col1, col2, col3 = st.columns(3)
+                                col1.metric("Input Tokens", token_info.get('input', 'N/A'))
+                                col2.metric("Output Tokens", token_info.get('output', 'N/A'))
+                                col3.metric("Total Tokens", token_info.get('total', 'N/A'))
+                                
+                                if "latency_ms" in metrics:
+                                    st.caption(f"Latency: {metrics['latency_ms']}ms | Stop reason: {metrics.get('stop_reason', 'Unknown')}")
                     
-                    if st.button("🚀 Generate Response", key="fewshot_generate"):
-                        with st.spinner("Processing with few-shot template..."):
-                            try:
-                                llm = create_llm(model, st.session_state.provider)
-                                if llm:
-                                    st.session_state.output = llm.invoke(st.session_state.fewshot_formatted_prompt)
-                                    
-                                    st.markdown("### 💬 Model Response")
-                                    st.markdown("<div class='output-container'>", unsafe_allow_html=True)
-                                    st.write(st.session_state.output)
-                                    st.markdown("</div>", unsafe_allow_html=True)
-                            except Exception as e:
-                                st.error(f"Error generating response: {str(e)}")
+                    elif "error" in result:
+                        status.update(label="Error occurred", state="error")
+                        st.error(f"An error occurred: {result['error']}")
+                
+                st.markdown("</div>", unsafe_allow_html=True)
                 
             except Exception as e:
-                st.error(f"Error creating few-shot template: {str(e)}")
-                
-    with col2:
-        st.markdown("### 💡 Code Example")
-        st.markdown("<div class='code-box'>", unsafe_allow_html=True)
-        st.code("""
-from langchain.prompts import FewShotPromptTemplate
-from langchain.prompts import PromptTemplate
-
-# Define example template
-example_template = "Input: {input}\\nOutput: {output}"
-example_prompt = PromptTemplate(
-    input_variables=["input", "output"],
-    template=example_template
-)
-
-# Define examples
-examples = [
-    {"input": "Smartphone", 
-     "output": "- High res display\\n- Long battery life"},
-    {"input": "Laptop", 
-     "output": "- Lightweight design\\n- Powerful GPU"}
-]
-
-# Create few-shot template
-few_shot_prompt = FewShotPromptTemplate(
-    examples=examples,
-    example_prompt=example_prompt,
-    prefix="List features in bullet points:\\n\\n",
-    suffix="\\nInput: {input}\\nOutput:",
-    input_variables=["input"],
-    example_separator="\\n\\n"
-)
-
-# Format prompt with user query
-formatted = few_shot_prompt.format(input="Tablet")
-
-# Get response from LLM
-response = llm.invoke(formatted)
-        """, language="python")
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("### 📋 Tips for Few-Shot Learning")
-        st.info("""
-        • Use 3-5 diverse but consistent examples
-        • Make sure examples follow the same pattern
-        • Order examples from simple to complex
-        • Include examples that cover edge cases
-        • Keep the format consistent between examples
-        """)
-        
-        st.markdown("### 🧩 Structure")
-        st.markdown("""
-        A few-shot template consists of:
-        1. **Prefix**: Instructions and context
-        2. **Examples**: Input/output pairs
-        3. **Suffix**: Final prompt with placeholder
-        """)
-
-# Template Chains Tab
-with tab3:
-    st.markdown("<div class='header-text'>Template Chains</div>", unsafe_allow_html=True)
+                st.error(f"An error occurred: {str(e)}")
     
-    st.markdown("<div class='info-box'>", unsafe_allow_html=True)
+    else:
+        st.info("👆 Select a template above to get started")
+
+def display_conversation_history():
+    """Display the conversation history."""
+    if st.session_state.conversation_history:
+        st.markdown("### Conversation History")
+        
+        for msg in st.session_state.conversation_history:
+            role_class = "user-message" if msg["role"] == "user" else "assistant-message"
+            with st.container():
+                st.markdown(f"<div class='chat-message {role_class}'>", unsafe_allow_html=True)
+                st.markdown(f"**{msg['role'].capitalize()}:**")
+                st.markdown(msg["content"])
+                st.markdown("</div>", unsafe_allow_html=True)
+
+# ------- MAIN APP -------
+
+def main():
+    # Initialize session state
+    init_session_state()
+    
+    # Header
+    st.markdown("<h1 class='main-header'>LangChain + Amazon Bedrock</h1>", unsafe_allow_html=True)
+    
     st.markdown("""
-    **Template chains** combine prompt templates with LLMs to create powerful workflows.
-    With LangChain's LLMChain, you can:
-    - Connect templates directly to models
-    - Process inputs through multiple templates
-    - Build complex reasoning systems
-    """)
-    st.markdown("</div>", unsafe_allow_html=True)
+    <div style="text-align: center; margin-bottom: 2rem;">
+        This interactive dashboard demonstrates how to use LangChain Prompt Templates with Amazon Bedrock's foundation models.
+        Select a template, customize the variables, and generate high-quality content with structured prompts.
+    </div>
+    """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns([3, 2])
+    # Get model and parameters from sidebar
+    model_id, params = parameter_sidebar()
     
-    with col1:
-        st.markdown("### ⛓️ Create a Chain")
-        
-        # Template for the chain
-        chain_template = st.text_area(
-            "Define your prompt template:",
-            value="You are a product advisor specialized in technology.\n\nUser query: {query}\n\nProvide a helpful response with specific product recommendations:",
-            height=150
-        )
-        
-        # Query to process
-        st.session_state.chain_query = st.text_area(
-            "Your query:",
-            value=st.session_state.chain_query,
-            height=100
-        )
-        
-        # Create and run the chain
-        if st.button("🔄 Run Chain", key="run_chain"):
-            with st.spinner("Processing chain..."):
-                try:
-                    # Create prompt template
-                    prompt_template = PromptTemplate.from_template(chain_template)
-                    
-                    # Create LLM instance
-                    llm = create_llm(model, st.session_state.provider)
-                    
-                    if llm:
-                        # Create chain
-                        chain = LLMChain(
-                            llm=llm,
-                            prompt=prompt_template,
-                            verbose=True
-                        )
-                        
-                        # Run chain
-                        st.session_state.chain_result = chain.run(query=st.session_state.chain_query)
-                        
-                        # Display trace steps animation
-                        st.markdown("### 🔄 Chain Execution Steps")
-                        with st.status("Chain Process", expanded=True) as status:
-                            st.write("1️⃣ Initializing chain...")
-                            time.sleep(0.5)
-                            st.write("2️⃣ Formatting prompt template...")
-                            
-                            formatted_prompt = prompt_template.format(query=st.session_state.chain_query)
-                            st.code(formatted_prompt, language="text")
-                            
-                            time.sleep(0.5)
-                            st.write("3️⃣ Sending to LLM...")
-                            time.sleep(0.5)
-                            st.write("4️⃣ Processing response...")
-                            time.sleep(0.5)
-                            status.update(label="Completed!", state="complete")
-                        
-                        # Show result
-                        st.markdown("### 🎯 Chain Result")
-                        st.markdown("<div class='output-container'>", unsafe_allow_html=True)
-                        st.write(st.session_state.chain_result)
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                except Exception as e:
-                    st.error(f"Error running chain: {str(e)}")
+    # Display session ID
+    st.caption(f"Session ID: {st.session_state.session_id[:8]}...")
     
-    with col2:
-        st.markdown("### 💡 Code Example")
-        st.markdown("<div class='code-box'>", unsafe_allow_html=True)
-        st.code("""
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_community.llms import Bedrock
-
-# Create prompt template
-prompt = PromptTemplate(
-    input_variables=["query"],
-    template="You are a product advisor.\\n\\n"
-             "User query: {query}\\n\\n"
-             "Provide recommendations:",
-)
-
-# Initialize LLM
-llm = Bedrock(
-    model_id="anthropic.claude-v2:1",
-    client=bedrock_client
-)
-
-# Create the chain
-chain = LLMChain(
-    llm=llm,
-    prompt=prompt,
-    verbose=True
-)
-
-# Run the chain
-result = chain.run(query="What smartphone should I buy?")
-        """, language="python")
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("### 🧩 Advanced Chain Types")
-        st.info("""
-        Beyond simple LLMChains, LangChain offers:
-        
-        • **Sequential Chains**: Run multiple chains in sequence
-        • **Router Chains**: Direct input to different chains based on content
-        • **Memory Chains**: Keep track of conversation history
-        • **ReAct Chains**: Combine reasoning and actions
-        """)
-        
-        st.markdown("### 📊 Chain Applications")
-        apps_data = pd.DataFrame({
-            "Application": ["Document QA", "Chatbots", "Summarization", "Data Analysis"],
-            "Chain Type": ["RetrievalQA", "ConversationChain", "MapReduceChain", "SQLDatabaseChain"]
-        })
-        st.table(apps_data)
-
-# Best Practices Tab
-with tab4:
-    st.markdown("<div class='header-text'>Template Best Practices</div>", unsafe_allow_html=True)
+    # Main content area
+    prompt_template_interface(model_id, params)
     
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("### 🎯 Effective Structure")
-        st.markdown("""
-        #### Clear Role Definition
-        ```
-        You are a {role} specialized in {domain}.
-        ```
-        
-        #### Specific Instructions
-        ```
-        Your task is to {action} with these requirements:
-        - {requirement_1}
-        - {requirement_2}
-        ```
-        
-        #### Output Formatting
-        ```
-        Format your response as:
-        {format_description}
-        ```
-        """)
-        
-        st.markdown("### 🔄 Template Variables")
-        variables_data = pd.DataFrame({
-            "Variable Type": ["Content", "Instructions", "Format", "Context", "Examples"],
-            "Purpose": [
-                "Dynamic content to analyze or transform",
-                "Specific actions or operations to perform",
-                "Output structure and presentation",
-                "Background information for the task",
-                "Demonstrations of expected behavior"
-            ]
-        })
-        st.table(variables_data)
-    
-    with col2:
-        st.markdown("### 🚫 Common Mistakes")
-        
-        with st.expander("❌ Ambiguous Instructions"):
-            st.markdown("""
-            **Poor Template:**
-            ```
-            Please analyze {text}.
-            ```
-            
-            **Improved Template:**
-            ```
-            Analyze {text} by:
-            1. Identifying the main theme
-            2. Listing key arguments
-            3. Evaluating supporting evidence
-            ```
-            """)
-        
-        with st.expander("❌ Inconsistent Formatting"):
-            st.markdown("""
-            **Poor Template:**
-            ```
-            Example 1: input={input1}, output={output1}
-            For input={input2} the output is {output2}
-            ```
-            
-            **Improved Template:**
-            ```
-            Example 1:
-            Input: {input1}
-            Output: {output1}
-            
-            Example 2:
-            Input: {input2}
-            Output: {output2}
-            ```
-            """)
-        
-        with st.expander("❌ Information Overload"):
-            st.markdown("""
-            **Poor Template:**
-            ```
-            {20_paragraphs_of_context}
-            Now answer: {question}
-            ```
-            
-            **Improved Template:**
-            ```
-            Context: {concise_relevant_context}
-            
-            Using ONLY the information above, answer:
-            Question: {question}
-            ```
-            """)
-        
-        st.markdown("### 🌟 Template Evaluation")
-        st.info("""
-        Test your templates with this checklist:
-        
-        1. **Clarity**: Are instructions specific and unambiguous?
-        2. **Completeness**: Does the template include all necessary information?
-        3. **Consistency**: Are examples and formatting consistent?
-        4. **Effectiveness**: Does the template produce desired outputs?
-        5. **Efficiency**: Is the template concise and focused?
-        """)
+    # Display conversation history
+    display_conversation_history()
 
-# Footer
-st.markdown("""
-<footer>
-    <p>LangChain Prompt Template Explorer - Learn to craft effective prompts for any LLM application</p>
-</footer>
-""", unsafe_allow_html=True)
+if __name__ == "__main__":
+    main()
