@@ -80,18 +80,9 @@ def update_prompt_type(prompt_type):
 
 def call_llm(prompt, model_id, provider):
     """Call the LLM based on provider type"""
-    if provider == "Claude 3":
-        params = helpers.getmodelparams(provider)
-        params.update({'messages': [{"role": "user", "content": prompt}]})
-        
-        llm = BedrockChat(model_id=model_id, client=bedrock_runtime, model_kwargs=params)
-        response = llm.invoke(prompt)
-        
-        return st.info(response.content)
-    else:
-        llm = Bedrock(model_id=model_id, client=bedrock_runtime, model_kwargs=helpers.getmodelparams(provider))
-        response = llm.invoke(prompt)
-        return st.info(response)
+    llm = Bedrock(model_id=model_id, client=bedrock_runtime, model_kwargs=helpers.getmodelparams(provider))
+    response = llm.invoke(prompt)
+    return response
 
 # Sidebar
 with st.sidebar:
