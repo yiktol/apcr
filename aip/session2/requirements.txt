@@ -1,7 +1,7 @@
 streamlit
 botocore
 boto3
-numpy==2.0
+numpy==1.26.4
 pandas
 torch 
 transformers 
@@ -15,3 +15,8 @@ xgboost
 imblearn
 shap
 nltk
+accelerate
+gensim
+langchain
+langchain_aws
+jsonlines
