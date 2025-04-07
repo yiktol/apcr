@@ -6,7 +6,7 @@ streamlit run /home/ubuntu/environment/apcr/saa/Home.py --server.port 8095 &
 
 streamlit run /home/ubuntu/environment/genaionaws/01-BedrockAPI/Home.py --server.port 8080 &
 
-streamlit run /home/ubuntu/environment/genaionaws/00-MLBasics/Home.py --server.port 8094 &
+streamlit run /home/ubuntu/environment/apcr/aip/session1/Home.py --server.port 8094 &
 
 streamlit run /home/ubuntu/environment/apcr/aip/session2/Home.py --server.port 8082 &
 
