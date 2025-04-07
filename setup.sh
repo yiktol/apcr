@@ -12,5 +12,8 @@ streamlit run /home/ubuntu/environment/apcr/aip/session2/Home.py --server.port 8
 
 streamlit run /home/ubuntu/environment/genaionaws/04-Embedding/Home.py --server.port 8084 &
 
+streamlit run /home/ubuntu/APCR/environment/apcr/aip/session3/Home.py --server.port 8081 &
+
 # crontab -e
 #@reboot /bin/sh /home/ubuntu/environment/apcr/setup.sh
+#@hourly /bin/sh /home/ubuntu/environment/apcr/setup.sh
