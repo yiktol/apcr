@@ -1,0 +1,17 @@
+streamlit
+botocore
+boto3
+numpy==2.0
+pandas
+torch 
+transformers 
+matplotlib 
+seaborn 
+plotly 
+scikit-learn 
+pillow
+streamlit_drawable_canvas
+xgboost
+imblearn
+shap
+nltk
