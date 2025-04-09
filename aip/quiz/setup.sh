@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-directory=/home/ubuntu/environment/apcr/aip/session1
+directory=/home/ubuntu/environment/apcr/aip/quiz
 
 cd $directory
 
@@ -21,5 +21,5 @@ if [ -d $directory/.env ];
         
 fi
 
-$directory/.env/bin/streamlit run $directory/Home.py --server.port 8094 &
+$directory/.env/bin/streamlit run $directory/Home.py --server.port 8095 &
 deactivate
