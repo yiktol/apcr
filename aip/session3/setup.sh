@@ -13,6 +13,7 @@ if [ -d $directory/.env ];
 
         python -m venv .env
         source .env/bin/activate
+        pip install -U pip
         pip install -r requirements.txt
         deactivate
 fi
