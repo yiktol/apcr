@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-directory=/home/ubuntu/environment/apcr/aip/session1/
+directory=/home/ubuntu/environment/apcr/aip/session1
 
 cd $directory
 
