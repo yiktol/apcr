@@ -1,14 +1,22 @@
 #!/usr/bin/bash
 
-cd /home/ubuntu/environment/apcr/aip/session3
+directory=/home/ubuntu/environment/apcr/aip/session3/
 
-python -m venv .env
+# cd /home/ubuntu/environment/apcr/aip/session3/
+cd $directory
 
-source .env/bin/activate
+if [ -d $directory/.env ]; 
+    then
+        echo "Directory exists."
+    else
+        echo "Directory does not exists."
 
-pip install -r requirements.txt
+        python -m venv .env
+        source .env/bin/activate
+        pip install -r requirements.txt
+        deactivate
+fi
 
-streamlit run Home.py --server.port 8081 &
+/home/ubuntu/environment/apcr/aip/session3/.env/bin/streamlit run /home/ubuntu/environment/apcr/aip/session3/Home.py --server.port 8081 &
 
-deactivate
 
