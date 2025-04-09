@@ -11,13 +11,17 @@ if [ -d $directory/.env ];
     else
         echo "Directory does not exists."
 
+        echo "Creating Virtual Environment"
         python -m venv .env
         source $directory/.env/bin/activate
+
+        echo "Installing dependencies"
         pip install -U pip
         pip install -r requirements.txt
-        deactivate
+        
 fi
 
-"$directory"/.env/bin/streamlit run $directory/Home.py --server.port 8081 &
+$directory/.env/bin/streamlit run $directory/Home.py --server.port 8081 &
+deactivate
 
 
