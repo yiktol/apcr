@@ -161,7 +161,7 @@ with st.container():
             <h3>Domain 1: Fundamentals of AI and ML</h3>
             <p>Test your understanding of AI concepts, machine learning fundamentals, and the AWS ML stack.</p>
             <p class='caption'>Topics include: ML workflows, supervised vs. unsupervised learning, AWS ML services</p>
-            <a href='#' class='aws-button'>Start Domain 1 Assessment →</a>
+            <a href='https://t.yikyakyuk.com/apcr-aip-quiz/Quiz_1' class='aws-button'>Start Domain 1 Assessment →</a>
         </div>
     """, unsafe_allow_html=True)
 
@@ -172,7 +172,7 @@ with st.container():
             <h3>Domain 2: Fundamentals of Generative AI</h3>
             <p>Explore your knowledge of generative AI technologies including large language models, transformers, and diffusion models.</p>
             <p class='caption'>Topics include: LLMs, transformer architecture, Amazon Bedrock, image generation</p>
-            <a href='#' class='aws-button'>Start Domain 2 Assessment →</a>
+            <a href='https://t.yikyakyuk.com/apcr-aip-quiz/Quiz_2' class='aws-button'>Start Domain 2 Assessment →</a>
         </div>
     """, unsafe_allow_html=True)
 
@@ -183,7 +183,7 @@ with st.container():
             <h3>Domain 3: Applications of Foundation Models</h3>
             <p>Test your ability to identify appropriate foundation model applications and implementation strategies.</p>
             <p class='caption'>Topics include: Text applications, image generation, prompt engineering, fine-tuning</p>
-            <a href='#' class='aws-button'>Start Domain 3 Assessment →</a>
+            <a href='https://t.yikyakyuk.com/apcr-aip-quiz/Quiz_3' class='aws-button'>Start Domain 3 Assessment →</a>
         </div>
     """, unsafe_allow_html=True)
 
@@ -194,7 +194,7 @@ with st.container():
             <h3>Domain 4 & 5: Responsible AI, Security, and Governance</h3>
             <p>Evaluate your understanding of AI ethics, security considerations, and governance frameworks.</p>
             <p class='caption'>Topics include: Bias mitigation, transparency, data privacy, model security</p>
-            <a href='#' class='aws-button'>Start Domains 4 & 5 Assessment →</a>
+            <a href='https://t.yikyakyuk.com/apcr-aip-quiz/Quiz_4' class='aws-button'>Start Domains 4 & 5 Assessment →</a>
         </div>
     """, unsafe_allow_html=True)
 

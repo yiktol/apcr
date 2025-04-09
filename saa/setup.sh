@@ -3,12 +3,22 @@
 directory=/home/ubuntu/environment/apcr/saa
 cd $directory
 
-python -m venv .env
+if [ -d $directory/.env ]; 
+    then
+        echo "Directory exists."
+        source $directory/.env/bin/activate
+    else
+        echo "Directory does not exists."
 
-source .env/bin/activate
+        echo "Creating Virtual Environment"
+        python -m venv .env
+        source $directory/.env/bin/activate
 
-pip install -r requirements.txt
+        echo "Installing dependencies"
+        pip install -U pip
+        pip install -r requirements.txt
+        
+fi
 
-"/home/ubuntu/environment/apcr/saa/.env/bin"/streamlit run /home/ubuntu/environment/apcr/saa/Home.py --server.port 8095 &
-
+$directory/.env/bin/streamlit run $directory/Home.py --server.port 8095 &
 deactivate
