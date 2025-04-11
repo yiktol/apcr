@@ -93,7 +93,8 @@ questions = [
             "D": "Configure the web servers' security group to allow SSH traffic from a bastion host.",
             "E": "Deny all SSH traffic from the corporate network in the inbound network ACL."
         },
-        "correct_answer": "B and D",
+        "correct_answer": ["B", "D"],
+        "multi_select": True,
         "explanation": {
             "A": "While this could be a good practice, it's not necessary to meet the stated requirements. The question doesn't specify a need for integration with the corporate directory.",
             "B": "A bastion host provides a secure way to access private resources from an external network. By configuring security group rules to only allow traffic from the corporate network, it ensures that only authorized users can access the bastion host. It satisfies the requirement of limiting access to users originating from the corporate network.",

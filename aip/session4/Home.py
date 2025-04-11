@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -55,7 +54,7 @@ def main():
         font-size: 14px;
         margin-right: 8px;
     }
-        ul {
+    ul {
         margin-left: 20px;
         margin-top: 10px;
     }
@@ -63,7 +62,10 @@ def main():
         margin-bottom: 5px;
     }
     </style>
+    """, unsafe_allow_html=True)
     
+    # Header
+    st.markdown("""
     <div class="gradient-header">
         <h1>Responsible AI & Security Framework</h1>
         <p>AWS Partner Certification Readiness: AI Practitioner - Session 4</p>
@@ -122,7 +124,7 @@ def main():
         st.markdown("""
         <div class="card">
             <h4 class="topic-header">Domain 4: Guidelines for Responsible AI</h4>
-            
+            <br>
             <div style="margin-bottom: 15px;">
                 <span class="badge">4.1</span> <strong>Explain Responsible AI Systems Development</strong>
                 <ul>
@@ -133,7 +135,6 @@ def main():
                     <li>Model monitoring and governance</li>
                 </ul>
             </div>
-            
             <div>
                 <span class="badge">4.2</span> <strong>Transparent & Explainable Models</strong>
                 <ul>
@@ -150,7 +151,7 @@ def main():
         st.markdown("""
         <div class="card">
             <h4 class="topic-header">Domain 5: Security, Compliance & Governance</h4>
-            
+            <br>
             <div style="margin-bottom: 15px;">
                 <span class="badge">5.1</span> <strong>Securing AI Systems</strong>
                 <ul>
@@ -161,7 +162,6 @@ def main():
                     <li>Secure private connectivity with AWS PrivateLink</li>
                 </ul>
             </div>
-            
             <div>
                 <span class="badge">5.2</span> <strong>Governance & Compliance Regulations</strong>
                 <ul>
