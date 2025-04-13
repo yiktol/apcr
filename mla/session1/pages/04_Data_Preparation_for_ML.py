@@ -116,7 +116,7 @@ Perfect for data scientists preparing data for machine learning models.
 """)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("© 2023 ML Data Prep")
+st.sidebar.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")
 
 # Main page
 st.markdown('<h1 class="main-header">🔄 Data Preparation for Machine Learning</h1>', unsafe_allow_html=True)

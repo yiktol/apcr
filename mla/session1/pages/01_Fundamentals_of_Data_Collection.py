@@ -1038,7 +1038,7 @@ st.markdown(
     """
     <div style="text-align: center; color: #666;">
     Created for AWS Machine Learning Engineer - Associate Certification Training<br>
-    AWS Partner Certification Readiness
+    © 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
     </div>
     """,
     unsafe_allow_html=True

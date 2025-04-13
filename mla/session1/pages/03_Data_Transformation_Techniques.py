@@ -88,9 +88,7 @@ if st.sidebar.button("🔄 Reset Session", key="reset_session"):
         del st.session_state[key]
     st.rerun()
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("### About")
-st.sidebar.info("This application demonstrates various data cleaning techniques for machine learning.")
+
 
 # Header
 st.title("🧹 Data Cleaning for Machine Learning")
@@ -145,6 +143,15 @@ def reset_data():
 if 'df' not in st.session_state:
     st.session_state.df = generate_sample_data()
     st.session_state.df_original = st.session_state.df.copy()
+
+
+# Reset data button
+if st.sidebar.button("Reset to Original Data", key="reset_2"):
+    reset_data()
+    st.rerun()
+st.sidebar.markdown("---")
+st.sidebar.markdown("### About")
+st.sidebar.info("This application demonstrates various data cleaning techniques for machine learning.")
 
 # Main tabs
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
@@ -1143,7 +1150,7 @@ with tab8:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center">
-    <p>© 2025 Data Cleaning for Machine Learning | Powered by AWS</p>
+    <p>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
 </div>
 """, unsafe_allow_html=True)
 # ```

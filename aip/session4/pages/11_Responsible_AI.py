@@ -55,7 +55,20 @@ st.markdown("""
         padding: 20px;
         border-left: 4px solid #2196f3;
         margin: 20px 0;
+    },
+        .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
     }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 4px 4px 0 0;
+        padding: 10px 16px;
+        background-color: #F3F4F6;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #E0E7FF;
+        border-bottom: 2px solid #4F46E5;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
