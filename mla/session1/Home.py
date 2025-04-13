@@ -2549,4 +2549,4 @@ with col1:
     st.image("images/aws_logo.png", width=70)
 with col2:
     st.markdown("**AWS Machine Learning Engineer - Associate | Domain 1: Data Preparation for ML**")
-    st.markdown("© 2024 AWS Partner Certification Readiness")
+    st.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")

@@ -13,7 +13,6 @@ altair
 seaborn
 plotly
 umap
-scipy==1.15.2
+scipy<1.13
 hyperopt
 scikit-optimize
-st_clickable_images
