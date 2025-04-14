@@ -102,28 +102,20 @@ if 'ordinal_data' not in st.session_state:
         'satisfaction': ['Very Low', 'Low', 'Medium', 'High', 'Very High', 'Medium', 'Low']
     })
 
-# Quiz state variables
-if 'quiz_score' not in st.session_state:
-    st.session_state.quiz_score = 0
-if 'quiz_submitted' not in st.session_state:
-    st.session_state.quiz_submitted = False
-if 'quiz_answers' not in st.session_state:
-    st.session_state.quiz_answers = {}
-
 # Sidebar
 with st.sidebar:
-    # st.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
-    # st.title("Navigation")
+    st.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
+    st.title("Navigation")
     
     # Session management
-    st.subheader("⚙️ Session Management")
+    st.subheader("Session Management")
     if st.button("🔄 Reset Session"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
-        st.rerun()
+        st.experimental_rerun()
     
     st.markdown("---")
-    st.markdown("### About This App")
+    st.markdown("### About This Tutorial")
     st.info("""
     This interactive tutorial demonstrates various encoding techniques 
     used in machine learning to convert categorical data into numerical format.
@@ -139,7 +131,7 @@ with st.sidebar:
     """)
 
 # Main content
-st.title("Machine Learning Encoding Techniques")
+st.title("🧩 Machine Learning Encoding Techniques")
 st.markdown("#### An Interactive Guide to Converting Categorical Data for ML Models")
 
 st.markdown("""
@@ -157,8 +149,7 @@ tabs = st.tabs([
     "🏷️ Label Encoding", 
     "🔢 Ordinal Encoding", 
     "🔥 One-Hot Encoding", 
-    "🧪 Interactive Lab",
-    "📋 Knowledge Check"
+    "🧪 Interactive Lab"
 ])
 
 # Tab 1: Overview
@@ -1430,116 +1421,56 @@ with tabs[5]:
     </div>
     """, unsafe_allow_html=True)
 
-# Tab 7: Knowledge Check
-with tabs[6]:
-    st.header("Test Your Knowledge")
-    st.markdown("Let's see how well you understand encoding techniques for machine learning!")
-    
-    # Quiz questions
-    questions = [
-        {
-            "question": "Which encoding technique is most appropriate for categorical variables with a clear inherent order?",
-            "options": ["One-Hot Encoding", "Label Encoding", "Ordinal Encoding", "Binary Encoding"],
-            "correct": "Ordinal Encoding",
-            "explanation": "Ordinal encoding is specifically designed for categorical variables that have a natural order or hierarchy, like education levels or satisfaction ratings."
-        },
-        {
-            "question": "For nominal categorical data with high cardinality (many unique values), which encoding technique is typically recommended?",
-            "options": ["One-Hot Encoding", "Label Encoding", "Binary Encoding", "Target Encoding"],
-            "correct": "Label Encoding",
-            "explanation": "Label encoding is often preferred for high cardinality features as one-hot encoding would create too many columns, potentially leading to the curse of dimensionality."
-        },
-        {
-            "question": "What potential issue does label encoding introduce when used with linear models?",
-            "options": [
-                "It creates too many features", 
-                "It implies an ordinal relationship that might not exist",
-                "It's too memory-intensive", 
-                "It removes important information from the original data"
-            ],
-            "correct": "It implies an ordinal relationship that might not exist",
-            "explanation": "Label encoding assigns numeric values (like 0, 1, 2) to categories, which can mislead linear models into interpreting a relationship between categories that doesn't exist in reality."
-        },
-        {
-            "question": "Which encoding method is most suitable for binary categorical features like Yes/No or True/False?",
-            "options": ["One-Hot Encoding", "Binary Encoding", "Ordinal Encoding", "Count Encoding"],
-            "correct": "Binary Encoding",
-            "explanation": "Binary encoding is the simplest and most appropriate technique for variables with exactly two categories, mapping them to 0 and 1."
-        },
-        {
-            "question": "What problem does dropping the first category (drop_first=True) solve in one-hot encoding?",
-            "options": ["Reduces memory usage", "Improves model accuracy", "Avoids the dummy variable trap", "Makes the model train faster"],
-            "correct": "Avoids the dummy variable trap",
-            "explanation": "Dropping the first category helps avoid the dummy variable trap (multicollinearity) in linear models, as the full set of one-hot encoded columns would be perfectly correlated."
-        }
-    ]
-    
-    # Function to handle quiz submission
-    def submit_quiz():
-        score = 0
-        for q_idx, question in enumerate(questions):
-            if st.session_state.quiz_answers.get(f"q{q_idx}") == question["correct"]:
-                score += 1
-        st.session_state.quiz_score = score
-        st.session_state.quiz_submitted = True
-    
-    # Function to reset quiz
-    def reset_quiz():
-        st.session_state.quiz_score = 0
-        st.session_state.quiz_submitted = False
-        st.session_state.quiz_answers = {}
-    
-    # Display questions
-    for q_idx, question in enumerate(questions):
-        st.subheader(f"Question {q_idx+1}")
-        st.markdown(f"**{question['question']}**")
-        
-        # If quiz is not submitted, show radio buttons
-        if not st.session_state.quiz_submitted:
-            st.session_state.quiz_answers[f"q{q_idx}"] = st.radio(
-                f"Select your answer for question {q_idx+1}:",
-                question["options"],
-                index=None,
-                key=f"radio_{q_idx}"
-            )
-        # If quiz is submitted, show results
-        else:
-            user_answer = st.session_state.quiz_answers.get(f"q{q_idx}")
-            if user_answer == question["correct"]:
-                st.success(f"✅ Your answer: {user_answer}")
-                st.info(f"Explanation: {question['explanation']}")
-            else:
-                st.error(f"❌ Your answer: {user_answer}")
-                st.info(f"Correct answer: {question['correct']}")
-                st.info(f"Explanation: {question['explanation']}")
-        
-        st.markdown("---")
-    
-    # Submit or reset buttons
-    if not st.session_state.quiz_submitted:
-        if st.button("Submit Answers"):
-            submit_quiz()
-    else:
-        st.header(f"Your Score: {st.session_state.quiz_score}/{len(questions)}")
-        
-        # Score interpretation
-        if st.session_state.quiz_score == len(questions):
-            st.balloons()
-            st.success("🏆 Perfect score! You're an encoding expert!")
-        elif st.session_state.quiz_score >= len(questions) * 0.8:
-            st.success("🎓 Great job! You have a strong understanding of encoding techniques.")
-        elif st.session_state.quiz_score >= len(questions) * 0.6:
-            st.warning("📚 Good effort! Review the explanations to strengthen your knowledge.")
-        else:
-            st.error("🔄 You might want to revisit the earlier sections to reinforce your understanding.")
-        
-        if st.button("Take Quiz Again"):
-            reset_quiz()
-
 # Footer
 st.markdown("---")
-st.markdown("""
-<div style="text-align: center">
-    <p>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style="text-align: center; color: #666;">
+    Created for AWS Machine Learning Engineer - Associate Certification Training<br>
+    © 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# ```
+
+# This interactive Streamlit application provides a comprehensive guide to different encoding techniques used in machine learning. Here's what the application includes:
+
+# 1. **Modern UI/UX Design**:
+#    - Uses AWS color scheme (orange, dark blue, teal, etc.)
+#    - Tab-based navigation for easy content exploration
+#    - Responsive card-based layout
+#    - Custom styling for tabs and interactive elements
+
+# 2. **Session Management**:
+#    - Reset session button in the sidebar
+#    - All session state initialized properly
+#    - No state preservation between refreshes
+
+# 3. **Tab 1: Overview**:
+#    - Introduction to encoding techniques
+#    - Visual comparison of different encoding methods
+#    - Decision flowchart to help choose the right technique
+#    - Comparison table of advantages and disadvantages
+
+# 4. **Tab 2-5: Encoding Technique Details**:
+#    - Binary Encoding - For true/false, yes/no features
+#    - Label Encoding - For categorical features with no inherent order
+#    - Ordinal Encoding - For categories with meaningful order
+#    - One-Hot Encoding - For nominal categorical features
+
+# 5. **Tab 6: Interactive Lab**:
+#    - Choose from sample datasets or upload your own
+#    - Select features to encode
+#    - Apply multiple encoding techniques simultaneously
+#    - Compare results side by side
+#    - Visualize the transformations
+
+# For each encoding technique, the application provides:
+# - Detailed explanation of how the technique works
+# - Interactive examples with visualizations
+# - Code examples for implementation
+# - Try-it-yourself sections where users can input their own data
+# - Real-world use cases and practical considerations
+
+# The visuals include bar charts, heatmaps, and other interactive elements to help users understand how each encoding technique transforms data. The AWS color scheme gives the application a professional look aligned with AWS branding.

@@ -31,10 +31,6 @@ if 'initialized' not in st.session_state:
     st.session_state.augmented_images = None
     st.session_state.augmented_text = None
     st.session_state.augmented_timeseries = None
-    # Initialize quiz state
-    st.session_state.quiz_score = 0
-    st.session_state.quiz_submitted = False
-    st.session_state.quiz_answers = {}
 
 # Page configuration
 st.set_page_config(
@@ -96,19 +92,12 @@ st.markdown("""
         background-color: #FF9900 !important;
         color: white !important;
     }
-    .stButton>button {
-        background-color: #FF9900;
-        color: white;
-    }
-    .stButton>button:hover {
-        background-color: #FFAC31;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # Sidebar for session management
-st.sidebar.subheader("⚙️ Session Management")
-if st.sidebar.button("🔄 Reset Session", key="reset_btn"):
+st.sidebar.title("⚙️ Session Management")
+if st.sidebar.button("Reset Session", key="reset_btn"):
     # Clear all session state variables
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -116,8 +105,8 @@ if st.sidebar.button("🔄 Reset Session", key="reset_btn"):
     st.experimental_rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("""### About This App""")
-st.sidebar.info("""
+st.sidebar.markdown("""
+### About This App
 This application helps you understand:
 - Data Splitting techniques
 - Data Shuffling methods
@@ -126,11 +115,11 @@ This application helps you understand:
 Perfect for data scientists preparing data for machine learning models.
 """)
 
-# st.sidebar.markdown("---")
-# st.sidebar.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")
+st.sidebar.markdown("---")
+st.sidebar.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")
 
 # Main page
-st.markdown('<h1 class="main-header">Data Preparation for Machine Learning</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🔄 Data Preparation for Machine Learning</h1>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="info-box">
@@ -144,7 +133,6 @@ tabs = st.tabs([
     "📊 Data Splitting",
     "🔀 Data Shuffling",
     "🔄 Data Augmentation",
-    "📋 Knowledge Check",
     "📚 Resources"
 ])
 
@@ -1460,124 +1448,8 @@ with tabs[2]:
             # Save to session state
             st.session_state.augmented_timeseries = (augmented_series, titles)
 
-# =========== INTERACTIVE QUIZ TAB =============
-with tabs[3]:
-    st.header("Test Your Knowledge")
-    st.markdown("Let's see how well you understand data preparation techniques for machine learning!")
-    
-    # Quiz questions based on the content in the other tabs
-    questions = [
-        {
-            "question": "What is the main purpose of splitting data into training, validation, and test sets?",
-            "options": [
-                "To make the model train faster", 
-                "To ensure the model generalizes well to unseen data", 
-                "To reduce memory requirements",
-                "To make the code more organized"
-            ],
-            "correct": "To ensure the model generalizes well to unseen data",
-            "explanation": "Data splitting helps ensure your model can perform well on new, unseen data by evaluating it on separate validation and test sets that weren't used during training."
-        },
-        {
-            "question": "In a k-fold cross-validation with k=5, what percentage of the data is used for training in each fold?",
-            "options": ["20%", "50%", "80%", "95%"],
-            "correct": "80%",
-            "explanation": "In k-fold cross-validation with k=5, the data is divided into 5 equal parts. In each iteration, 1 part (20%) is used for validation and the remaining 4 parts (80%) are used for training."
-        },
-        {
-            "question": "Why is data shuffling important before splitting into train/test sets?",
-            "options": [
-                "It makes the model converge faster", 
-                "It prevents the model from learning the order of samples", 
-                "It ensures the train and test sets have similar distributions",
-                "All of the above"
-            ],
-            "correct": "It ensures the train and test sets have similar distributions",
-            "explanation": "Shuffling data before splitting helps ensure that both train and test sets have similar statistical distributions, avoiding bias that might exist in the original order of the data."
-        },
-        {
-            "question": "Which of the following is NOT a common image augmentation technique?",
-            "options": ["Horizontal flipping", "Brightness adjustment", "Dropout regularization", "Random cropping"],
-            "correct": "Dropout regularization",
-            "explanation": "Dropout is a regularization technique applied during model training, not a data augmentation method. The other options (flipping, brightness adjustment, and cropping) are common image augmentation techniques."
-        },
-        {
-            "question": "For time series data with important temporal patterns, which approach is typically most appropriate?",
-            "options": [
-                "Random shuffling of all data points", 
-                "Using sliding window approaches without shuffling", 
-                "Mini-batch shuffling",
-                "Epoch-based shuffling"
-            ],
-            "correct": "Using sliding window approaches without shuffling",
-            "explanation": "Time series data often contains important sequential patterns. Using sliding window approaches preserves these temporal dependencies, while shuffling would disrupt the time-based patterns that the model needs to learn."
-        },
-    ]
-    
-    # Function to handle quiz submission
-    def submit_quiz():
-        score = 0
-        for q_idx, question in enumerate(questions):
-            if st.session_state.quiz_answers.get(f"q{q_idx}") == question["correct"]:
-                score += 1
-        st.session_state.quiz_score = score
-        st.session_state.quiz_submitted = True
-    
-    # Function to reset quiz
-    def reset_quiz():
-        st.session_state.quiz_score = 0
-        st.session_state.quiz_submitted = False
-        st.session_state.quiz_answers = {}
-    
-    # Display questions
-    for q_idx, question in enumerate(questions):
-        st.subheader(f"Question {q_idx+1}")
-        st.markdown(f"**{question['question']}**")
-        
-        # If quiz is not submitted, show radio buttons
-        if not st.session_state.quiz_submitted:
-            st.session_state.quiz_answers[f"q{q_idx}"] = st.radio(
-                f"Select your answer for question {q_idx+1}:",
-                question["options"],
-                index=None,
-                key=f"radio_{q_idx}"
-            )
-        # If quiz is submitted, show results
-        else:
-            user_answer = st.session_state.quiz_answers.get(f"q{q_idx}")
-            if user_answer == question["correct"]:
-                st.success(f"✅ Your answer: {user_answer}")
-                st.info(f"Explanation: {question['explanation']}")
-            else:
-                st.error(f"❌ Your answer: {user_answer}")
-                st.info(f"Correct answer: {question['correct']}")
-                st.info(f"Explanation: {question['explanation']}")
-        
-        st.markdown("---")
-    
-    # Submit or reset buttons
-    if not st.session_state.quiz_submitted:
-        if st.button("Submit Answers"):
-            submit_quiz()
-    else:
-        st.header(f"Your Score: {st.session_state.quiz_score}/{len(questions)}")
-        
-        # Score interpretation
-        if st.session_state.quiz_score == len(questions):
-            st.balloons()
-            st.success("🏆 Perfect score! You're a data preparation expert!")
-        elif st.session_state.quiz_score >= len(questions) * 0.8:
-            st.success("🎓 Great job! You have a strong understanding of data preparation techniques.")
-        elif st.session_state.quiz_score >= len(questions) * 0.6:
-            st.warning("📚 Good effort! Review the explanations to strengthen your knowledge.")
-        else:
-            st.error("🔄 You might want to revisit the earlier sections to reinforce your understanding.")
-        
-        if st.button("Take Quiz Again"):
-            reset_quiz()
-
 # =========== RESOURCES TAB =============
-with tabs[4]:
+with tabs[3]:
     st.markdown('<h2 class="sub-header">📚 Resources</h2>', unsafe_allow_html=True)
     
     st.markdown("""
@@ -1688,14 +1560,39 @@ with tabs[4]:
         ```
         """)
 
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center">
-    <p>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
-</div>
-""", unsafe_allow_html=True)
-
 # Run the app if script is executed directly
 if __name__ == "__main__":
     pass
+# ```
+
+# This Streamlit application provides an interactive learning experience for understanding data preparation for machine learning models, focusing on data splitting, shuffling, and augmentation techniques. Key features include:
+
+# 1. **User Interface:**
+#    - Clean, modern design with tab-based navigation and emoji icons
+#    - Responsive layout that adapts to different screen sizes
+#    - Informative sections with consistent styling
+
+# 2. **Data Splitting Section:**
+#    - Explanations of training/validation/test splits
+#    - Interactive examples of simple hold-out and cross-validation methods
+#    - Visual representations of different splitting techniques
+#    - Interactive tool to experiment with different splitting parameters
+
+# 3. **Data Shuffling Section:**
+#    - Clear explanations of random permutation, epoch-based shuffling, and mini-batch shuffling
+#    - Visualizations showing how each technique transforms data
+#    - Interactive demonstration to see the effects on time series data
+
+# 4. **Data Augmentation Section:**
+#    - Comprehensive coverage of image, text, and time series augmentation
+#    - Real-time image augmentation with options like flipping, rotation, and noise addition
+#    - Text augmentation with synonym replacement, word deletion, and more
+#    - Time series augmentation with jitter, scaling, and time warping
+
+# 5. **Resources Section:**
+#    - Curated links to further learning materials
+#    - Best practices summary
+#    - Common pitfalls to avoid
+#    - Quick reference code snippets
+
+# The application includes session state management with a reset button in the sidebar, allowing users to clear their work and start fresh anytime. The implementation uses data visualization libraries like Matplotlib, Plotly, and Altair to create engaging, interactive visualizations that help users understand complex concepts.

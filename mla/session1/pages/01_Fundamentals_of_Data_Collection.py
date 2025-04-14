@@ -80,11 +80,11 @@ if 'tab_selected' not in st.session_state:
     
 # Sidebar for session management
 with st.sidebar:
-    st.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
-    st.title("Navigation")
+    # st.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
+    # st.title("Navigation")
     
     # Session management
-    st.subheader("Session Management")
+    st.subheader("⚙️ Session Management")
     if st.button("🔄 Reset Session"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
@@ -111,7 +111,7 @@ tabs = st.tabs([
     "📊 Data Structures", 
     "💾 Storage Formats", 
     "🏢 Data Warehouses vs Data Lakes", 
-    "📋 Interactive Quiz"
+    "📋 Knowledge Check"
 ])
 
 # Tab 1: Data Structures
@@ -919,7 +919,7 @@ with tabs[2]:
         </div>
         """, unsafe_allow_html=True)
 
-# Tab 4: Interactive Quiz
+# Tab 4: Knowledge Check
 with tabs[3]:
     st.header("Test Your Knowledge")
     st.markdown("Let's see how well you understand AWS data storage concepts with this quick quiz!")
@@ -996,6 +996,7 @@ with tabs[3]:
             st.session_state.quiz_answers[f"q{q_idx}"] = st.radio(
                 f"Select your answer for question {q_idx+1}:",
                 question["options"],
+                index=None,
                 key=f"radio_{q_idx}"
             )
         # If quiz is submitted, show results
@@ -1034,15 +1035,11 @@ with tabs[3]:
 
 # Footer
 st.markdown("---")
-st.markdown(
-    """
-    <div style="text-align: center; color: #666;">
-    Created for AWS Machine Learning Engineer - Associate Certification Training<br>
-    © 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div style="text-align: center">
+    <p>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
+</div>
+""", unsafe_allow_html=True)
 # ```
 
 # This Streamlit application creates an interactive e-learning web page covering AWS data structures and storage concepts. Here's what the application includes:
@@ -1068,7 +1065,7 @@ st.markdown(
 #    - Visual architecture diagrams for each storage type
 #    - AWS services mapping for each storage solution
 
-# 5. **Tab 4: Interactive Quiz**:
+# 5. **Tab 4: Knowledge Check**:
 #    - 5-question quiz to test knowledge
 #    - Immediate feedback with explanations
 #    - Score calculation and performance assessment

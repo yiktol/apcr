@@ -142,6 +142,13 @@ st.markdown("""
         margin: 15px 0;
         border: 1px solid #E5E7EB;
     }
+    .stButton>button {
+        background-color: #FF9900;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #FFAC31;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -218,7 +225,7 @@ with st.sidebar:
             st.rerun()
     
     # Reset button
-    if st.button("Reset Session 🔄"):
+    if st.button("🔄 Reset Session"):
         reset_session()
     
     # Progress tracking
@@ -257,7 +264,7 @@ tabs = st.tabs([
     "⚙️ Data Transformation", 
     "🧩 Feature Engineering", 
     "🛡️ Data Integrity", 
-    "❓ Quiz", 
+    "❓ Knowledge Check", 
     "📚 Resources"
 ])
 
@@ -2372,7 +2379,7 @@ with tabs[6]:
             # Display each question
             for i, q in enumerate(selected_questions):
                 st.markdown(f"**Question {i+1}:** {q['question']}")
-                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], index=None,key=f"q{i}")
                 user_answers.append((answer, q['correct'], q['explanation']))
             
             # Submit button
@@ -2548,5 +2555,4 @@ col1, col2 = st.columns([1, 5])
 with col1:
     st.image("images/aws_logo.png", width=70)
 with col2:
-    st.markdown("**AWS Machine Learning Engineer - Associate | Domain 1: Data Preparation for ML**")
     st.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")

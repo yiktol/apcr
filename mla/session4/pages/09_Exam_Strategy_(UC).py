@@ -118,7 +118,7 @@ st.markdown("""
 
 # Construction icon and title
 st.markdown('<div class="icon">🚧</div>', unsafe_allow_html=True)
-st.markdown('<h1>Under Construction</h1>', unsafe_allow_html=True)
+st.markdown('<h1>Website Under Construction</h1>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">We\'re working hard to bring you an amazing experience.</div>', unsafe_allow_html=True)
 
 # Progress bar

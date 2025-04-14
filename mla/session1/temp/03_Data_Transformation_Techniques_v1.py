@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -53,13 +52,6 @@ st.markdown("""
         color: white !important;
     
     }
-    .stButton>button {
-        background-color: #FF9900;
-        color: white;
-    }
-    .stButton>button:hover {
-        background-color: #FFAC31;
-    }
     div[data-testid="stSidebarNav"] li div a {
         margin-left: 1rem;
         padding: 0rem;
@@ -86,17 +78,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize quiz state variables
-if 'quiz_score' not in st.session_state:
-    st.session_state.quiz_score = 0
-if 'quiz_submitted' not in st.session_state:
-    st.session_state.quiz_submitted = False
-if 'quiz_answers' not in st.session_state:
-    st.session_state.quiz_answers = {}
-
 # Sidebar for session management
-# st.sidebar.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
-st.sidebar.subheader("⚙️ Session Management")
+st.sidebar.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
+st.sidebar.title("Session Management")
 
 if st.sidebar.button("🔄 Reset Session", key="reset_session"):
     # Clear all session state
@@ -107,7 +91,7 @@ if st.sidebar.button("🔄 Reset Session", key="reset_session"):
 
 
 # Header
-st.title("Data Cleaning for Machine Learning")
+st.title("🧹 Data Cleaning for Machine Learning")
 st.markdown("Explore different data transformation techniques to prepare your data for ML models")
 
 # Initialize sample data
@@ -162,15 +146,15 @@ if 'df' not in st.session_state:
 
 
 # Reset data button
-if st.sidebar.button("↺ Reset to Original Data", key="reset_2"):
+if st.sidebar.button("Reset to Original Data", key="reset_2"):
     reset_data()
     st.rerun()
 st.sidebar.markdown("---")
-st.sidebar.markdown("### About this App")
+st.sidebar.markdown("### About")
 st.sidebar.info("This application demonstrates various data cleaning techniques for machine learning.")
 
 # Main tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "📚 Introduction", 
     "❓ Missing Values", 
     "🔄 Duplicates", 
@@ -178,8 +162,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🎯 Feature Selection", 
     "⚖️ Balance Dataset", 
     "🛠️ Feature Engineering",
-    "🔀 Data Conversion",
-    "📋 Knowledge Check"
+    "🔀 Data Conversion"
 ])
 
 with tab1:
@@ -230,7 +213,7 @@ with tab1:
         st.plotly_chart(fig)
     
     # Reset data button
-    if st.button("↺ Reset to Original Data"):
+    if st.button("Reset to Original Data"):
         reset_data()
         st.rerun()
 
@@ -709,75 +692,43 @@ with tab6:
             """)
             
             if st.button("Apply Balancing"):
-                # First, ensure we handle missing values before balancing
-                has_missing = st.session_state.df.isnull().any().any()
+                X = st.session_state.df.drop(columns=['target'])
+                y = st.session_state.df['target']
                 
-                if has_missing:
-                    st.warning("Dataset contains missing values. These will be imputed before balancing.")
-                    # Simple imputation for all columns
-                    numeric_cols = st.session_state.df.select_dtypes(include=['number']).columns
-                    categorical_cols = st.session_state.df.select_dtypes(include=['object', 'category']).columns
+                # Handle non-numeric features for SMOTE
+                if balancing_method == "SMOTE (Synthetic Minority Over-sampling)":
+                    categorical_cols = X.select_dtypes(include=['object', 'category']).columns
                     
-                    # Create a copy to avoid warnings
-                    temp_df = st.session_state.df.copy()
-                    
-                    # Impute numeric columns with mean
-                    if len(numeric_cols) > 0:
-                        num_imputer = SimpleImputer(strategy='mean')
-                        temp_df[numeric_cols] = num_imputer.fit_transform(temp_df[numeric_cols])
-                    
-                    # Impute categorical columns with most frequent value
-                    if len(categorical_cols) > 0:
-                        for col in categorical_cols:
-                            if temp_df[col].isnull().any():
-                                mode_val = temp_df[col].mode()[0]
-                                temp_df[col].fillna(mode_val, inplace=True)
-                    
-                    # Use the imputed dataframe for balancing
-                    X = temp_df.drop(columns=['target'])
-                    y = temp_df['target']
-                else:
-                    X = st.session_state.df.drop(columns=['target'])
-                    y = st.session_state.df['target']
-                
-                # Handle non-numeric features for all methods
-                categorical_cols = X.select_dtypes(include=['object', 'category']).columns
-                
-                # Create dummy variables for categorical columns
-                if not categorical_cols.empty:
-                    X = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
-                    st.info(f"Created dummy variables for categorical columns: {', '.join(categorical_cols)}")
+                    # Create dummy variables for categorical columns
+                    if not categorical_cols.empty:
+                        X = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
+                        st.info(f"Created dummy variables for categorical columns: {', '.join(categorical_cols)}")
                 
                 # Apply balancing technique
-                try:
-                    if balancing_method == "Random Oversampling":
-                        sampler = RandomOverSampler(random_state=42)
-                        X_resampled, y_resampled = sampler.fit_resample(X, y)
-                    elif balancing_method == "Random Undersampling":
-                        sampler = RandomUnderSampler(random_state=42)
-                        X_resampled, y_resampled = sampler.fit_resample(X, y)
-                    else:  # "SMOTE"
+                if balancing_method == "Random Oversampling":
+                    sampler = RandomOverSampler(random_state=42)
+                    X_resampled, y_resampled = sampler.fit_resample(X, y)
+                elif balancing_method == "Random Undersampling":
+                    sampler = RandomUnderSampler(random_state=42)
+                    X_resampled, y_resampled = sampler.fit_resample(X, y)
+                else:  # "SMOTE"
+                    try:
                         sampler = SMOTE(random_state=42)
                         X_resampled, y_resampled = sampler.fit_resample(X, y)
-                    
-                    # Recreate the dataframe - we only keep the numeric columns and target
-                    # since categorical columns were converted to dummies
-                    resampled_df = pd.concat([X_resampled, pd.Series(y_resampled, name='target')], axis=1)
-                    
-                    # Update the session state
-                    # Keep only numeric columns and target from original df to avoid issues
-                    if has_missing or len(categorical_cols) > 0:
-                        st.info("Note: Categorical columns have been converted to dummy variables in the balanced dataset.")
-                    
-                    st.session_state.df = resampled_df
-                    
-                    # Show success message
-                    new_class_counts = st.session_state.df['target'].value_counts()
-                    st.success(f"Applied {balancing_method}. New class distribution: {dict(new_class_counts)}")
+                    except ValueError as e:
+                        st.error(f"Error applying SMOTE: {e}")
+                        st.info("SMOTE requires numeric features. Please convert categorical features first.")
+                        X_resampled, y_resampled = X, y
                 
-                except Exception as e:
-                    st.error(f"Error applying balancing technique: {str(e)}")
-                    st.info("Make sure there are no missing values and all features are properly encoded.")
+                # Recreate the dataframe
+                resampled_df = pd.concat([X_resampled, pd.Series(y_resampled, name='target')], axis=1)
+                
+                # Update the session state
+                st.session_state.df = resampled_df
+                
+                # Show success message
+                new_class_counts = st.session_state.df['target'].value_counts()
+                st.success(f"Applied {balancing_method}. New class distribution: {dict(new_class_counts)}")
         
         # Display the resulting dataframe
         st.subheader("Resulting Dataset")
@@ -1195,121 +1146,6 @@ with tab8:
         st.write(f"Columns: {st.session_state.df.shape[1]}")
         st.write(f"Data types: {st.session_state.df.dtypes.value_counts().to_dict()}")
 
-with tab9:
-    st.header("Test Your Knowledge")
-    st.markdown("Let's see how well you understand data cleaning techniques for machine learning!")
-    
-    # Quiz questions - generated from the contexts in the app
-    questions = [
-        {
-            "question": "Which technique is most appropriate for handling categorical variables with a meaningful order?",
-            "options": ["One-Hot Encoding", "Label Encoding", "Ordinal Encoding", "Binary Encoding"],
-            "correct": "Ordinal Encoding",
-            "explanation": "Ordinal encoding is specifically designed for categorical variables that have a natural order or hierarchy, such as education levels (High School < Bachelor < Master < PhD)."
-        },
-        {
-            "question": "When dealing with outliers in your dataset, which feature scaling method is least sensitive to them?",
-            "options": ["MinMax Scaling", "Standard Scaling", "Robust Scaling", "No scaling"],
-            "correct": "Robust Scaling",
-            "explanation": "Robust Scaling uses the median and quantiles instead of mean and standard deviation, making it less sensitive to outliers in the data."
-        },
-        {
-            "question": "What problem might arise if you apply SMOTE to balance your dataset without first handling missing values?",
-            "options": [
-                "The minority class will still be underrepresented", 
-                "SMOTE will fail because it doesn't accept missing values encoded as NaN",
-                "The majority class will be oversampled instead", 
-                "SMOTE will automatically fill in the missing values"
-            ],
-            "correct": "SMOTE will fail because it doesn't accept missing values encoded as NaN",
-            "explanation": "SMOTE requires complete data with no missing values. If your dataset contains NaN values, you need to impute them before applying SMOTE."
-        },
-        {
-            "question": "Which feature selection approach is most appropriate when you have several highly correlated features?",
-            "options": [
-                "Keep all features to maximize information", 
-                "Drop all correlated features", 
-                "Drop one feature from each pair of highly correlated features", 
-                "Create interaction features between correlated features"
-            ],
-            "correct": "Drop one feature from each pair of highly correlated features",
-            "explanation": "When features are highly correlated, they provide redundant information. Keeping one feature from each correlated pair reduces dimensionality while retaining the important information."
-        },
-        {
-            "question": "What is the main reason for applying feature scaling in machine learning pipelines?",
-            "options": [
-                "To convert categorical features to numerical ones", 
-                "To ensure all features contribute equally to the model", 
-                "To remove outliers from the dataset", 
-                "To create polynomial features"
-            ],
-            "correct": "To ensure all features contribute equally to the model",
-            "explanation": "Feature scaling puts all features on a similar scale so that no feature dominates the model due to its range. This is particularly important for algorithms that use distance calculations or gradient descent."
-        }
-    ]
-    
-    # Function to handle quiz submission
-    def submit_quiz():
-        score = 0
-        for q_idx, question in enumerate(questions):
-            if st.session_state.quiz_answers.get(f"q{q_idx}") == question["correct"]:
-                score += 1
-        st.session_state.quiz_score = score
-        st.session_state.quiz_submitted = True
-    
-    # Function to reset quiz
-    def reset_quiz():
-        st.session_state.quiz_score = 0
-        st.session_state.quiz_submitted = False
-        st.session_state.quiz_answers = {}
-    
-    # Display questions
-    for q_idx, question in enumerate(questions):
-        st.subheader(f"Question {q_idx+1}")
-        st.markdown(f"**{question['question']}**")
-        
-        # If quiz is not submitted, show radio buttons
-        if not st.session_state.quiz_submitted:
-            st.session_state.quiz_answers[f"q{q_idx}"] = st.radio(
-                f"Select your answer for question {q_idx+1}:",
-                question["options"],
-                index=None,
-                key=f"radio_{q_idx}"
-            )
-        # If quiz is submitted, show results
-        else:
-            user_answer = st.session_state.quiz_answers.get(f"q{q_idx}")
-            if user_answer == question["correct"]:
-                st.success(f"✅ Your answer: {user_answer}")
-                st.info(f"Explanation: {question['explanation']}")
-            else:
-                st.error(f"❌ Your answer: {user_answer}")
-                st.info(f"Correct answer: {question['correct']}")
-                st.info(f"Explanation: {question['explanation']}")
-        
-        st.markdown("---")
-    
-    # Submit or reset buttons
-    if not st.session_state.quiz_submitted:
-        if st.button("Submit Answers"):
-            submit_quiz()
-    else:
-        st.header(f"Your Score: {st.session_state.quiz_score}/{len(questions)}")
-        
-        # Score interpretation
-        if st.session_state.quiz_score == len(questions):
-            st.balloons()
-            st.success("🏆 Perfect score! You're a data cleaning expert!")
-        elif st.session_state.quiz_score >= len(questions) * 0.8:
-            st.success("🎓 Great job! You have a strong understanding of data cleaning techniques.")
-        elif st.session_state.quiz_score >= len(questions) * 0.6:
-            st.warning("📚 Good effort! Review the explanations to strengthen your knowledge.")
-        else:
-            st.error("🔄 You might want to revisit the earlier sections to reinforce your understanding.")
-        
-        if st.button("Take Quiz Again"):
-            reset_quiz()
-
 # Footer
 st.markdown("---")
 st.markdown("""
@@ -1317,3 +1153,39 @@ st.markdown("""
     <p>© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
 </div>
 """, unsafe_allow_html=True)
+# ```
+
+# ## How to Run
+
+# 1. Install the required packages:
+# ```bash
+# pip install streamlit pandas numpy matplotlib seaborn scikit-learn imbalanced-learn plotly
+# ```
+
+# 2. Save the code above in a file named `app.py`
+
+# 3. Run the Streamlit application:
+# ```bash
+# streamlit run app.py
+# ```
+
+# ## Features of the Application
+
+# The application is organized into tabs, each focusing on different data cleaning techniques:
+
+# 1. **Introduction**: Overview of data cleaning and its importance in machine learning
+# 2. **Missing Values**: Methods to handle missing values (dropping, imputation)
+# 3. **Duplicates**: Identify and remove duplicate records
+# 4. **Feature Scaling**: Techniques for scaling numerical features (MinMax, Standard, Robust)
+# 5. **Feature Selection**: Methods to select relevant features and drop redundant ones
+# 6. **Balance Dataset**: Techniques to handle class imbalance (oversampling, undersampling, SMOTE)
+# 7. **Feature Engineering**: Create new features from existing ones
+# 8. **Data Conversion**: Convert data types to suit ML algorithms
+
+# Each tab includes:
+# - Explanation of why the technique is important
+# - Interactive controls to apply the technique to the sample data
+# - Visualizations showing before and after effects
+# - Results display showing transformed data
+
+# The application uses AWS color scheme and modern UI elements for a professional look. Session management is included in the sidebar, allowing users to reset the session at any time.
