@@ -475,7 +475,7 @@ with tabs[1]:
     
     custom_header("Amazon SageMaker AI", "section")
     
-    st.image("https://d1.awsstatic.com/product-marketing/SageMaker/sagemaker-howitworks-final.2f8550a4252eb0fdd7125845301ad76e6ca56784.png", caption="Amazon SageMaker Workflow")
+    st.image("images/sagemaker_workflow.png", caption="Amazon SageMaker Workflow", width=800)
     
     col1, col2 = st.columns(2)
     
@@ -554,7 +554,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("### Structured Data")
-        st.image("https://miro.medium.com/v2/resize:fit:1400/1*Z8-9VTB1K9t2NCj1HW4c7Q.jpeg", width=200)
+        st.image("images/structuredata.png", width=200)
         st.markdown("""
         - Organized in tabular format
         - Examples: SQL databases, spreadsheets
@@ -565,7 +565,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("### Semi-structured Data")
-        st.image("https://media.geeksforgeeks.org/wp-content/uploads/20230901230038/What-is-Semi-structured-data.webp", width=200)
+        st.image("images/semistructuredata.png", width=200)
         st.markdown("""
         - Has organizational properties but not in relational databases
         - Examples: XML, JSON, NoSQL databases
@@ -576,7 +576,7 @@ with tabs[2]:
     
     with col3:
         st.markdown("### Unstructured Data")
-        st.image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPOQ7oNvs98X8Yjo8lwGkZi92vZaHZPBdZbA&usqp=CAU", width=200)
+        st.image("images/unstructuredata.png", width=200)
         st.markdown("""
         - No pre-defined model or organization
         - Examples: Text files, social media posts, images, videos
@@ -661,7 +661,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("### Real-time Data Streaming")
-        st.image("https://d1.awsstatic.com/reInvent/reinvent-2022/kinesis/Product-Page-Diagram_Amazon-Kinesis_HIW%402x.7c1189d1ea160aadab8b1322a17ae69bf2a64d39.png", width=400)
+        st.image("images/realtime-data-processing.png", width=600)
         st.markdown("""
         **Amazon Kinesis**
         - Kinesis Data Streams: Collect and process large streams of data records in real time
@@ -675,7 +675,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("### Batch Processing and Data Transfer")
-        st.image("https://d1.awsstatic.com/Product-Page-Diagram_AWS-Transfer-Family-for-SFTP%402x.4c90804cc40c8b0aeb125a3fc6ac988265e23984.png", width=400)
+        st.image("images/batch_data_processing.png", width=600)
         st.markdown("""
         **AWS CLI & SDKs**
         - Command line interface and software development kits for interacting with AWS services
@@ -743,7 +743,7 @@ with tabs[2]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.image("https://d1.awsstatic.com/diagrams/product-page-diagrams/Product-Page-Diagram_Amazon-S3-DATA%20LAKE_HIW_1.51ec76dd97858c8fb6f509ca43db78a6b7d3097f.png", caption="AWS Storage Services")
+        st.image("images/storage_services.png", caption="AWS Storage Services",width=700)
     
     with col2:
         st.markdown("""
@@ -812,7 +812,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("### Data Lake")
-        st.image("https://d1.awsstatic.com/s3-pdx.1a68536c0b5591ec0e2c7d5eddeb0f944436ca18.png", width=400)
+        st.image("images/datalake.png", width=400)
         st.markdown("""
         **A data lake is a centralized repository that helps you store structured, semi-structured, and unstructured data at any scale.**
         
@@ -833,7 +833,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("### Data Warehouse")
-        st.image("https://d1.awsstatic.com/reInvent/reinvent-2022/redshift/Product-Page-Diagram_Amazon-Redshift-Data-Sharing-in-a-data-mesh_HIW%402x.15abcfb06a787375519723991baa168eec7c90d9.png", width=400)
+        st.image("images/datawarehouse.png", width=400)
         st.markdown("""
         **A data warehouse is a central repository of information coming from one or more data sources, optimized for analytics.**
         
@@ -877,7 +877,7 @@ with tabs[2]:
     
     custom_header("AWS Glue", "section")
     
-    st.image("https://d1.awsstatic.com/diagrams/product-page-diagrams/product-page-diagram_AWS-Glue_how-it-works.85ec7c5601c4ff416b9fe4995708f2310e66b892.png", caption="AWS Glue Workflow")
+    st.image("images/glue.png", caption="AWS Glue Workflow",width=800)
     
     st.markdown("""
     **AWS Glue** is a fully managed extract, transform, and load (ETL) service that makes it convenient to prepare and load data for analytics.
@@ -1047,7 +1047,7 @@ with tabs[3]:
            - Cross-reference with reliable sources
         """, "info")
         
-        st.image("https://miro.medium.com/max/1400/1*KzmIUYPmxgEHhXX7SlnpRw.jpeg", caption="Data Cleaning Process")
+        st.image("images/datacleaning.png", caption="Data Cleaning Process")
     
     custom_header("Identifying Outliers", "section")
     
@@ -1152,7 +1152,7 @@ with tabs[3]:
     
     with col2:
         st.markdown("### Label Encoding")
-        st.image("https://miro.medium.com/v2/resize:fit:640/format:webp/0*a3TcO_s-SUS3Xtmq.png", caption="Label Encoding")
+        st.image("images/label_encoding.png", caption="Label Encoding",width=300)
         st.markdown("""
         - Maps each category to a number
         - Good for ordinal data where order matters
@@ -1163,7 +1163,7 @@ with tabs[3]:
     
     with col3:
         st.markdown("### One-Hot Encoding")
-        st.image("https://miro.medium.com/v2/resize:fit:720/format:webp/1*MBXp5nefzGYSIfpeMoax0Q.png", caption="One-Hot Encoding")
+        st.image("images/one-hot-encoding.png", caption="One-Hot Encoding")
         st.markdown("""
         - Creates binary columns for each category
         - Good for nominal data with no inherent order
@@ -1217,7 +1217,7 @@ with tabs[3]:
     
     with col1:
         st.markdown("### Amazon SageMaker Data Wrangler")
-        st.image("https://d1.awsstatic.com/lineage/product-page-diagram_SageMaker_Data-Wrangler-How-it-Works.01bbed559a60a547c410def9986bc8ab42445e1d.png", width=400)
+        st.image("images/data-wrangler.png", width=600)
         st.markdown("""
         **Key Features:**
         - Visual, no-code interface for data preparation
@@ -1236,7 +1236,7 @@ with tabs[3]:
     
     with col2:
         st.markdown("### AWS Glue")
-        st.image("https://d1.awsstatic.com/diagrams/product-page-diagram_aws-batch-how-it-works_110d1e1cedc264f07a985b4dfd1e390a03b9a04a.png", width=400)
+        st.image("images/glue.png", width=600)
         st.markdown("""
         **Key Features:**
         - Fully managed ETL service
@@ -1400,7 +1400,7 @@ with tabs[4]:
         **This is why feature selection and dimensionality reduction are important parts of feature engineering**
         """)
         
-        st.image("https://miro.medium.com/v2/resize:fit:1400/1*qODKsRQQR_7XvJh_UwLDEA.png", caption="Curse of Dimensionality")
+        st.image("images/curse_dimensionality.png", caption="Curse of Dimensionality",width=600)
     
     with col2:
         st.markdown("### Impact on Model Performance")
@@ -1639,7 +1639,7 @@ with tabs[4]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.image("https://d1.awsstatic.com/reInvent/reinvent-2022/sagemaker/Product-Page-Diagram_Amazon-SageMaker-Feature-Store%402x.d90936a516a0d6ce6ea7a4720769d080a4c8cf9b.png", width=500)
+        st.image("images/feature-store-intro-diagram.png", width=700)
         
         st.markdown("""
         **Amazon SageMaker Feature Store** is a purpose-built repository for machine learning features.
