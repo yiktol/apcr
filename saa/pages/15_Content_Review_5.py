@@ -4332,8 +4332,7 @@ def knowledge_checks_page():
 
 # Home page content
 def home_page():
-    st.title("AWS Solutions Architect - Associate")
-    st.header("Content Review - Session 5")
+
     
     col1, col2 = st.columns([1, 2])
     
@@ -4344,6 +4343,8 @@ def home_page():
             st.error("Unable to load image")
     
     with col2:
+        st.title("AWS Solutions Architect - Associate")
+        st.header("Content Review - Session 5")
         st.markdown("""
         Welcome to the AWS Partner Certification Readiness program. This interactive guide will help you prepare 
         for the Solutions Architect - Associate certification. Navigate through the topics using the tabs above.

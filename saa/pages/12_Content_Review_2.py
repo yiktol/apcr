@@ -1,3 +1,4 @@
+
 import streamlit as st
 import base64
 from PIL import Image
@@ -6,6 +7,23 @@ from io import BytesIO
 import json
 import random
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
+import altair as alt
+import uuid
+
+# Define AWS color scheme
+AWS_COLORS = {
+    "primary": "#232F3E",     # AWS Navy
+    "secondary": "#FF9900",   # AWS Orange
+    "light": "#FFFFFF",       # White
+    "dark_gray": "#545B64",   # Dark Gray
+    "light_gray": "#D5DBDB",  # Light Gray
+    "success": "#008296",     # Teal
+    "warning": "#EC7211",     # Orange
+    "error": "#D13212",       # Red
+    "info": "#1E88E5",        # Blue
+}
 
 # Set page configuration
 st.set_page_config(
@@ -15,12 +33,266 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Apply AWS color scheme with CSS
+st.markdown(f"""
+<style>
+    /* Main colors */
+    :root {{
+        --primary: {AWS_COLORS["primary"]};
+        --secondary: {AWS_COLORS["secondary"]};
+        --light: {AWS_COLORS["light"]};
+        --dark-gray: {AWS_COLORS["dark_gray"]};
+        --light-gray: {AWS_COLORS["light_gray"]};
+        --success: {AWS_COLORS["success"]};
+        --warning: {AWS_COLORS["warning"]};
+        --error: {AWS_COLORS["error"]};
+        --info: {AWS_COLORS["info"]};
+    }}
+    
+    /* General styling */
+    .stApp {{
+        background-color: var(--light);
+    }}
+    
+    .main {{
+        background-color: var(--light);
+    }}
+    
+    h1, h2, h3, h4 {{
+        color: var(--primary);
+        font-family: 'Amazon Ember', 'Helvetica Neue', Arial, sans-serif;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        background-color: var(--light-gray);
+        border-radius: 4px 4px 0px 0px;
+        padding: 10px 20px;
+        height: 50px;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {{
+        background-color: var(--secondary);
+        color: var(--light);
+    }}
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {{
+        background-color: var(--light);
+        padding: 1rem;
+    }}
+    
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+        color: var(--primary);
+    }}
+    
+    /* Card styling */
+    .aws-card {{
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }}
+    
+    .aws-info-card {{
+        background-color: #f0f7fb;
+        border-left: 5px solid var(--info);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-warning-card {{
+        background-color: #fff8f0;
+        border-left: 5px solid var(--warning);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-success-card {{
+        background-color: #f0f9f8;
+        border-left: 5px solid var(--success);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-feature-card {{
+        background-color: white;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .aws-feature-card:hover {{
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }}
+    
+    /* Button styling */
+    .stButton>button {{
+        background-color: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 600;
+    }}
+    
+    .stButton>button:hover {{
+        background-color: #e67e00;
+    }}
+    
+    /* Table styling */
+    .dataframe {{
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+    }}
+    
+    .dataframe th {{
+        background-color: var(--primary);
+        color: white;
+        text-align: left;
+        padding: 12px 8px;
+    }}
+    
+    .dataframe td {{
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }}
+    
+    .dataframe tr:nth-child(even) {{
+        background-color: #f2f2f2;
+    }}
+    
+    /* Progress indicators */
+    .stProgress > div > div > div > div {{
+        background-color: var(--secondary);
+    }}
+    
+    /* Alert boxes */
+    .alert-success {{
+        background-color: #e6f4f1;
+        color: var(--success);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-warning {{
+        background-color: #fdf2e9;
+        color: var(--warning);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-error {{
+        background-color: #fdedec;
+        color: var(--error);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-info {{
+        background-color: #e8f4f8;
+        color: var(--info);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    /* Topic icons */
+    .topic-icon {{
+        font-size: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }}
+    
+    /* Footer */
+    .footer {{
+        text-align: center;
+        padding: 20px 0;
+        font-size: 12px;
+        color: var(--dark-gray);
+        border-top: 1px solid var(--light-gray);
+        margin-top: 40px;
+    }}
+    
+    /* Sidebar buttons */
+    .sidebar-button {{
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        text-align: left;
+        width: 100%;
+        margin: 5px 0;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }}
+    
+    .sidebar-button:hover {{
+        background-color: rgba(255, 255, 255, 0.2);
+    }}
+    
+    .sidebar-button.active {{
+        background-color: var(--secondary);
+    }}
+    
+    /* Knowledge Check Section */
+    .quiz-section {{
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--light-gray);
+    }}
+    
+    .quiz-section h4 {{
+        border-bottom: 1px solid var(--light-gray);
+        padding-bottom: 10px;
+    }}
+    
+    .quiz-header {{
+        background-color: var(--secondary);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px 5px 0 0;
+        margin-bottom: 0;
+    }}
+    
+    .quiz-container {{
+        border: 1px solid var(--secondary);
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }}
+    
+    .quiz-body {{
+        padding: 15px;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
 # Function to load and cache images from URL
 @st.cache_data
 def load_image_from_url(url):
-    response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
-    return img
+    try:
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        return img
+    except Exception as e:
+        st.warning(f"Could not load image: {str(e)}")
+        return None
 
 # Define AWS stock images URLs
 aws_images = {
@@ -437,59 +709,161 @@ quiz_data = {
     ]
 }
 
-# Function to display quiz
-def display_quiz(topic):
-    if topic in quiz_data and quiz_data[topic]:
-        st.subheader("💡 Scenario-Based Knowledge Check")
+# Initialize session state
+def init_session_state():
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    
+    # Initialize tracking only for knowledge checks
+    if "quiz_scores" not in st.session_state:
+        st.session_state.quiz_scores = {}
+    
+    if "quiz_attempted" not in st.session_state:
+        st.session_state.quiz_attempted = {}
+    
+    if "quiz_answers" not in st.session_state:
+        st.session_state.quiz_answers = {}
+    
+# Reset session state
+def reset_session():
+    for key in list(st.session_state.keys()):
+        if key != "session_id":
+            del st.session_state[key]
+    init_session_state()
+    st.success("✅ Session data has been reset successfully!")
+    
+# Initialize session state at app startup
+init_session_state()
+
+# Function to create a pretty chart for quiz results
+def create_quiz_results_chart():
+    if not st.session_state.quiz_attempted:
+        return None
         
-        # Initialize session state for quiz results if not exists
-        if f"{topic}_score" not in st.session_state:
-            st.session_state[f"{topic}_score"] = 0
-            st.session_state[f"{topic}_attempted"] = 0
-            st.session_state[f"{topic}_answers"] = {}
+    # Prepare data for visualization
+    topics = []
+    scores = []
+    attempted = []
+    
+    for topic, attempted_count in st.session_state.quiz_attempted.items():
+        if attempted_count > 0:
+            topics.append(topic.upper())
+            scores.append(st.session_state.quiz_scores.get(topic, 0))
+            attempted.append(attempted_count)
+    
+    if not topics:  # No quiz data yet
+        return None
+    
+    # Create a DataFrame for the chart
+    data = {
+        'Topic': topics,
+        'Correct': scores,
+        'Attempted': attempted
+    }
+    df = pd.DataFrame(data)
+    
+    # Calculate percentage correct
+    df['Percentage'] = (df['Correct'] / df['Attempted'] * 100).round(0).astype(int)
+    
+    # Create a bar chart with Altair
+    source = pd.melt(df, id_vars=['Topic', 'Percentage'], value_vars=['Correct', 'Attempted'], 
+                  var_name='Type', value_name='Questions')
+    
+    chart = alt.Chart(source).mark_bar().encode(
+        x=alt.X('Topic:N', sort=None, title=None),
+        y=alt.Y('Questions:Q', title='Questions'),
+        color=alt.Color('Type:N', scale=alt.Scale(
+            domain=['Correct', 'Attempted'],
+            range=[AWS_COLORS["success"], AWS_COLORS["light_gray"]]
+        )),
+        tooltip=['Topic', 'Type', 'Questions', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    ).properties(
+        title='Quiz Results by Topic',
+        height=350
+    )
+    
+    text = alt.Chart(df).mark_text(
+        align='center',
+        baseline='bottom',
+        dy=-5,
+        color='black',
+        fontSize=14
+    ).encode(
+        x='Topic:N',
+        y=alt.Y('Attempted:Q'),
+        text=alt.Text('Percentage:Q', format='.0f', title='Success Rate %'),
+        tooltip=['Topic', 'Correct', 'Attempted', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    )
+    
+    return (chart + text).interactive()
+
+# Function to handle quiz in knowledge checks page
+def handle_quiz(topic, index, quiz):
+    question = quiz["question"]
+    options = quiz["options"]
+    correct_answer = quiz["answer"]
+    
+    # Create a unique key for each quiz component
+    question_key = f"{topic}_{index}"
+    radio_key = f"{topic}_radio_{index}"
+    check_key = f"check_{topic}_{index}"
+    
+    # Create a container for this quiz question
+    with st.container():
+        st.markdown(f"""
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h4>{topic.upper()} - Question {index+1}</h4>
+            </div>
+            <div class="quiz-body">
+                <p>{question}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Display each quiz question
-        for i, quiz in enumerate(quiz_data[topic]):
-            question = quiz["question"]
-            options = quiz["options"]
-            correct_answer = quiz["answer"]
-            
-            st.write(f"**Scenario {i+1}:** {question}")
-            
-            # Create a unique key for each radio button
-            key = f"{topic}_quiz_{i}"
-            answer_key = f"{topic}_answer_{i}"
-            
-            # Display radio buttons for quiz options
-            selected_answer = st.radio(
-                "Select your answer:",
-                options,
-                key=key,
-                index=None
-            )
-            
-            # Check button
-            check_key = f"check_{topic}_{i}"
-            
-            if st.button("Check Answer", key=check_key):
+        # Display radio buttons for options
+        selected_answer = st.radio(
+            "Select your answer:",
+            options,
+            key=radio_key,
+            index=None
+        )
+        
+        # Check button
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            check_clicked = st.button("Check Answer", key=check_key)
+        
+        # Result display
+        with col2:
+            if check_clicked:
                 if selected_answer is None:
                     st.warning("Please select an answer first.")
                 else:
-                    st.session_state[f"{topic}_attempted"] += 1
-                    if selected_answer == correct_answer:
+                    # Initialize topic in session state if it doesn't exist
+                    if topic not in st.session_state.quiz_attempted:
+                        st.session_state.quiz_attempted[topic] = 0
+                    if topic not in st.session_state.quiz_scores:
+                        st.session_state.quiz_scores[topic] = 0
+                    
+                    # Check if this specific question has been answered correctly before
+                    answer_key = f"{topic}_answer_{index}"
+                    already_correct = st.session_state.quiz_answers.get(answer_key, False)
+                    
+                    # Update tracking
+                    st.session_state.quiz_attempted[topic] += 1
+                    
+                    if selected_answer == correct_answer and not already_correct:
                         st.success(f"✅ Correct! {correct_answer} is the right answer.")
-                        if answer_key not in st.session_state[f"{topic}_answers"] or not st.session_state[f"{topic}_answers"][answer_key]:
-                            st.session_state[f"{topic}_score"] += 1
-                            st.session_state[f"{topic}_answers"][answer_key] = True
+                        st.session_state.quiz_scores[topic] += 1
+                        st.session_state.quiz_answers[answer_key] = True
+                    elif selected_answer == correct_answer and already_correct:
+                        st.success(f"✅ Correct! {correct_answer} is the right answer.")
                     else:
                         st.error(f"❌ Incorrect. The correct answer is: {correct_answer}")
-                        st.session_state[f"{topic}_answers"][answer_key] = False
-            
-            st.divider()
+                        st.session_state.quiz_answers[answer_key] = False
         
-        # Display score if any questions have been attempted
-        if st.session_state[f"{topic}_attempted"] > 0:
-            st.info(f"Your score: {st.session_state[f'{topic}_score']} out of {st.session_state[f'{topic}_attempted']} questions attempted")
+        st.divider()
 
 # Function for home page
 def home_page():
@@ -497,7 +871,7 @@ def home_page():
     
     with col1:
         try:
-            st.image(aws_images["home"], width=300)
+            st.image(load_image_from_url(aws_images["home"]), width=300)
         except:
             st.error("Unable to load image")
     
@@ -506,32 +880,75 @@ def home_page():
         st.header("Content Review – Session 2")
         st.markdown("""
         Welcome to the AWS Partner Certification Readiness program. This interactive guide will help you prepare 
-        for the Solutions Architect - Associate certification. Navigate through the topics using the sidebar menu.
+        for the Solutions Architect - Associate certification. Navigate through the topics using the tabs above.
         
         Each section contains key concepts, important takeaways, and interactive quizzes to reinforce your learning.
-        
-        **Topics covered:**
-        - Virtual Private Cloud (VPC)
-        - Route 53 (DNS)
-        - AWS Direct Connect
-        - Transit Gateway
-        - Security Groups & NACLs
-        - AWS Global Accelerator
-        - AWS Storage Gateway
         """)
     
-    st.info("""
-    **Certification Preparation Tip:** Practice hands-on with the services covered in this guide. 
-    The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services 
-    and how they can be used together to design resilient, cost-effective solutions.
-    """)
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Topics covered:</h3>
+        <p>
+        • Virtual Private Cloud (VPC)<br>
+        • Route 53 (DNS)<br>
+        • AWS Direct Connect<br>
+        • Transit Gateway<br>
+        • Security Groups & NACLs<br>
+        • AWS Global Accelerator<br>
+        • AWS Storage Gateway
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-success-card">
+        <h3>Certification Preparation Tip</h3>
+        <p>Practice hands-on with the services covered in this guide. 
+        The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services 
+        and how they can be used together to design resilient, cost-effective solutions.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Display overview section
+    st.header("Overview")
+    
+    # Create a grid of service cards
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🌐 Networking Services</h4>
+            <ul>
+                <li><strong>VPC:</strong> Create isolated virtual networks</li>
+                <li><strong>Route 53:</strong> Scalable DNS and domain registration</li>
+                <li><strong>Direct Connect:</strong> Dedicated connectivity to AWS</li>
+                <li><strong>Transit Gateway:</strong> Centralized connectivity hub</li>
+                <li><strong>Global Accelerator:</strong> Improve global application availability</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🔒 Security & Storage</h4>
+            <ul>
+                <li><strong>Security Groups:</strong> Instance-level virtual firewall</li>
+                <li><strong>NACLs:</strong> Subnet-level security controls</li>
+                <li><strong>Storage Gateway:</strong> Hybrid cloud storage integration</li>
+                <li><strong>Encryption:</strong> Data protection in transit and at rest</li>
+                <li><strong>AWS PrivateLink:</strong> Private connectivity to services</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Function for VPC page
 def vpc_page():
     st.title("Virtual Private Cloud (VPC)")
     
     try:
-        st.image(aws_images["vpc"], width=800)
+        st.image(load_image_from_url(aws_images["vpc"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -551,74 +968,129 @@ def vpc_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Core Components")
         st.markdown("""
-        - **Subnets**: Range of IP addresses in your VPC
-        - **Route Tables**: Set of rules to determine where network traffic is directed
-        - **Internet Gateway**: Enables communication between your VPC and the internet
-        - **NAT Gateway**: Allows private subnet resources to access the internet
-        - **Security Groups**: Virtual firewall controlling inbound and outbound traffic at the instance level
-        - **Network ACLs**: Firewall controlling inbound and outbound traffic at the subnet level
-        """)
+        <div class="aws-feature-card">
+            <h4>Core Components</h4>
+            <ul>
+                <li><strong>Subnets:</strong> Range of IP addresses in your VPC</li>
+                <li><strong>Route Tables:</strong> Set of rules to determine where network traffic is directed</li>
+                <li><strong>Internet Gateway:</strong> Enables communication between your VPC and the internet</li>
+                <li><strong>NAT Gateway:</strong> Allows private subnet resources to access the internet</li>
+                <li><strong>Security Groups:</strong> Virtual firewall controlling inbound and outbound traffic at the instance level</li>
+                <li><strong>Network ACLs:</strong> Firewall controlling inbound and outbound traffic at the subnet level</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Advanced Components")
         st.markdown("""
-        - **VPC Endpoints**: Private connectivity to AWS services without internet gateway
-        - **VPC Peering**: Connect VPCs to route traffic between them
-        - **Transit Gateway**: Central hub to connect VPCs and on-premises networks
-        - **Shared VPC**: Share subnets with other AWS accounts
-        - **Elastic IP**: Static public IPv4 address for your instances
-        - **VPC Flow Logs**: Capture network flow information for monitoring
-        """)
+        <div class="aws-feature-card">
+            <h4>Advanced Components</h4>
+            <ul>
+                <li><strong>VPC Endpoints:</strong> Private connectivity to AWS services without internet gateway</li>
+                <li><strong>VPC Peering:</strong> Connect VPCs to route traffic between them</li>
+                <li><strong>Transit Gateway:</strong> Central hub to connect VPCs and on-premises networks</li>
+                <li><strong>Shared VPC:</strong> Share subnets with other AWS accounts</li>
+                <li><strong>Elastic IP:</strong> Static public IPv4 address for your instances</li>
+                <li><strong>VPC Flow Logs:</strong> Capture network flow information for monitoring</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Public vs. Private Subnets")
-    st.markdown("""
-    **Public Subnet:**
-    - Has a route to an Internet Gateway
-    - Resources can directly communicate with the internet
-    - Typically hosts public-facing resources like web servers
     
-    **Private Subnet:**
-    - No direct route to an Internet Gateway
-    - Resources cannot directly communicate with the internet
-    - Requires a NAT Gateway for outbound internet access
-    - Typically hosts internal resources like databases
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Public Subnet</h4>
+            <ul>
+                <li>Has a route to an Internet Gateway</li>
+                <li>Resources can directly communicate with the internet</li>
+                <li>Typically hosts public-facing resources like web servers</li>
+                <li>Public IP addresses can be assigned to instances</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Private Subnet</h4>
+            <ul>
+                <li>No direct route to an Internet Gateway</li>
+                <li>Resources cannot directly communicate with the internet</li>
+                <li>Requires a NAT Gateway for outbound internet access</li>
+                <li>Typically hosts internal resources like databases</li>
+                <li>Additional layer of security for sensitive workloads</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("IP Addressing")
     st.markdown("""
-    **Key Considerations:**
-    - Plan your IP address space before creating a VPC
-    - VPC CIDR blocks can be between /16 and /28
-    - Consider future AWS region expansion
-    - Plan for connectivity to corporate networks
-    - Avoid overlapping IP spaces
-    - CIDR cannot be modified once created, but additional CIDRs can be added
-    """)
+    <div class="aws-info-card">
+        <h4>Key Considerations:</h4>
+        <ul>
+            <li>Plan your IP address space before creating a VPC</li>
+            <li>VPC CIDR blocks can be between /16 and /28</li>
+            <li>Consider future AWS region expansion</li>
+            <li>Plan for connectivity to corporate networks</li>
+            <li>Avoid overlapping IP spaces</li>
+            <li>CIDR cannot be modified once created, but additional CIDRs can be added</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Security in VPC")
+    st.subheader("Defense in Depth")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Security Groups</h4>
+            <p>Instance-level firewall (stateful)</p>
+            <ul>
+                <li>Allow rules only</li>
+                <li>Evaluated as a whole</li>
+                <li>Return traffic automatically allowed</li>
+                <li>Can reference other security groups</li>
+                <li>Attached to instances, not subnets</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Network ACLs</h4>
+            <p>Subnet-level firewall (stateless)</p>
+            <ul>
+                <li>Allow and deny rules</li>
+                <li>Evaluated in order by rule number</li>
+                <li>Return traffic must be explicitly allowed</li>
+                <li>Can only reference IP addresses</li>
+                <li>Automatically applied to all instances in subnet</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("""
-    **Defense in Depth:**
-    1. **Security Groups**: Instance-level firewall (stateful)
-       - Allow rules only
-       - Evaluated as a whole
-       - Return traffic automatically allowed
-    
-    2. **Network ACLs**: Subnet-level firewall (stateless)
-       - Allow and deny rules
-       - Evaluated in order by rule number
-       - Return traffic must be explicitly allowed
-    """)
-    
-    display_quiz("vpc")
+    <div class="aws-warning-card">
+        <h4>Best Practice</h4>
+        <p>Use both Security Groups and NACLs for a defense-in-depth approach. Security Groups are your primary defense for allowing specific traffic to instances, while NACLs provide a backup layer of defense at the subnet level.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Route 53 page
 def route53_page():
     st.title("Amazon Route 53")
     
     try:
-        st.image(aws_images["route53"], width=800)
+        st.image(load_image_from_url(aws_images["route53"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -636,70 +1108,106 @@ def route53_page():
     
     st.header("DNS Functionality")
     st.markdown("""
-    Route 53 translates user-friendly domain names (like www.example.com) into IP addresses (like 192.0.2.1) that computers use to connect to each other. It serves as the backbone for connecting users to your applications.
-    
-    **Primary Functions:**
-    1. **Domain Registration**: Register and manage domain names
-    2. **DNS Routing**: Direct traffic to the resources that host your applications
-    3. **Health Checking**: Monitor resource health and route traffic away from unhealthy resources
-    """)
+    <div class="aws-card">
+        <p>Route 53 translates user-friendly domain names (like www.example.com) into IP addresses (like 192.0.2.1) that computers use to connect to each other. It serves as the backbone for connecting users to your applications.</p>
+        <h4>Primary Functions:</h4>
+        <ol>
+            <li><strong>Domain Registration:</strong> Register and manage domain names</li>
+            <li><strong>DNS Routing:</strong> Direct traffic to the resources that host your applications</li>
+            <li><strong>Health Checking:</strong> Monitor resource health and route traffic away from unhealthy resources</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Routing Policies")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Basic Routing Policies")
         st.markdown("""
-        - **Simple**: Route traffic to a single resource
-        - **Weighted**: Route traffic to multiple resources in proportions you specify
-        - **Failover**: Route traffic to a primary resource or a standby resource if the primary is unavailable
-        - **Multivalue Answer**: Respond to DNS queries with up to eight healthy records selected at random
-        """)
+        <div class="aws-feature-card">
+            <h4>Basic Routing Policies</h4>
+            <ul>
+                <li><strong>Simple:</strong> Route traffic to a single resource</li>
+                <li><strong>Weighted:</strong> Route traffic to multiple resources in proportions you specify</li>
+                <li><strong>Failover:</strong> Route traffic to a primary resource or a standby resource if the primary is unavailable</li>
+                <li><strong>Multivalue Answer:</strong> Respond to DNS queries with up to eight healthy records selected at random</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Advanced Routing Policies")
         st.markdown("""
-        - **Latency-based**: Route traffic to the region with the lowest latency
-        - **Geolocation**: Route traffic based on the geographic location of your users
-        - **Geoproximity**: Route traffic based on the geographic location of resources and optionally shift traffic from one location to another
-        - **IP-based**: Route traffic based on users' IP addresses
-        """)
+        <div class="aws-feature-card">
+            <h4>Advanced Routing Policies</h4>
+            <ul>
+                <li><strong>Latency-based:</strong> Route traffic to the region with the lowest latency</li>
+                <li><strong>Geolocation:</strong> Route traffic based on the geographic location of your users</li>
+                <li><strong>Geoproximity:</strong> Route traffic based on the geographic location of resources and optionally shift traffic from one location to another</li>
+                <li><strong>IP-based:</strong> Route traffic based on users' IP addresses</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Public vs. Private Hosted Zones")
-    st.markdown("""
-    **Public Hosted Zones:**
-    - Control how traffic is routed on the internet
-    - Accessible from the public internet
-    - Used for public-facing applications
     
-    **Private Hosted Zones:**
-    - Control routing within one or more VPCs
-    - Not accessible from the public internet
-    - Used for internal applications and services
-    - Requires enableDnsHostnames and enableDnsSupport VPC attributes
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Public Hosted Zones</h4>
+            <ul>
+                <li>Control how traffic is routed on the internet</li>
+                <li>Accessible from the public internet</li>
+                <li>Used for public-facing applications</li>
+                <li>Requires domain registration</li>
+                <li>Can be used with Route 53 health checks</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Private Hosted Zones</h4>
+            <ul>
+                <li>Control routing within one or more VPCs</li>
+                <li>Not accessible from the public internet</li>
+                <li>Used for internal applications and services</li>
+                <li>Requires enableDnsHostnames and enableDnsSupport VPC attributes</li>
+                <li>Can be shared across VPCs (same or different accounts)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Health Checks")
     st.markdown("""
-    Route 53 health checks monitor the health and performance of your web applications, web servers, and other resources.
+    <div class="aws-info-card">
+        <p>Route 53 health checks monitor the health and performance of your web applications, web servers, and other resources.</p>
+        <h4>Types of Health Checks:</h4>
+        <ul>
+            <li><strong>Endpoint monitoring:</strong> Check the health of a specified endpoint</li>
+            <li><strong>Calculated health checks:</strong> Combine the results of multiple health checks into a single health check</li>
+            <li><strong>CloudWatch alarm monitoring:</strong> Evaluate the state of a CloudWatch alarm</li>
+        </ul>
+        <p>Health checks can be used with DNS failover to route traffic away from unhealthy endpoints and to healthy endpoints.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Types of Health Checks:**
-    - **Endpoint monitoring**: Check the health of a specified endpoint
-    - **Calculated health checks**: Combine the results of multiple health checks into a single health check
-    - **CloudWatch alarm monitoring**: Evaluate the state of a CloudWatch alarm
-    
-    Health checks can be used with DNS failover to route traffic away from unhealthy endpoints and to healthy endpoints.
-    """)
-    
-    display_quiz("route53")
+    st.markdown("""
+    <div class="aws-warning-card">
+        <h4>Important Note</h4>
+        <p>Route 53 health checks can only monitor resources that are accessible from the public internet. For private resources, use CloudWatch metrics and alarms to trigger health check status changes.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Direct Connect page
 def direct_connect_page():
     st.title("AWS Direct Connect")
     
     try:
-        st.image(aws_images["direct_connect"], width=800)
+        st.image(load_image_from_url(aws_images["direct_connect"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -716,68 +1224,146 @@ def direct_connect_page():
     """)
     
     st.header("Connection Options")
-    st.markdown("""
-    **Dedicated Connection:**
-    - 1, 10, or 100 Gbps dedicated connection
-    - Ordered through AWS and provisioned by AWS Direct Connect Partners
-    - Physical ethernet port dedicated to a customer
-    - Multiple Virtual Interfaces can be configured
     
-    **Hosted Connection:**
-    - Capacity ranges from 50 Mbps to 10 Gbps
-    - Ordered through an AWS Direct Connect Partner
-    - Typically provisioned more quickly than Dedicated Connections
-    - Single Virtual Interface per connection
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Dedicated Connection</h4>
+            <ul>
+                <li>1, 10, or 100 Gbps dedicated connection</li>
+                <li>Ordered through AWS and provisioned by AWS Direct Connect Partners</li>
+                <li>Physical ethernet port dedicated to a customer</li>
+                <li>Multiple Virtual Interfaces can be configured</li>
+                <li>Higher bandwidth and lowest latency</li>
+                <li>Longer provisioning time (typically weeks)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Hosted Connection</h4>
+            <ul>
+                <li>Capacity ranges from 50 Mbps to 10 Gbps</li>
+                <li>Ordered through an AWS Direct Connect Partner</li>
+                <li>Typically provisioned more quickly than Dedicated Connections</li>
+                <li>Single Virtual Interface per connection</li>
+                <li>More flexible bandwidth options</li>
+                <li>Shorter deployment time</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Virtual Interfaces (VIFs)")
     st.markdown("""
     Virtual Interfaces (VIFs) enable access to AWS services through Direct Connect. Each VIF is a BGP connection configured for a specific purpose.
-    
-    **Types of VIFs:**
-    - **Private VIF**: Connect to resources in your VPC using private IP addresses
-    - **Public VIF**: Access all AWS public services using public IP addresses
-    - **Transit VIF**: Connect to resources in your VPCs through a Transit Gateway
     """)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Private VIF</h4>
+            <ul>
+                <li>Connect to resources in your VPC using private IP addresses</li>
+                <li>Bypasses the public internet</li>
+                <li>Supports VPC resources access</li>
+                <li>Uses private RFC1918 addresses</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Public VIF</h4>
+            <ul>
+                <li>Access all AWS public services using public IP addresses</li>
+                <li>Still bypasses the public internet</li>
+                <li>Used for S3, DynamoDB, etc.</li>
+                <li>Uses public routable addresses</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Transit VIF</h4>
+            <ul>
+                <li>Connect to resources in your VPCs through a Transit Gateway</li>
+                <li>Simplifies multiple VPC connectivity</li>
+                <li>Used with Direct Connect Gateway</li>
+                <li>Supports cross-region connectivity</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Direct Connect Gateway")
     st.markdown("""
-    AWS Direct Connect Gateway is a globally available resource that allows you to connect your AWS Direct Connect connection to VPCs across different AWS regions and accounts.
-    
-    **Key Features:**
-    - Global resource (not region-specific)
-    - Connect to multiple VPCs across regions
-    - Connect to VPCs in different AWS accounts (within the same payer ID)
-    - Simplifies network architecture for global deployments
-    - Enables traffic flow from VPCs to Direct Connect connection
-    """)
+    <div class="aws-info-card">
+        <p>AWS Direct Connect Gateway is a globally available resource that allows you to connect your AWS Direct Connect connection to VPCs across different AWS regions and accounts.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Global resource (not region-specific)</li>
+            <li>Connect to multiple VPCs across regions</li>
+            <li>Connect to VPCs in different AWS accounts (within the same payer ID)</li>
+            <li>Simplifies network architecture for global deployments</li>
+            <li>Enables traffic flow from VPCs to Direct Connect connection</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Resilience and High Availability")
     st.markdown("""
     To ensure high availability, implement redundancy at multiple levels:
-    
-    **Redundancy Options:**
-    - Multiple Direct Connect connections
-    - Multiple Direct Connect locations
-    - Multiple customer routers
-    - Multiple AWS regions
-    
-    **Common HA Designs:**
-    - Single location, multiple connections
-    - Multiple locations, multiple connections
-    - Site-to-Site VPN as a backup to Direct Connect
-    
-    BGP routing provides automatic failover when configured properly.
     """)
     
-    display_quiz("direct_connect")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Redundancy Options</h4>
+            <ul>
+                <li>Multiple Direct Connect connections</li>
+                <li>Multiple Direct Connect locations</li>
+                <li>Multiple customer routers</li>
+                <li>Multiple AWS regions</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Common HA Designs</h4>
+            <ul>
+                <li>Single location, multiple connections</li>
+                <li>Multiple locations, multiple connections</li>
+                <li>Site-to-Site VPN as a backup to Direct Connect</li>
+                <li>Direct Connect with Link Aggregation Groups (LAG)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-warning-card">
+        <h4>Best Practice</h4>
+        <p>For critical workloads, establish connections to at least two Direct Connect locations for maximum resilience. Additionally, configure a Site-to-Site VPN as a backup option in case all Direct Connect connections become unavailable.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Transit Gateway page
 def transit_gateway_page():
     st.title("AWS Transit Gateway")
     
     try:
-        st.image(aws_images["transit_gateway"], width=800)
+        st.image(load_image_from_url(aws_images["transit_gateway"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -795,63 +1381,105 @@ def transit_gateway_page():
     
     st.header("Core Functionality")
     st.markdown("""
-    Transit Gateway serves as a hub that controls how traffic is routed among all connected networks, which act like spokes.
-    
-    **Key Features:**
-    - Connect thousands of VPCs and on-premises networks
-    - Highly available and scalable by default
-    - Region-specific service with cross-region peering capability
-    - Support for multicast traffic
-    - Up to 50 Gbps bandwidth per VPC connection (burst)
-    - Centralized network control and management
-    """)
+    <div class="aws-card">
+        <p>Transit Gateway serves as a hub that controls how traffic is routed among all connected networks, which act like spokes.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Connect thousands of VPCs and on-premises networks</li>
+            <li>Highly available and scalable by default</li>
+            <li>Region-specific service with cross-region peering capability</li>
+            <li>Support for multicast traffic</li>
+            <li>Up to 50 Gbps bandwidth per VPC connection (burst)</li>
+            <li>Centralized network control and management</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Transit Gateway Route Tables")
     st.markdown("""
-    Transit Gateway route tables determine where network traffic is directed.
-    
-    **Key Concepts:**
-    - Each Transit Gateway comes with a default route table
-    - Additional route tables can be created for traffic segregation
-    - Attachments (VPCs, VPN connections) can be associated with route tables
-    - Route propagation can be enabled or disabled per attachment
-    - Route tables enable network segmentation and isolation
-    - Similar to VPC route tables but control traffic between attachments
-    """)
+    <div class="aws-info-card">
+        <p>Transit Gateway route tables determine where network traffic is directed.</p>
+        <h4>Key Concepts:</h4>
+        <ul>
+            <li>Each Transit Gateway comes with a default route table</li>
+            <li>Additional route tables can be created for traffic segregation</li>
+            <li>Attachments (VPCs, VPN connections) can be associated with route tables</li>
+            <li>Route propagation can be enabled or disabled per attachment</li>
+            <li>Route tables enable network segmentation and isolation</li>
+            <li>Similar to VPC route tables but control traffic between attachments</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Transit Gateway Attachments")
-    st.markdown("""
-    Attachments are connections between Transit Gateway and your networks.
     
-    **Types of Attachments:**
-    - **VPC Attachments**: Connect Transit Gateway to VPCs
-    - **VPN Attachments**: Connect to on-premises networks using Site-to-Site VPN
-    - **Direct Connect Gateway Attachments**: Connect to on-premises networks using Direct Connect
-    - **Transit Gateway Peering Attachments**: Connect Transit Gateways across regions
-    - **Appliance Mode Attachments**: Support for specific routing needs like stateful inspection
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>VPC Attachments</h4>
+            <ul>
+                <li>Connect Transit Gateway to VPCs</li>
+                <li>Specify one or more subnets (in different AZs) for the attachment</li>
+                <li>Support for IPv4 and IPv6 traffic</li>
+            </ul>
+            <h4>VPN Attachments</h4>
+            <ul>
+                <li>Connect to on-premises networks using Site-to-Site VPN</li>
+                <li>Support for static routes or dynamic routing using BGP</li>
+                <li>Encrypted connection over the internet</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Direct Connect Gateway Attachments</h4>
+            <ul>
+                <li>Connect to on-premises networks using Direct Connect</li>
+                <li>Provide private, dedicated connectivity</li>
+                <li>Higher bandwidth and more consistent latency</li>
+            </ul>
+            <h4>Transit Gateway Peering Attachments</h4>
+            <ul>
+                <li>Connect Transit Gateways across regions</li>
+                <li>Enable global network connectivity</li>
+                <li>Traffic stays on AWS global network</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Centralized Network Architecture")
     st.markdown("""
-    Transit Gateway enables a hub-and-spoke network topology, replacing complex mesh connections.
+    <div class="aws-card">
+        <p>Transit Gateway enables a hub-and-spoke network topology, replacing complex mesh connections.</p>
+        <h4>Architectural Benefits:</h4>
+        <ul>
+            <li><strong>Simplified Management:</strong> Centralized point of control for network traffic</li>
+            <li><strong>Reduced Connection Complexity:</strong> N-to-1 connections instead of N-to-N mesh</li>
+            <li><strong>Network Segmentation:</strong> Create isolated routing domains using multiple route tables</li>
+            <li><strong>Streamlined Security:</strong> Centralized inspection and filtering of traffic</li>
+            <li><strong>Consistent Policies:</strong> Apply consistent routing and security policies across the network</li>
+            <li><strong>Scalable Design:</strong> Easily add new networks without reconfiguring existing connections</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Architectural Benefits:**
-    - **Simplified Management**: Centralized point of control for network traffic
-    - **Reduced Connection Complexity**: N-to-1 connections instead of N-to-N mesh
-    - **Network Segmentation**: Create isolated routing domains using multiple route tables
-    - **Streamlined Security**: Centralized inspection and filtering of traffic
-    - **Consistent Policies**: Apply consistent routing and security policies across the network
-    - **Scalable Design**: Easily add new networks without reconfiguring existing connections
-    """)
-    
-    display_quiz("transit_gateway")
+    st.markdown("""
+    <div class="aws-success-card">
+        <h4>Use Case Example</h4>
+        <p>A company with 15 VPCs across 3 AWS accounts would typically require 105 VPC peering connections for full connectivity. With Transit Gateway, they only need 15 attachments (one per VPC), significantly simplifying the network architecture and reducing management overhead.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Security Groups and NACLs page
 def security_groups_nacls_page():
     st.title("AWS Security Groups & Network ACLs")
     
     try:
-        st.image(aws_images["security"], width=800)
+        st.image(load_image_from_url(aws_images["security"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -863,91 +1491,149 @@ def security_groups_nacls_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Security Groups")
         st.markdown("""
-        **Key Characteristics:**
-        - Acts at the **instance level** (first line of defense)
-        - Supports **allow rules only**
-        - **Stateful**: Return traffic automatically allowed
-        - All rules are **evaluated** before deciding to allow traffic
-        - Attached to AWS resources (EC2, RDS, etc.)
-        - Can reference other security groups or IP addresses
-        - Default security group allows all outbound traffic
-        """)
+        <div class="aws-card">
+            <h4>Security Groups</h4>
+            <p><strong>Acts at the instance level (first line of defense)</strong></p>
+            <ul>
+                <li>Supports <strong>allow rules only</strong></li>
+                <li><strong>Stateful:</strong> Return traffic automatically allowed</li>
+                <li>All rules are <strong>evaluated</strong> before deciding to allow traffic</li>
+                <li>Attached to AWS resources (EC2, RDS, etc.)</li>
+                <li>Can reference other security groups or IP addresses</li>
+                <li>Default security group allows all outbound traffic</li>
+                <li>Multiple security groups can be attached to a resource</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Network ACLs")
         st.markdown("""
-        **Key Characteristics:**
-        - Acts at the **subnet level** (second line of defense)
-        - Supports both **allow and deny rules**
-        - **Stateless**: Return traffic must be explicitly allowed
-        - Rules are **evaluated in order** by rule number
-        - Automatically applied to all instances in the subnet
-        - Can only reference IP addresses (not security groups)
-        - Default NACL allows all inbound and outbound traffic
-        """)
+        <div class="aws-card">
+            <h4>Network ACLs</h4>
+            <p><strong>Acts at the subnet level (second line of defense)</strong></p>
+            <ul>
+                <li>Supports both <strong>allow and deny rules</strong></li>
+                <li><strong>Stateless:</strong> Return traffic must be explicitly allowed</li>
+                <li>Rules are <strong>evaluated in order</strong> by rule number</li>
+                <li>Automatically applied to all instances in the subnet</li>
+                <li>Can only reference IP addresses (not security groups)</li>
+                <li>Default NACL allows all inbound and outbound traffic</li>
+                <li>One NACL per subnet, but can be shared across subnets</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Security Group Rules")
     st.markdown("""
-    Security group rules control the allowed inbound and outbound traffic for AWS resources.
-    
-    **Components of a Security Group Rule:**
-    - **Protocol**: TCP, UDP, ICMP, or custom protocol
-    - **Port Range**: Single port or range of ports
-    - **Source/Destination**: IP ranges or references to other security groups
-    - **Description**: Optional description for the rule
-    
-    **Key Points:**
-    - Security groups are stateful - if you allow an inbound port, the return traffic is automatically allowed
-    - You cannot block specific IP addresses using security groups - use NACLs instead
-    - You can create references between security groups, even across VPC peering connections
-    - Security groups evaluate all rules before allowing traffic
-    - Default is to deny all inbound traffic and allow all outbound traffic
-    """)
+    <div class="aws-info-card">
+        <p>Security group rules control the allowed inbound and outbound traffic for AWS resources.</p>
+        <h4>Components of a Security Group Rule:</h4>
+        <ul>
+            <li><strong>Protocol:</strong> TCP, UDP, ICMP, or custom protocol</li>
+            <li><strong>Port Range:</strong> Single port or range of ports</li>
+            <li><strong>Source/Destination:</strong> IP ranges or references to other security groups</li>
+            <li><strong>Description:</strong> Optional description for the rule</li>
+        </ul>
+        <h4>Key Points:</h4>
+        <ul>
+            <li>Security groups are stateful - if you allow an inbound port, the return traffic is automatically allowed</li>
+            <li>You cannot block specific IP addresses using security groups - use NACLs instead</li>
+            <li>You can create references between security groups, even across VPC peering connections</li>
+            <li>Security groups evaluate all rules before allowing traffic</li>
+            <li>Default is to deny all inbound traffic and allow all outbound traffic</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Network ACL Rules")
     st.markdown("""
-    Network ACL rules control traffic entering and exiting subnets within your VPC.
-    
-    **Components of a NACL Rule:**
-    - **Rule Number**: Determines the order of evaluation (1-32766)
-    - **Protocol**: TCP, UDP, ICMP, or custom protocol
-    - **Port Range**: Single port or range of ports
-    - **Source/Destination**: IP ranges only
-    - **Allow/Deny**: Specify whether to allow or deny the traffic
-    
-    **Key Points:**
-    - NACLs are stateless - you must create separate rules for inbound and outbound traffic
-    - Rules are processed in order, from lowest to highest number
-    - Once a rule matches traffic, it's applied immediately without checking other rules
-    - Include an explicit deny all rule at the end (highest number)
-    - Use NACLs to block specific IP addresses or port ranges
-    """)
+    <div class="aws-info-card">
+        <p>Network ACL rules control traffic entering and exiting subnets within your VPC.</p>
+        <h4>Components of a NACL Rule:</h4>
+        <ul>
+            <li><strong>Rule Number:</strong> Determines the order of evaluation (1-32766)</li>
+            <li><strong>Protocol:</strong> TCP, UDP, ICMP, or custom protocol</li>
+            <li><strong>Port Range:</strong> Single port or range of ports</li>
+            <li><strong>Source/Destination:</strong> IP ranges only</li>
+            <li><strong>Allow/Deny:</strong> Specify whether to allow or deny the traffic</li>
+        </ul>
+        <h4>Key Points:</h4>
+        <ul>
+            <li>NACLs are stateless - you must create separate rules for inbound and outbound traffic</li>
+            <li>Rules are processed in order, from lowest to highest number</li>
+            <li>Once a rule matches traffic, it's applied immediately without checking other rules</li>
+            <li>Include an explicit deny all rule at the end (highest number)</li>
+            <li>Use NACLs to block specific IP addresses or port ranges</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Defense in Depth Strategy")
     st.markdown("""
-    Implement both security groups and NACLs as complementary controls for defense in depth.
+    <div class="aws-success-card">
+        <h4>Best Practices</h4>
+        <ul>
+            <li>Use security groups as your primary method of protecting resources</li>
+            <li>Use NACLs as a secondary layer of defense at the subnet level</li>
+            <li>Configure NACLs to block known bad actors or traffic patterns</li>
+            <li>Keep security group rules as restrictive as possible</li>
+            <li>Use security group referencing to allow services to communicate</li>
+            <li>Document the purpose of each security group and NACL rule</li>
+            <li>Regularly audit and clean up unused rules and groups</li>
+            <li>Consider using AWS Firewall Manager to centrally configure and manage rules</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Best Practices:**
-    - Use security groups as your primary method of protecting resources
-    - Use NACLs as a secondary layer of defense at the subnet level
-    - Configure NACLs to block known bad actors or traffic patterns
-    - Keep security group rules as restrictive as possible
-    - Use security group referencing to allow services to communicate
-    - Document the purpose of each security group and NACL rule
-    - Regularly audit and clean up unused rules and groups
-    - Consider using AWS Firewall Manager to centrally configure and manage rules
-    """)
+    col1, col2 = st.columns([3, 2])
     
-    display_quiz("security_groups_nacls")
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Example Multi-Tier Application Security</h4>
+            <ol>
+                <li><strong>Web Tier Security Group:</strong>
+                    <ul>
+                        <li>Allow inbound HTTP/HTTPS from 0.0.0.0/0</li>
+                        <li>Allow outbound to App Tier Security Group</li>
+                    </ul>
+                </li>
+                <li><strong>App Tier Security Group:</strong>
+                    <ul>
+                        <li>Allow inbound from Web Tier Security Group</li>
+                        <li>Allow outbound to Database Tier Security Group</li>
+                    </ul>
+                </li>
+                <li><strong>Database Tier Security Group:</strong>
+                    <ul>
+                        <li>Allow inbound database port from App Tier Security Group</li>
+                        <li>No outbound rules needed (default allows all)</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-warning-card">
+            <h4>Security Group Limits</h4>
+            <ul>
+                <li>Maximum of 10,000 security groups per Region (adjustable)</li>
+                <li>Maximum of 60 inbound and 60 outbound rules per security group</li>
+                <li>Maximum of 16 security groups per ENI (adjustable up to 25)</li>
+                <li>Security group changes take effect immediately</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Function for Global Accelerator page
 def global_accelerator_page():
     st.title("AWS Global Accelerator")
     
     try:
-        st.image(aws_images["global_accelerator"], width=800)
+        st.image(load_image_from_url(aws_images["global_accelerator"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -966,73 +1652,131 @@ def global_accelerator_page():
     
     st.header("How Global Accelerator Works")
     st.markdown("""
-    AWS Global Accelerator uses the AWS global network to route traffic from users to application endpoints through the most efficient path.
-    
-    **Traffic Flow:**
-    1. User traffic enters the AWS network from the closest edge location using anycast IP addresses
-    2. Traffic stays on the AWS global network backbone instead of the public internet
-    3. Global Accelerator routes traffic to the optimal healthy endpoint in the nearest region
-    4. If an endpoint becomes unhealthy, Global Accelerator quickly reroutes traffic to healthy endpoints
-    
-    This approach bypasses internet congestion and reduces latency by using AWS's private network backbone for most of the route.
-    """)
+    <div class="aws-card">
+        <p>AWS Global Accelerator uses the AWS global network to route traffic from users to application endpoints through the most efficient path.</p>
+        <h4>Traffic Flow:</h4>
+        <ol>
+            <li>User traffic enters the AWS network from the closest edge location using anycast IP addresses</li>
+            <li>Traffic stays on the AWS global network backbone instead of the public internet</li>
+            <li>Global Accelerator routes traffic to the optimal healthy endpoint in the nearest region</li>
+            <li>If an endpoint becomes unhealthy, Global Accelerator quickly reroutes traffic to healthy endpoints</li>
+        </ol>
+        
+        <p>This approach bypasses internet congestion and reduces latency by using AWS's private network backbone for most of the route.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Components")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Static IP Addresses</h4>
+            <ul>
+                <li>Two static anycast IPv4 addresses</li>
+                <li>Serve as entry points for your application</li>
+                <li>Remain fixed even if your architecture changes</li>
+                <li>Can bring your own IP addresses (BYOIP)</li>
+            </ul>
+            
+            <h4>Accelerator</h4>
+            <ul>
+                <li>Main Global Accelerator resource</li>
+                <li>Contains listeners and endpoint groups</li>
+                <li>Can be standard or custom routing type</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Listeners</h4>
+            <ul>
+                <li>Process inbound connections based on ports and protocols</li>
+                <li>Support TCP and UDP protocols</li>
+                <li>Define port ranges for client connections</li>
+            </ul>
+            <h4>Endpoint Groups</h4>
+            <ul>
+                <li>Collection of endpoints in a single region</li>
+                <li>Control traffic distribution with traffic dials (0-100%)</li>
+                <li>Enable gradual shifting of traffic between regions</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("""
-    **1. Static IP Addresses**
-    - Two static anycast IPv4 addresses
-    - Serve as entry points for your application
-    - Remain fixed even if your architecture changes
-    - Can bring your own IP addresses (BYOIP)
-    
-    **2. Accelerator**
-    - Main Global Accelerator resource
-    - Contains listeners and endpoint groups
-    - Can be standard or custom routing type
-    
-    **3. Listeners**
-    - Process inbound connections based on ports and protocols
-    - Support TCP and UDP protocols
-    - Define port ranges for client connections
-    
-    **4. Endpoint Groups**
-    - Collection of endpoints in a single region
-    - Control traffic distribution with traffic dials (0-100%)
-    - Enable gradual shifting of traffic between regions
-    
-    **5. Endpoints**
-    - Resources to which Global Accelerator routes traffic
-    - Types: Application Load Balancers, Network Load Balancers, EC2 instances, Elastic IPs
-    - Weight determines proportion of traffic (0-255)
-    """)
+    <div class="aws-info-card">
+        <h4>Endpoints</h4>
+        <p>Resources to which Global Accelerator routes traffic</p>
+        <ul>
+            <li><strong>Types:</strong> Application Load Balancers, Network Load Balancers, EC2 instances, Elastic IPs</li>
+            <li><strong>Weight:</strong> Determines proportion of traffic (0-255)</li>
+            <li><strong>Health Checks:</strong> Automatically detect and route away from unhealthy endpoints</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Global Accelerator vs. CloudFront")
     st.markdown("""
     While both services use the AWS global network and edge locations, they serve different purposes.
-    
-    **Global Accelerator:**
-    - Optimizes the path from users to applications
-    - Works with both HTTP and non-HTTP protocols (TCP/UDP)
-    - Provides static IP addresses for applications
-    - Ideal for non-cacheable content, gaming, IoT, or voice over IP
-    - Routes to the nearest healthy endpoint
-    
-    **CloudFront:**
-    - Content delivery network (CDN) that caches content
-    - Primarily for HTTP/HTTPS traffic
-    - Optimizes delivery of cacheable content
-    - Dynamic DNS name, not static IPs
-    - Ideal for web applications, media, and file downloads
     """)
     
-    display_quiz("global_accelerator")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>Global Accelerator</h4>
+            <ul>
+                <li>Optimizes the path from users to applications</li>
+                <li>Works with both HTTP and non-HTTP protocols (TCP/UDP)</li>
+                <li>Provides static IP addresses for applications</li>
+                <li>Ideal for non-cacheable content, gaming, IoT, or voice over IP</li>
+                <li>Routes to the nearest healthy endpoint</li>
+                <li>Faster failover (within seconds)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h4>CloudFront</h4>
+            <ul>
+                <li>Content delivery network (CDN) that caches content</li>
+                <li>Primarily for HTTP/HTTPS traffic</li>
+                <li>Optimizes delivery of cacheable content</li>
+                <li>Dynamic DNS name, not static IPs</li>
+                <li>Ideal for web applications, media, and file downloads</li>
+                <li>Advanced features like Lambda@Edge, field-level encryption</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-success-card">
+        <h4>Use Case Examples</h4>
+        <ul>
+            <li><strong>Gaming applications:</strong> Low latency and low packet loss using UDP protocols</li>
+            <li><strong>IoT devices:</strong> Reliable connectivity with fixed IP addresses</li>
+            <li><strong>Voice assistants:</strong> Voice processing with real-time communication requirements</li>
+            <li><strong>Financial applications:</strong> Consistent low latency for trading platforms</li>
+            <li><strong>Global APIs:</strong> Predictable performance for microservice architectures</li>
+            <li><strong>Multi-region failover:</strong> Fast automated detection and rerouting</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Storage Gateway page
 def storage_gateway_page():
     st.title("AWS Storage Gateway")
     
     try:
-        st.image(aws_images["storage_gateway"], width=800)
+        st.image(load_image_from_url(aws_images["storage_gateway"]), width=800)
     except:
         st.warning("Image could not be displayed")
     
@@ -1054,149 +1798,273 @@ def storage_gateway_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("File Gateway")
         st.markdown("""
-        **Key Features:**
-        - Provides SMB and NFS file interfaces
-        - Stores files as native S3 objects
-        - Local cache for frequently accessed data
-        - Supports S3 storage classes and lifecycle policies
+        <div class="aws-feature-card">
+            <h4>File Gateway</h4>
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Provides SMB and NFS file interfaces</li>
+                <li>Stores files as native S3 objects</li>
+                <li>Local cache for frequently accessed data</li>
+                <li>Supports S3 storage classes and lifecycle policies</li>
+            </ul>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>File share migrations to cloud</li>
+                <li>Hybrid file storage</li>
+                <li>Backup and archive repositories</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
-        **Use Cases:**
-        - File share migrations to cloud
-        - Hybrid file storage
-        - Backup and archive repositories
-        """)
-        
-        st.subheader("Volume Gateway")
         st.markdown("""
-        **Key Features:**
-        - Provides iSCSI block storage volumes
-        - Two modes: Cached or Stored
-        - EBS snapshots for backup
-        
-        **Use Cases:**
-        - On-premises block storage extension
-        - Backup and disaster recovery
-        - Cloud migration for block storage
-        """)
+        <div class="aws-feature-card">
+            <h4>Volume Gateway</h4>
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Provides iSCSI block storage volumes</li>
+                <li>Two modes: Cached or Stored</li>
+                <li>EBS snapshots for backup</li>
+            </ul>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>On-premises block storage extension</li>
+                <li>Backup and disaster recovery</li>
+                <li>Cloud migration for block storage</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Tape Gateway")
         st.markdown("""
-        **Key Features:**
-        - Virtual tape library interface
-        - Compatible with backup software
-        - Stores data on S3 and Glacier
-        - Eliminates physical tape management
+        <div class="aws-feature-card">
+            <h4>Tape Gateway</h4>
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Virtual tape library interface</li>
+                <li>Compatible with backup software</li>
+                <li>Stores data on S3 and Glacier</li>
+                <li>Eliminates physical tape management</li>
+            </ul>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>Tape backup replacement</li>
+                <li>Long-term data archiving</li>
+                <li>Regulatory compliance</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
-        **Use Cases:**
-        - Tape backup replacement
-        - Long-term data archiving
-        - Regulatory compliance
-        """)
-        
-        st.subheader("Amazon FSx File Gateway")
         st.markdown("""
-        **Key Features:**
-        - Low-latency access to Amazon FSx for Windows File Server
-        - Full SMB support and Windows compatibility
-        - AD integration and ACL support
-        
-        **Use Cases:**
-        - Windows file share migrations
-        - Multi-site file collaboration
-        - On-premises access to FSx
-        """)
+        <div class="aws-feature-card">
+            <h4>Amazon FSx File Gateway</h4>
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Low-latency access to Amazon FSx for Windows File Server</li>
+                <li>Full SMB support and Windows compatibility</li>
+                <li>AD integration and ACL support</li>
+            </ul>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>Windows file share migrations</li>
+                <li>Multi-site file collaboration</li>
+                <li>On-premises access to FSx</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Deployment Options")
     st.markdown("""
-    Storage Gateway can be deployed in several ways to suit your environment:
-    
-    **Deployment Methods:**
-    - **VMware ESXi**: Virtual appliance for VMware environments
-    - **Microsoft Hyper-V**: Virtual appliance for Hyper-V environments
-    - **KVM**: Virtual appliance for Linux KVM hypervisor
-    - **Amazon EC2**: Deploy as an EC2 instance within AWS
-    - **Hardware Appliance**: Physical hardware appliance for on-premises use
-    
-    Each gateway requires local storage for cache and, in some cases, upload buffer. Size appropriately based on workload characteristics.
-    """)
+    <div class="aws-info-card">
+        <p>Storage Gateway can be deployed in several ways to suit your environment:</p>
+        <h4>Deployment Methods:</h4>
+        <ul>
+            <li><strong>VMware ESXi:</strong> Virtual appliance for VMware environments</li>
+            <li><strong>Microsoft Hyper-V:</strong> Virtual appliance for Hyper-V environments</li>
+            <li><strong>KVM:</strong> Virtual appliance for Linux KVM hypervisor</li>
+            <li><strong>Amazon EC2:</strong> Deploy as an EC2 instance within AWS</li>
+            <li><strong>Hardware Appliance:</strong> Physical hardware appliance for on-premises use</li>
+        </ul>
+        <p>Each gateway requires local storage for cache and, in some cases, upload buffer. Size appropriately based on workload characteristics.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Integration with AWS Services")
     st.markdown("""
-    Storage Gateway integrates with many AWS services to provide a seamless hybrid experience:
+    <div class="aws-card">
+        <p>Storage Gateway integrates with many AWS services to provide a seamless hybrid experience:</p>
+        <h4>Key Integrations:</h4>
+        <ul>
+            <li><strong>Amazon S3:</strong> Store files, volumes, and tapes as objects</li>
+            <li><strong>Amazon S3 Glacier:</strong> Archive tape data for long-term retention</li>
+            <li><strong>Amazon EBS:</strong> Create EBS snapshots from volumes</li>
+            <li><strong>AWS Backup:</strong> Centrally manage backup of gateway volumes</li>
+            <li><strong>Amazon CloudWatch:</strong> Monitor gateway performance and health</li>
+            <li><strong>AWS IAM:</strong> Control access to gateway resources</li>
+            <li><strong>AWS KMS:</strong> Encrypt data in transit and at rest</li>
+            <li><strong>Amazon FSx:</strong> Access FSx for Windows File Server from on-premises</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Key Integrations:**
-    - **Amazon S3**: Store files, volumes, and tapes as objects
-    - **Amazon S3 Glacier**: Archive tape data for long-term retention
-    - **Amazon EBS**: Create EBS snapshots from volumes
-    - **AWS Backup**: Centrally manage backup of gateway volumes
-    - **Amazon CloudWatch**: Monitor gateway performance and health
-    - **AWS IAM**: Control access to gateway resources
-    - **AWS KMS**: Encrypt data in transit and at rest
-    - **Amazon FSx**: Access FSx for Windows File Server from on-premises
-    """)
+    st.markdown("""
+    <div class="aws-warning-card">
+        <h4>Performance Considerations</h4>
+        <ul>
+            <li>Size cache appropriately based on active working set</li>
+            <li>Provision adequate bandwidth for data transfer needs</li>
+            <li>Consider upload buffer size for Volume Gateway</li>
+            <li>Monitor CloudWatch metrics to identify bottlenecks</li>
+            <li>Consider deploying gateway in EC2 for large-scale migration projects</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Function for Knowledge Checks page
+def knowledge_checks_page():
+    st.title("Knowledge Checks")
     
-    display_quiz("global_accelerator")
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Test your knowledge</h3>
+        <p>Answer the scenario-based questions below to check your understanding. Your progress is tracked at the bottom of this page.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Create tabs for each topic's quizzes
+    tabs = st.tabs([
+        "🌐 VPC", 
+        "🔍 Route 53", 
+        "🔌 Direct Connect", 
+        "🚉 Transit Gateway",
+        "🔒 Security Groups & NACLs", 
+        "🚀 Global Accelerator",
+        "💾 Storage Gateway"
+    ])
+    
+    # VPC Quiz Tab
+    with tabs[0]:
+        st.header("VPC Knowledge Check")
+        for i, quiz in enumerate(quiz_data["vpc"]):
+            handle_quiz("vpc", i, quiz)
+    
+    # Route 53 Quiz Tab
+    with tabs[1]:
+        st.header("Route 53 Knowledge Check")
+        for i, quiz in enumerate(quiz_data["route53"]):
+            handle_quiz("route53", i, quiz)
+    
+    # Direct Connect Quiz Tab
+    with tabs[2]:
+        st.header("Direct Connect Knowledge Check")
+        for i, quiz in enumerate(quiz_data["direct_connect"]):
+            handle_quiz("direct_connect", i, quiz)
+    
+    # Transit Gateway Quiz Tab
+    with tabs[3]:
+        st.header("Transit Gateway Knowledge Check")
+        for i, quiz in enumerate(quiz_data["transit_gateway"]):
+            handle_quiz("transit_gateway", i, quiz)
+            
+    # Security Groups & NACLs Quiz Tab
+    with tabs[4]:
+        st.header("Security Groups & NACLs Knowledge Check")
+        for i, quiz in enumerate(quiz_data["security_groups_nacls"]):
+            handle_quiz("security_groups_nacls", i, quiz)
+            
+    # Global Accelerator Quiz Tab
+    with tabs[5]:
+        st.header("Global Accelerator Knowledge Check")
+        for i, quiz in enumerate(quiz_data["global_accelerator"]):
+            handle_quiz("global_accelerator", i, quiz)
+            
+    # Storage Gateway Quiz Tab
+    with tabs[6]:
+        st.header("Storage Gateway Knowledge Check")
+        for i, quiz in enumerate(quiz_data["storage_gateway"]):
+            handle_quiz("storage_gateway", i, quiz)
+    
+    # Progress Summary
+    st.header("Your Progress")
+    
+    # Display chart if there's data
+    chart = create_quiz_results_chart()
+    if chart:
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.info("Complete some knowledge checks to see your progress!")
+    
+    # Calculate and display overall progress
+    if st.session_state.quiz_attempted:
+        total_attempted = sum(st.session_state.quiz_attempted.values())
+        total_correct = sum(st.session_state.quiz_scores.values())
+        
+        if total_attempted > 0:
+            percentage = int((total_correct / total_attempted) * 100)
+            
+            st.markdown(f"""
+            <div class="aws-success-card">
+                <h3>Overall Score: {total_correct}/{total_attempted} ({percentage}%)</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Progress bar
+            st.progress(total_correct / total_attempted)
 
-# Sidebar menu
-st.sidebar.title("AWS Solutions Architect")
-st.sidebar.image("https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png", width=200)
+st.sidebar.subheader("⚙️ Session Management")
 
-menu = st.sidebar.radio(
-    "Navigation",
-    ["Home", 
-     "Virtual Private Cloud (VPC)", 
-     "Route 53 (DNS)", 
-     "AWS Direct Connect", 
-     "Transit Gateway",
-     "Security Groups & NACLs", 
-     "AWS Global Accelerator", 
-     "AWS Storage Gateway"]
-)
+# Reset button for session data
+if st.sidebar.button("🔄 Reset Progress", key="reset_button"):
+    reset_session()
 
-# Display selected page
-if menu == "Home":
-    home_page()
-elif menu == "Virtual Private Cloud (VPC)":
-    vpc_page()
-elif menu == "Route 53 (DNS)":
-    route53_page()
-elif menu == "AWS Direct Connect":
-    direct_connect_page()
-elif menu == "Transit Gateway":
-    transit_gateway_page()
-elif menu == "Security Groups & NACLs":
-    security_groups_nacls_page()
-elif menu == "AWS Global Accelerator":
-    global_accelerator_page()
-elif menu == "AWS Storage Gateway":
-    storage_gateway_page()
+# Show session ID
+st.sidebar.caption(f"Session ID: {st.session_state.session_id[:8]}...")
 
-# Footer
 st.sidebar.divider()
 
-# Progress tracking
-if "total_score" not in st.session_state:
-    st.session_state["total_score"] = 0
-    st.session_state["total_attempted"] = 0
+# Main content tabs
+tabs = st.tabs([
+    "🏠 Home", 
+    "🌐 VPC", 
+    "🔍 Route 53", 
+    "🔌 Direct Connect", 
+    "🚉 Transit Gateway",
+    "🔒 Security Groups & NACLs", 
+    "🚀 Global Accelerator", 
+    "💾 Storage Gateway",
+    "🧪 Knowledge Checks"
+])
 
-topics = ["vpc", "route53", "direct_connect", "transit_gateway", "security_groups_nacls", "global_accelerator", "storage_gateway"]
-total_score = 0
-total_attempted = 0
+with tabs[0]:
+    home_page()
 
-for topic in topics:
-    if f"{topic}_score" in st.session_state:
-        total_score += st.session_state[f"{topic}_score"]
-        total_attempted += st.session_state[f"{topic}_attempted"]
+with tabs[1]:
+    vpc_page()
 
-if total_attempted > 0:
-    st.sidebar.markdown(f"**Your overall progress:** {total_score}/{total_attempted} questions ({int(total_score/total_attempted*100)}%)")
-    
-    # Visual progress bar
-    progress = total_score / (total_attempted if total_attempted > 0 else 1)
-    st.sidebar.progress(progress)
+with tabs[2]:
+    route53_page()
 
-st.sidebar.markdown("© 2025 AWS Partner Certification Readiness")
-st.sidebar.info("This application is designed to help you prepare for the AWS Solutions Architect - Associate certification.")
+with tabs[3]:
+    direct_connect_page()
+
+with tabs[4]:
+    transit_gateway_page()
+
+with tabs[5]:
+    security_groups_nacls_page()
+
+with tabs[6]:
+    global_accelerator_page()
+
+with tabs[7]:
+    storage_gateway_page()
+
+with tabs[8]:
+    knowledge_checks_page()
+
+# Footer
+st.markdown("""
+<div class="footer">
+    © 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+</div>
+""", unsafe_allow_html=True)

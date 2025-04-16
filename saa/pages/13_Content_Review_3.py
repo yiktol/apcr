@@ -7,6 +7,23 @@ import json
 import random
 from io import BytesIO
 import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+import altair as alt
+import uuid
+
+# Define AWS color scheme
+AWS_COLORS = {
+    "primary": "#232F3E",     # AWS Navy
+    "secondary": "#FF9900",   # AWS Orange
+    "light": "#FFFFFF",       # White
+    "dark_gray": "#545B64",   # Dark Gray
+    "light_gray": "#D5DBDB",  # Light Gray
+    "success": "#008296",     # Teal
+    "warning": "#EC7211",     # Orange
+    "error": "#D13212",       # Red
+    "info": "#1E88E5",        # Blue
+}
 
 # Set page configuration
 st.set_page_config(
@@ -16,12 +33,285 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Apply AWS color scheme with CSS
+st.markdown(f"""
+<style>
+    /* Main colors */
+    :root {{
+        --primary: {AWS_COLORS["primary"]};
+        --secondary: {AWS_COLORS["secondary"]};
+        --light: {AWS_COLORS["light"]};
+        --dark-gray: {AWS_COLORS["dark_gray"]};
+        --light-gray: {AWS_COLORS["light_gray"]};
+        --success: {AWS_COLORS["success"]};
+        --warning: {AWS_COLORS["warning"]};
+        --error: {AWS_COLORS["error"]};
+        --info: {AWS_COLORS["info"]};
+    }}
+    
+    /* General styling */
+    .stApp {{
+        background-color: var(--light);
+    }}
+    
+    .main {{
+        background-color: var(--light);
+    }}
+    
+    h1, h2, h3, h4 {{
+        color: var(--primary);
+        font-family: 'Amazon Ember', 'Helvetica Neue', Arial, sans-serif;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        background-color: var(--light-gray);
+        border-radius: 4px 4px 0px 0px;
+        padding: 10px 20px;
+        height: 50px;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {{
+        background-color: var(--secondary);
+        color: var(--light);
+    }}
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {{
+        background-color: var(--light);
+        padding: 1rem;
+    }}
+    
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+        color: var(--primary);
+    }}
+    
+    /* Card styling */
+    .aws-card {{
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }}
+    
+    .aws-info-card {{
+        background-color: #f0f7fb;
+        border-left: 5px solid var(--info);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-warning-card {{
+        background-color: #fff8f0;
+        border-left: 5px solid var(--warning);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-success-card {{
+        background-color: #f0f9f8;
+        border-left: 5px solid var(--success);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-feature-card {{
+        background-color: white;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .aws-feature-card:hover {{
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }}
+    
+    /* Button styling */
+    .stButton>button {{
+        background-color: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 600;
+    }}
+    
+    .stButton>button:hover {{
+        background-color: #e67e00;
+    }}
+    
+    /* Table styling */
+    .dataframe {{
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+    }}
+    
+    .dataframe th {{
+        background-color: var(--primary);
+        color: white;
+        text-align: left;
+        padding: 12px 8px;
+    }}
+    
+    .dataframe td {{
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }}
+    
+    .dataframe tr:nth-child(even) {{
+        background-color: #f2f2f2;
+    }}
+    
+    /* Progress indicators */
+    .stProgress > div > div > div > div {{
+        background-color: var(--secondary);
+    }}
+    
+    /* Alert boxes */
+    .alert-success {{
+        background-color: #e6f4f1;
+        color: var(--success);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-warning {{
+        background-color: #fdf2e9;
+        color: var(--warning);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-error {{
+        background-color: #fdedec;
+        color: var(--error);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-info {{
+        background-color: #e8f4f8;
+        color: var(--info);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    /* Topic icons */
+    .topic-icon {{
+        font-size: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }}
+    
+    /* Footer */
+    .footer {{
+        text-align: center;
+        padding: 20px 0;
+        font-size: 12px;
+        color: var(--dark-gray);
+        border-top: 1px solid var(--light-gray);
+        margin-top: 40px;
+    }}
+    
+    /* Quiz Section */
+    .quiz-section {{
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--light-gray);
+    }}
+    
+    .quiz-section h4 {{
+        border-bottom: 1px solid var(--light-gray);
+        padding-bottom: 10px;
+    }}
+    
+    .quiz-header {{
+        background-color: var(--secondary);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px 5px 0 0;
+        margin-bottom: 0;
+    }}
+    
+    .quiz-container {{
+        border: 1px solid var(--secondary);
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }}
+    
+    .quiz-body {{
+        padding: 15px;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
+# Initialize session state
+def init_session_state():
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    
+    # Initialize topic scores
+    topics = ["caching", "database", "ec2", "placement_groups", "amis_metadata", "kms", "security"]
+    
+    # Initialize tracking for quizzes
+    if "quiz_scores" not in st.session_state:
+        st.session_state.quiz_scores = {}
+    
+    if "quiz_attempted" not in st.session_state:
+        st.session_state.quiz_attempted = {}
+    
+    if "quiz_answers" not in st.session_state:
+        st.session_state.quiz_answers = {}
+    
+    # Initialize for each topic
+    for topic in topics:
+        if topic not in st.session_state.quiz_scores:
+            st.session_state.quiz_scores[topic] = 0
+        if topic not in st.session_state.quiz_attempted:
+            st.session_state.quiz_attempted[topic] = 0
+        if topic not in st.session_state.quiz_answers:
+            st.session_state.quiz_answers[topic] = {}
+
+# Function to reset session state
+def reset_session():
+    topics = ["caching", "database", "ec2", "placement_groups", "amis_metadata", "kms", "security"]
+    
+    for topic in topics:
+        st.session_state.quiz_scores[topic] = 0
+        st.session_state.quiz_attempted[topic] = 0
+        st.session_state.quiz_answers[topic] = {}
+    
+    st.success("✅ Quiz data has been reset successfully!")
+
+# Initialize session state at app startup
+init_session_state()
+
 # Function to load and cache images from URL
 @st.cache_data
 def load_image_from_url(url):
-    response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
-    return img
+    try:
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        return img
+    except Exception as e:
+        st.warning(f"Could not load image: {str(e)}")
+        return None
 
 # Define AWS stock images URLs
 aws_images = {
@@ -436,42 +726,139 @@ quiz_data = {
     ]
 }
 
-# Function to display quiz
-def display_quiz(topic):
-    if topic in quiz_data and quiz_data[topic]:
-        st.subheader("💡 Knowledge Check")
+# Function to create a pretty chart for quiz results
+def create_quiz_results_chart():
+    if not st.session_state.quiz_attempted:
+        return None
         
-        for i, quiz in enumerate(quiz_data[topic]):
-            question = quiz["question"]
-            options = quiz["options"]
-            correct_answer = quiz["answer"]
-            
-            st.write(f"**Scenario {i+1}:** {question}")
-            
-            # Create a unique key for each radio button
-            key = f"{topic}_quiz_{i}"
-            
-            # Display radio buttons for quiz options
-            selected_answer = st.radio(
-                "Select your answer:",
-                options,
-                key=key,
-                index=None
-            )
-            
-            # Check button
-            check_key = f"check_{topic}_{i}"
-            
-            if st.button("Check Answer", key=check_key):
-                if selected_answer == correct_answer:
-                    st.success(f"✅ Correct! {correct_answer} is the right answer.")
-                elif selected_answer is None:
+    # Prepare data for visualization
+    topics = []
+    scores = []
+    attempted = []
+    
+    for topic, attempted_count in st.session_state.quiz_attempted.items():
+        if attempted_count > 0:
+            topics.append(topic.upper())
+            scores.append(st.session_state.quiz_scores.get(topic, 0))
+            attempted.append(attempted_count)
+    
+    if not topics:  # No quiz data yet
+        return None
+    
+    # Create a DataFrame for the chart
+    data = {
+        'Topic': topics,
+        'Correct': scores,
+        'Attempted': attempted
+    }
+    df = pd.DataFrame(data)
+    
+    # Calculate percentage correct
+    df['Percentage'] = (df['Correct'] / df['Attempted'] * 100).round(0).astype(int)
+    
+    # Create a bar chart with Altair
+    source = pd.melt(df, id_vars=['Topic', 'Percentage'], value_vars=['Correct', 'Attempted'], 
+                  var_name='Type', value_name='Questions')
+    
+    chart = alt.Chart(source).mark_bar().encode(
+        x=alt.X('Topic:N', sort=None, title=None),
+        y=alt.Y('Questions:Q', title='Questions'),
+        color=alt.Color('Type:N', scale=alt.Scale(
+            domain=['Correct', 'Attempted'],
+            range=[AWS_COLORS["success"], AWS_COLORS["light_gray"]]
+        )),
+        tooltip=['Topic', 'Type', 'Questions', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    ).properties(
+        title='Quiz Results by Topic',
+        height=350
+    )
+    
+    text = alt.Chart(df).mark_text(
+        align='center',
+        baseline='bottom',
+        dy=-5,
+        color='black',
+        fontSize=14
+    ).encode(
+        x='Topic:N',
+        y=alt.Y('Attempted:Q'),
+        text=alt.Text('Percentage:Q', format='.0f', title='Success Rate %'),
+        tooltip=['Topic', 'Correct', 'Attempted', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    )
+    
+    return (chart + text).interactive()
+
+# Function to handle quiz in knowledge checks page
+def handle_quiz(topic, index, quiz):
+    question = quiz["question"]
+    options = quiz["options"]
+    correct_answer = quiz["answer"]
+    
+    # Create a unique key for each quiz component
+    question_key = f"{topic}_{index}"
+    radio_key = f"{topic}_radio_{index}"
+    check_key = f"check_{topic}_{index}"
+    
+    # Create a container for this quiz question
+    with st.container():
+        st.markdown(f"""
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h4>{topic.upper()} - Scenario {index+1}</h4>
+            </div>
+            <div class="quiz-body">
+                <p>{question}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display radio buttons for options
+        selected_answer = st.radio(
+            "Select your answer:",
+            options,
+            key=radio_key,
+            index=None
+        )
+        
+        # Check button
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            check_clicked = st.button("Check Answer", key=check_key)
+        
+        # Result display
+        with col2:
+            if check_clicked:
+                if selected_answer is None:
                     st.warning("Please select an answer first.")
                 else:
-                    st.error(f"❌ Incorrect. The correct answer is {correct_answer}.")
-            
-            st.divider()
-
+                    # Initialize topic in session state if it doesn't exist
+                    if topic not in st.session_state.quiz_attempted:
+                        st.session_state.quiz_attempted[topic] = 0
+                    if topic not in st.session_state.quiz_scores:
+                        st.session_state.quiz_scores[topic] = 0
+                    
+                    # Check if this specific question has been answered correctly before
+                    answer_key = f"{topic}_answer_{index}"
+                    already_correct = st.session_state.quiz_answers.get(topic, {}).get(answer_key, False)
+                    
+                    # Update tracking
+                    st.session_state.quiz_attempted[topic] += 1
+                    
+                    if selected_answer == correct_answer and not already_correct:
+                        st.success(f"✅ Correct! {correct_answer} is the right answer.")
+                        st.session_state.quiz_scores[topic] += 1
+                        if topic not in st.session_state.quiz_answers:
+                            st.session_state.quiz_answers[topic] = {}
+                        st.session_state.quiz_answers[topic][answer_key] = True
+                    elif selected_answer == correct_answer and already_correct:
+                        st.success(f"✅ Correct! {correct_answer} is the right answer.")
+                    else:
+                        st.error(f"❌ Incorrect. The correct answer is: {correct_answer}")
+                        if topic not in st.session_state.quiz_answers:
+                            st.session_state.quiz_answers[topic] = {}
+                        st.session_state.quiz_answers[topic][answer_key] = False
+        
+        st.divider()
 
 # Function for home page
 def home_page():
@@ -479,7 +866,9 @@ def home_page():
     
     with col1:
         try:
-            st.image(aws_images["home"], width=300)
+            image = load_image_from_url(aws_images["home"])
+            if image:
+                st.image(image, width=300)
         except:
             st.error("Unable to load image")
     
@@ -488,32 +877,43 @@ def home_page():
         st.header("Content Review - Session 3")
         st.markdown("""
         Welcome to the AWS Partner Certification Readiness program. This interactive guide will help you prepare 
-        for the Solutions Architect - Associate certification. Navigate through the topics using the sidebar menu.
+        for the Solutions Architect - Associate certification. Navigate through the topics using the tabs above.
         
-        Each section contains key concepts, important takeaways, and interactive quizzes to reinforce your learning.
-        
-        **Topics covered:**
-        - AWS Caching & File Servers
-        - AWS Database Offerings
-        - AWS Elastic Compute Cloud (EC2)
-        - EC2 Placement Groups
-        - EC2 AMIs and Instance Metadata
-        - Amazon KMS & EBS Encryption
-        - AWS Security
+        Each section contains key concepts and important takeaways. Test your knowledge with the Knowledge Checks tab.
         """)
     
-    st.info("""
-    **Certification Preparation Tip:** Practice hands-on with the services covered in this guide. 
-    The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services 
-    and how they can be used together to design resilient, cost-effective solutions.
-    """)
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Topics covered in Session 3:</h3>
+        <ul>
+            <li>AWS Caching & File Servers</li>
+            <li>AWS Database Offerings</li>
+            <li>AWS Elastic Compute Cloud (EC2)</li>
+            <li>EC2 Placement Groups</li>
+            <li>EC2 AMIs and Instance Metadata</li>
+            <li>Amazon KMS & EBS Encryption</li>
+            <li>AWS Security</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-success-card">
+        <h3>Certification Preparation Tip</h3>
+        <p>Practice hands-on with the services covered in this guide. 
+        The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services 
+        and how they can be used together to design resilient, cost-effective solutions.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for AWS Caching & File Servers page
 def caching_page():
     st.title("AWS Caching & File Servers")
     
     try:
-        st.image(aws_images["caching"], width=600)
+        image = load_image_from_url(aws_images["caching"])
+        if image:
+            st.image(image, width=600)
     except:
         st.warning("Image could not be displayed")
     
@@ -532,184 +932,259 @@ def caching_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Redis")
         st.markdown("""
-        - Advanced data structures (lists, sets, sorted sets, hashes)
-        - Replication and high availability
-        - Snapshots for backup and recovery
-        - Transactions and Pub/Sub capabilities
-        - **Use Cases**: Gaming leaderboards, chat/messaging, real-time analytics
-        """)
+        <div class="aws-feature-card">
+            <h4>Redis</h4>
+            <ul>
+                <li>Advanced data structures (lists, sets, sorted sets, hashes)</li>
+                <li>Replication and high availability</li>
+                <li>Snapshots for backup and recovery</li>
+                <li>Transactions and Pub/Sub capabilities</li>
+                <li><strong>Use Cases</strong>: Gaming leaderboards, chat/messaging, real-time analytics</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Memcached")
         st.markdown("""
-        - Simple design focused on simplicity
-        - Multi-threaded architecture
-        - Data partitioning
-        - **Use Cases**: Caching database query results, session caching, page caching
-        """)
+        <div class="aws-feature-card">
+            <h4>Memcached</h4>
+            <ul>
+                <li>Simple design focused on simplicity</li>
+                <li>Multi-threaded architecture</li>
+                <li>Data partitioning</li>
+                <li><strong>Use Cases</strong>: Caching database query results, session caching, page caching</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon Elastic File System (EFS)")
     st.markdown("""
-    A simple, serverless, set-and-forget elastic file system for Linux-based workloads.
-
-    **Key Features:**
-    - Fully managed Network File System (NFS) for Linux
-    - Highly available and durable (11 9's of durability)
-    - Automatically scales as files are added/removed
-    - Mount to Linux EC2 instances for shared file storage
-
-    **Storage Classes:**
-    - EFS Standard
-    - EFS Standard-Infrequent Access
-    - One Zone Storage
-    - One Zone-Infrequent Access
-    
-    **Use Case:** Modern application development with serverless architecture, allowing containerized or serverless applications to share and persist data.
-    """)
+    <div class="aws-card">
+        <p>A simple, serverless, set-and-forget elastic file system for Linux-based workloads.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Fully managed Network File System (NFS) for Linux</li>
+            <li>Highly available and durable (11 9's of durability)</li>
+            <li>Automatically scales as files are added/removed</li>
+            <li>Mount to Linux EC2 instances for shared file storage</li>
+        </ul>
+        <h4>Storage Classes:</h4>
+        <ul>
+            <li>EFS Standard</li>
+            <li>EFS Standard-Infrequent Access</li>
+            <li>One Zone Storage</li>
+            <li>One Zone-Infrequent Access</li>
+        </ul>
+        <p><strong>Use Case:</strong> Modern application development with serverless architecture, allowing containerized or serverless applications to share and persist data.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon FSx for Windows File Server")
     st.markdown("""
-    Fully managed file storage built on Windows Server.
-
-    **Key Features:**
-    - Fully managed, highly reliable Windows file servers
-    - Uses Server Message Block (SMB) protocol
-    - Backed by a fully native Windows file system
-
-    **Use Cases:**
-    - Migrate Windows file servers to AWS
-    - Run SQL Server workloads without SQL enterprise licensing
-    """)
-    
-    display_quiz("caching")
+    <div class="aws-card">
+        <p>Fully managed file storage built on Windows Server.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Fully managed, highly reliable Windows file servers</li>
+            <li>Uses Server Message Block (SMB) protocol</li>
+            <li>Backed by a fully native Windows file system</li>
+        </ul>
+        <h4>Use Cases:</h4>
+        <ul>
+            <li>Migrate Windows file servers to AWS</li>
+            <li>Run SQL Server workloads without SQL enterprise licensing</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for AWS Database Offerings page
 def database_page():
     st.title("AWS Database Offerings")
     
     try:
-        st.image(aws_images["database"], width=600)
+        image = load_image_from_url(aws_images["database"])
+        if image:
+            st.image(image, width=600)
     except:
         st.warning("Image could not be displayed")
     
     st.header("Purpose-built Database Services")
     
     st.markdown("""
-    AWS provides purpose-built database services designed for specific workloads and use cases:
-    
-    | Database Category | Key Service | Best For |
-    |------------------|-------------|----------|
-    | Relational | Amazon RDS, Aurora | Structured data, transactions, complex queries |
-    | Key-Value | DynamoDB | High-throughput, low-latency applications |
-    | Document | DocumentDB | JSON document storage and queries |
-    | In-Memory | ElastiCache | Microsecond latency, caching |
-    | Graph | Neptune | Highly connected data, relationships |
-    | Time Series | Timestream | IoT data, metrics, analytics over time |
-    | Ledger | QLDB | Immutable, verifiable transaction logs |
-    | Wide Column | Keyspaces | High-speed data processing |
-    """)
+    <div class="aws-card">
+        <p>AWS provides purpose-built database services designed for specific workloads and use cases:</p>
+        <table class="dataframe">
+            <thead>
+                <tr>
+                    <th>Database Category</th>
+                    <th>Key Service</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Relational</td>
+                    <td>Amazon RDS, Aurora</td>
+                    <td>Structured data, transactions, complex queries</td>
+                </tr>
+                <tr>
+                    <td>Key-Value</td>
+                    <td>DynamoDB</td>
+                    <td>High-throughput, low-latency applications</td>
+                </tr>
+                <tr>
+                    <td>Document</td>
+                    <td>DocumentDB</td>
+                    <td>JSON document storage and queries</td>
+                </tr>
+                <tr>
+                    <td>In-Memory</td>
+                    <td>ElastiCache</td>
+                    <td>Microsecond latency, caching</td>
+                </tr>
+                <tr>
+                    <td>Graph</td>
+                    <td>Neptune</td>
+                    <td>Highly connected data, relationships</td>
+                </tr>
+                <tr>
+                    <td>Time Series</td>
+                    <td>Timestream</td>
+                    <td>IoT data, metrics, analytics over time</td>
+                </tr>
+                <tr>
+                    <td>Ledger</td>
+                    <td>QLDB</td>
+                    <td>Immutable, verifiable transaction logs</td>
+                </tr>
+                <tr>
+                    <td>Wide Column</td>
+                    <td>Keyspaces</td>
+                    <td>High-speed data processing</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon RDS (Relational Database Service)")
     st.markdown("""
-    Set up, operate, and scale a managed relational database with just a few clicks.
-
-    **Key Features:**
-    - Available and durable (automated Multi-AZ replication, backups)
-    - Easy to administer (automated patching and maintenance)
-    - Scalable (compute and storage can scale independently)
-    - Secure (encryption at rest and in transit)
-
-    **Supported Engines:**
-    - MySQL
-    - PostgreSQL
-    - MariaDB
-    - Oracle
-    - SQL Server
-    - Amazon Aurora
-
-    **Important Features:**
-    - Multi-AZ deployments for high availability
-    - Read replicas for performance scaling
-    """)
+    <div class="aws-card">
+        <p>Set up, operate, and scale a managed relational database with just a few clicks.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Available and durable (automated Multi-AZ replication, backups)</li>
+            <li>Easy to administer (automated patching and maintenance)</li>
+            <li>Scalable (compute and storage can scale independently)</li>
+            <li>Secure (encryption at rest and in transit)</li>
+        </ul>
+        <h4>Supported Engines:</h4>
+        <ul>
+            <li>MySQL</li>
+            <li>PostgreSQL</li>
+            <li>MariaDB</li>
+            <li>Oracle</li>
+            <li>SQL Server</li>
+            <li>Amazon Aurora</li>
+        </ul>
+        <h4>Important Features:</h4>
+        <ul>
+            <li>Multi-AZ deployments for high availability</li>
+            <li>Read replicas for performance scaling</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon Aurora")
     st.markdown("""
-    MySQL and PostgreSQL-compatible relational database built for the cloud.
-
-    **Key Features:**
-    - 5x throughput of MySQL, 3x throughput of PostgreSQL
-    - Fault-tolerant, self-healing storage
-    - Six copies of data across three Availability Zones
-    - Continuous backup to Amazon S3
-    - Up to 15 low-latency read replicas
-
-    **Aurora Global Databases:**
-    - Span multiple AWS Regions
-    - Global reads with local latency
-    - Fast recovery from region-wide outages
-    - Replication with typically under 1 second latency
-    """)
+    <div class="aws-feature-card">
+        <p>MySQL and PostgreSQL-compatible relational database built for the cloud.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>5x throughput of MySQL, 3x throughput of PostgreSQL</li>
+            <li>Fault-tolerant, self-healing storage</li>
+            <li>Six copies of data across three Availability Zones</li>
+            <li>Continuous backup to Amazon S3</li>
+            <li>Up to 15 low-latency read replicas</li>
+        </ul>
+        <h4>Aurora Global Databases:</h4>
+        <ul>
+            <li>Span multiple AWS Regions</li>
+            <li>Global reads with local latency</li>
+            <li>Fast recovery from region-wide outages</li>
+            <li>Replication with typically under 1 second latency</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon DynamoDB")
     st.markdown("""
-    Fast and flexible NoSQL database service for any scale.
-
-    **Key Features:**
-    - Fully managed key-value and document database
-    - Single-digit millisecond performance at any scale
-    - Can handle more than 10 trillion requests per day
-    - Supports both eventually consistent and strongly consistent reads
-    
-    **DynamoDB Accelerator (DAX):**
-    - Fully managed in-memory cache for DynamoDB
-    - Microsecond latency (10x performance improvement)
-    - Compatible with existing DynamoDB API calls
-    - Scales to millions of requests per second
-    """)
-    
-    display_quiz("database")
+    <div class="aws-feature-card">
+        <p>Fast and flexible NoSQL database service for any scale.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Fully managed key-value and document database</li>
+            <li>Single-digit millisecond performance at any scale</li>
+            <li>Can handle more than 10 trillion requests per day</li>
+            <li>Supports both eventually consistent and strongly consistent reads</li>
+        </ul>
+        <h4>DynamoDB Accelerator (DAX):</h4>
+        <ul>
+            <li>Fully managed in-memory cache for DynamoDB</li>
+            <li>Microsecond latency (10x performance improvement)</li>
+            <li>Compatible with existing DynamoDB API calls</li>
+            <li>Scales to millions of requests per second</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for EC2 page
 def ec2_page():
     st.title("AWS Elastic Compute Cloud (EC2)")
     
     try:
-        st.image(aws_images["ec2"], width=600)
+        image = load_image_from_url(aws_images["ec2"])
+        if image:
+            st.image(image, width=600)
     except:
         st.warning("Image could not be displayed")
     
     st.header("Amazon EC2 Overview")
     st.markdown("""
-    Amazon EC2 provides secure, resizable compute capacity in the AWS Cloud.
-
-    **Key Features:**
-    - Increase or decrease capacity within minutes (99.99% availability per region)
-    - Complete control over computing resources
-    - Multiple security features and standards
-    - Various migration tools and paths to get started
-
-    **EC2 Auto Scaling:**
-    - Add or remove compute capacity to meet changes in demand
-    - Scale based on schedules or dynamic metrics
-    - Maintain application availability during demand spikes
-    
-    **AWS Auto Scaling:**
-    - Monitors and automatically adjusts capacity for various AWS resources
-    - Predicts future traffic patterns, including regular spikes
-    - Works with EC2 Auto Scaling to manage dependent services
-    """)
+    <div class="aws-card">
+        <p>Amazon EC2 provides secure, resizable compute capacity in the AWS Cloud.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Increase or decrease capacity within minutes (99.99% availability per region)</li>
+            <li>Complete control over computing resources</li>
+            <li>Multiple security features and standards</li>
+            <li>Various migration tools and paths to get started</li>
+        </ul>
+        <h4>EC2 Auto Scaling:</h4>
+        <ul>
+            <li>Add or remove compute capacity to meet changes in demand</li>
+            <li>Scale based on schedules or dynamic metrics</li>
+            <li>Maintain application availability during demand spikes</li>
+        </ul>
+        <h4>AWS Auto Scaling:</h4>
+        <ul>
+            <li>Monitors and automatically adjusts capacity for various AWS resources</li>
+            <li>Predicts future traffic patterns, including regular spikes</li>
+            <li>Works with EC2 Auto Scaling to manage dependent services</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
@@ -718,110 +1193,165 @@ def ec2_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("On-Demand Instances")
         st.markdown("""
-        - Pay by the second with no commitments
-        - Ideal for short-term, irregular workloads
-        - Full control over instance lifecycle
-        """)
-        
-        st.subheader("Spot Instances")
-        st.markdown("""
-        - Use unused EC2 capacity at up to 90% discount
-        - Ideal for flexible, fault-tolerant workloads
-        - Instances can be interrupted with 2-minute notification
-        """)
+        <div class="aws-feature-card">
+            <h4>On-Demand Instances</h4>
+            <ul>
+                <li>Pay by the second with no commitments</li>
+                <li>Ideal for short-term, irregular workloads</li>
+                <li>Full control over instance lifecycle</li>
+            </ul>
+            <h4>Spot Instances</h4>
+            <ul>
+                <li>Use unused EC2 capacity at up to 90% discount</li>
+                <li>Ideal for flexible, fault-tolerant workloads</li>
+                <li>Instances can be interrupted with 2-minute notification</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Savings Plans")
         st.markdown("""
-        - Lower prices for usage commitments (1 or 3 years)
-        - Flexible across instance families, sizes, OS, regions
-        - Available for EC2, Lambda, and Fargate
-        """)
-        
-        st.subheader("Dedicated Hosts")
-        st.markdown("""
-        - Physical servers dedicated to your use
-        - Allow BYOL (Bring Your Own License)
-        - Address compliance requirements
-        """)
+        <div class="aws-feature-card">
+            <h4>Savings Plans</h4>
+            <ul>
+                <li>Lower prices for usage commitments (1 or 3 years)</li>
+                <li>Flexible across instance families, sizes, OS, regions</li>
+                <li>Available for EC2, Lambda, and Fargate</li>
+            </ul>
+            <h4>Dedicated Hosts</h4>
+            <ul>
+                <li>Physical servers dedicated to your use</li>
+                <li>Allow BYOL (Bring Your Own License)</li>
+                <li>Address compliance requirements</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("EC2 Instance Types")
     st.markdown("""
-    | Instance Type | Features | Use Cases |
-    |--------------|----------|-----------|
-    | **General Purpose** | Balanced compute, memory, networking | Web servers, development environments, small databases |
-    | **Compute Optimized** | High-performance processors | Batch processing, HPC, gaming servers, scientific modeling |
-    | **Memory Optimized** | Fast performance for memory-intensive workloads | High-performance databases, real-time big data analytics |
-    | **Storage Optimized** | Low latency, high IOPS | NoSQL databases, data warehousing, distributed file systems |
-    | **Accelerated Computing** | Hardware accelerators for data processing | ML/AI, graphics workloads, game streaming |
-    """)
-    
-    display_quiz("ec2")
+    <div class="aws-card">
+        <table class="dataframe">
+            <thead>
+                <tr>
+                    <th>Instance Type</th>
+                    <th>Features</th>
+                    <th>Use Cases</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>General Purpose</strong></td>
+                    <td>Balanced compute, memory, networking</td>
+                    <td>Web servers, development environments, small databases</td>
+                </tr>
+                <tr>
+                    <td><strong>Compute Optimized</strong></td>
+                    <td>High-performance processors</td>
+                    <td>Batch processing, HPC, gaming servers, scientific modeling</td>
+                </tr>
+                <tr>
+                    <td><strong>Memory Optimized</strong></td>
+                    <td>Fast performance for memory-intensive workloads</td>
+                    <td>High-performance databases, real-time big data analytics</td>
+                </tr>
+                <tr>
+                    <td><strong>Storage Optimized</strong></td>
+                    <td>Low latency, high IOPS</td>
+                    <td>NoSQL databases, data warehousing, distributed file systems</td>
+                </tr>
+                <tr>
+                    <td><strong>Accelerated Computing</strong></td>
+                    <td>Hardware accelerators for data processing</td>
+                    <td>ML/AI, graphics workloads, game streaming</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for EC2 Placement Groups page
 def placement_groups_page():
     st.title("EC2 Placement Groups")
     st.markdown("""
-    Placement groups influence how EC2 instances are placed on underlying hardware, affecting performance, availability, and fault tolerance.
-    """)
+    <div class="aws-card">
+        <p>Placement groups influence how EC2 instances are placed on underlying hardware, affecting performance, availability, and fault tolerance.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.subheader("Cluster Placement Group")
         st.markdown("""
-        **Description:**
-        - Instances packed close together inside a single AZ
-        - Low network latency, high throughput network performance
-        
-        **Best For:**
-        - High-performance computing (HPC)
-        - Applications requiring low-latency node-to-node communication
-        """)
+        <div class="aws-feature-card">
+            <h4>Cluster Placement Group</h4>
+            <p><strong>Description:</strong></p>
+            <ul>
+                <li>Instances packed close together inside a single AZ</li>
+                <li>Low network latency, high throughput network performance</li>
+            </ul>
+            <p><strong>Best For:</strong></p>
+            <ul>
+                <li>High-performance computing (HPC)</li>
+                <li>Applications requiring low-latency node-to-node communication</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.image("https://d1.awsstatic.com/product-marketing/EC2/Cluster%20placement%20group.b8d5681f46e1825c2a9336ef2ab3adc64d382db5.PNG", use_container_width=True)
     
     with col2:
-        st.subheader("Spread Placement Group")
         st.markdown("""
-        **Description:**
-        - Instances placed on distinct underlying hardware
-        - Each instance on separate racks with independent power/network
-        
-        **Best For:**
-        - Critical applications requiring maximum availability
-        - Applications that need to minimize correlated failures
-        """)
+        <div class="aws-feature-card">
+            <h4>Spread Placement Group</h4>
+            <p><strong>Description:</strong></p>
+            <ul>
+                <li>Instances placed on distinct underlying hardware</li>
+                <li>Each instance on separate racks with independent power/network</li>
+            </ul>
+            <p><strong>Best For:</strong></p>
+            <ul>
+                <li>Critical applications requiring maximum availability</li>
+                <li>Applications that need to minimize correlated failures</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.image("https://d1.awsstatic.com/product-marketing/EC2/Spread%20placement%20group.1c74c4a77af093c607e319aa3fc3e18860c9871e.PNG", use_container_width=True)
     
     with col3:
-        st.subheader("Partition Placement Group")
         st.markdown("""
-        **Description:**
-        - Instances grouped into logical partitions
-        - Each partition on distinct racks
-        - Partitions within a group don't share hardware
-        
-        **Best For:**
-        - Large distributed and replicated workloads
-        - Hadoop, Cassandra, and Kafka clusters
-        """)
+        <div class="aws-feature-card">
+            <h4>Partition Placement Group</h4>
+            <p><strong>Description:</strong></p>
+            <ul>
+                <li>Instances grouped into logical partitions</li>
+                <li>Each partition on distinct racks</li>
+                <li>Partitions within a group don't share hardware</li>
+            </ul>
+            <p><strong>Best For:</strong></p>
+            <ul>
+                <li>Large distributed and replicated workloads</li>
+                <li>Hadoop, Cassandra, and Kafka clusters</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.image("https://d1.awsstatic.com/product-marketing/EC2/Partition%20placement%20group.0dc869e45dedab443a6706764c71053c5cc9ceff.PNG", use_container_width=True)
     
-    st.info("""
-    **Key Takeaway**: Choose your placement group strategy based on your application needs:
-    - **Cluster**: For highest network performance and throughput
-    - **Spread**: For highest availability and reducing correlated failures
-    - **Partition**: For distributed applications that need to control partition placement
-    """)
-    
-    display_quiz("placement_groups")
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Key Takeaway</h4>
+        <p>Choose your placement group strategy based on your application needs:</p>
+        <ul>
+            <li><strong>Cluster:</strong> For highest network performance and throughput</li>
+            <li><strong>Spread:</strong> For highest availability and reducing correlated failures</li>
+            <li><strong>Partition:</strong> For distributed applications that need to control partition placement</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for EC2 AMIs and Instance Metadata page
 def amis_metadata_page():
@@ -829,252 +1359,377 @@ def amis_metadata_page():
     
     st.header("Amazon Machine Images (AMI)")
     st.markdown("""
-    An Amazon Machine Image (AMI) provides the information required to launch an EC2 instance.
-
-    **AMI Types:**
-    - **Amazon EBS-backed AMI**: Root device is an EBS volume created from an EBS snapshot
-    - **Instance store-backed AMI**: Root device is an instance store volume created from a template in S3
-
-    **What an AMI includes:**
-    - One or more EBS snapshots (or instance store template)
-    - Launch permissions controlling which AWS accounts can use the AMI
-    - Block device mapping that specifies volumes to attach when launched
-
-    **Common AMI sources:**
-    - AWS-provided AMIs
-    - AWS Marketplace AMIs
-    - Community AMIs
-    - Custom AMIs you create
-    """)
+    <div class="aws-card">
+        <p>An Amazon Machine Image (AMI) provides the information required to launch an EC2 instance.</p>
+        <h4>AMI Types:</h4>
+        <ul>
+            <li><strong>Amazon EBS-backed AMI:</strong> Root device is an EBS volume created from an EBS snapshot</li>
+            <li><strong>Instance store-backed AMI:</strong> Root device is an instance store volume created from a template in S3</li>
+        </ul>
+        <h4>What an AMI includes:</h4>
+        <ul>
+            <li>One or more EBS snapshots (or instance store template)</li>
+            <li>Launch permissions controlling which AWS accounts can use the AMI</li>
+            <li>Block device mapping that specifies volumes to attach when launched</li>
+        </ul>
+        <h4>Common AMI sources:</h4>
+        <ul>
+            <li>AWS-provided AMIs</li>
+            <li>AWS Marketplace AMIs</li>
+            <li>Community AMIs</li>
+            <li>Custom AMIs you create</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("EC2 Instance Metadata")
     st.markdown("""
-    Instance metadata is data about your instance that you can use to configure or manage the running instance.
-
-    **Key Features:**
-    - Available from within the running instance
-    - No need to use AWS console or CLI for basic information
-    - Useful for writing scripts that run on the instance
-    - Accessed via a special endpoint: `http://169.254.169.254/latest/meta-data/`
-
-    **Common metadata categories:**
-    - Instance ID and type
-    - Hostname
-    - Local IP address
-    - IAM role information
-    - Security groups
-
-    **Instance User Data:**
-    - Custom data provided at instance launch
-    - Used for configuration scripts that run on startup
-    - Limited to 16 KB before base64 encoding
-    - Accessed via `http://169.254.169.254/latest/user-data/`
-    """)
+    <div class="aws-card">
+        <p>Instance metadata is data about your instance that you can use to configure or manage the running instance.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Available from within the running instance</li>
+            <li>No need to use AWS console or CLI for basic information</li>
+            <li>Useful for writing scripts that run on the instance</li>
+            <li>Accessed via a special endpoint: <code>http://169.254.169.254/latest/meta-data/</code></li>
+        </ul>
+        <h4>Common metadata categories:</h4>
+        <ul>
+            <li>Instance ID and type</li>
+            <li>Hostname</li>
+            <li>Local IP address</li>
+            <li>IAM role information</li>
+            <li>Security groups</li>
+        </ul>
+        <h4>Instance User Data:</h4>
+        <ul>
+            <li>Custom data provided at instance launch</li>
+            <li>Used for configuration scripts that run on startup</li>
+            <li>Limited to 16 KB before base64 encoding</li>
+            <li>Accessed via <code>http://169.254.169.254/latest/user-data/</code></li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.info("""
-    **Security Best Practice**: With IMDSv2, you should use token-based requests to access
-    instance metadata. This is more secure than the earlier IMDSv1 method which allows direct 
-    requests. Always configure your EC2 instances to use IMDSv2 whenever possible.
-    """)
-    
-    display_quiz("amis_metadata")
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Security Best Practice</h4>
+        <p>With IMDSv2, you should use token-based requests to access
+        instance metadata. This is more secure than the earlier IMDSv1 method which allows direct 
+        requests. Always configure your EC2 instances to use IMDSv2 whenever possible.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for KMS & EBS Encryption page
 def kms_ebs_page():
     st.title("Amazon KMS & EBS Encryption")
     
     try:
-        st.image(aws_images["kms"], width=700)
+        image = load_image_from_url(aws_images["kms"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("AWS Key Management Service (KMS)")
     st.markdown("""
-    AWS KMS is a managed service that makes it easy to create and control cryptographic keys used to protect your data.
-
-    **Key Features:**
-    - Secure and resilient service using FIPS 140-2 validated hardware security modules
-    - Centralized management of encryption keys
-    - Integrated with many AWS services
-    - Comprehensive logging and auditing via CloudTrail
-
-    **Types of KMS Keys:**
-    """)
+    <div class="aws-card">
+        <p>AWS KMS is a managed service that makes it easy to create and control cryptographic keys used to protect your data.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Secure and resilient service using FIPS 140-2 validated hardware security modules</li>
+            <li>Centralized management of encryption keys</li>
+            <li>Integrated with many AWS services</li>
+            <li>Comprehensive logging and auditing via CloudTrail</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.subheader("Types of KMS Keys")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Customer Managed Keys")
         st.markdown("""
-        - Created and controlled by customers
-        - Full control over key policies and lifecycle
-        - All requests logged to CloudTrail
-        - Ideal for granular control
-        """)
+        <div class="aws-feature-card">
+            <h4>Customer Managed Keys</h4>
+            <ul>
+                <li>Created and controlled by customers</li>
+                <li>Full control over key policies and lifecycle</li>
+                <li>All requests logged to CloudTrail</li>
+                <li>Ideal for granular control</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("AWS Managed Keys")
         st.markdown("""
-        - Created and managed by AWS
-        - Used for specific AWS services
-        - Cannot be modified by customers
-        - Key policies managed by AWS
-        """)
+        <div class="aws-feature-card">
+            <h4>AWS Managed Keys</h4>
+            <ul>
+                <li>Created and managed by AWS</li>
+                <li>Used for specific AWS services</li>
+                <li>Cannot be modified by customers</li>
+                <li>Key policies managed by AWS</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("Amazon EBS Encryption")
     st.markdown("""
-    Amazon EBS encryption offers a simple encryption solution for your EBS resources.
-
-    **When you create an encrypted EBS volume, the following is encrypted:**
-    - Data at rest inside the volume
-    - All data in transit between the volume and the instance
-    - All snapshots created from the volume
-    - All volumes created from those snapshots
-
-    **Key Features:**
-    - Uses AES-256 encryption algorithm
-    - Encryption operations occur on EC2 host servers
-    - Minimal impact on performance
-    - Integrated with AWS KMS for key management
+    <div class="aws-card">
+        <p>Amazon EBS encryption offers a simple encryption solution for your EBS resources.</p>
+        <h4>When you create an encrypted EBS volume, the following is encrypted:</h4>
+        <ul>
+            <li>Data at rest inside the volume</li>
+            <li>All data in transit between the volume and the instance</li>
+            <li>All snapshots created from the volume</li>
+            <li>All volumes created from those snapshots</li>
+        </ul>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Uses AES-256 encryption algorithm</li>
+            <li>Encryption operations occur on EC2 host servers</li>
+            <li>Minimal impact on performance</li>
+            <li>Integrated with AWS KMS for key management</li>
+        </ul>
+        <h4>How It Works:</h4>
+        <ol>
+            <li>EBS encrypts your volume with a data key using AES-256</li>
+            <li>The data key is generated by AWS KMS</li>
+            <li>The data key is encrypted by your specified KMS key</li>
+            <li>The encrypted data key is stored with your volume information</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **How It Works:**
-    1. EBS encrypts your volume with a data key using AES-256
-    2. The data key is generated by AWS KMS 
-    3. The data key is encrypted by your specified KMS key
-    4. The encrypted data key is stored with your volume information
-    """)
-    
-    st.info("""
-    **Best Practice**: Consider enabling encryption by default for all new EBS volumes and 
-    snapshots in your account. This ensures all future storage resources are protected with minimal 
-    operational overhead.
-    """)
-    
-    display_quiz("kms")
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Best Practice</h4>
+        <p>Consider enabling encryption by default for all new EBS volumes and 
+        snapshots in your account. This ensures all future storage resources are protected with minimal 
+        operational overhead.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for Security page
 def security_page():
     st.title("AWS Security")
     
     try:
-        st.image(aws_images["security"], width=700)
+        image = load_image_from_url(aws_images["security"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("Amazon CloudTrail")
     st.markdown("""
-    CloudTrail logs, monitors, and retains account activity related to actions across your AWS infrastructure.
-
-    **Key Features:**
-    - Records user activity and API calls across your AWS account
-    - Enables auditing, security monitoring, and operational troubleshooting
-    - Logs can be stored in S3, CloudWatch Logs, or analyzed with Athena
-    - Helps prove compliance with regulatory standards
-    
-    **What are trails?**
-    
-    A trail is a configuration that enables delivery of CloudTrail events to an S3 bucket, CloudWatch Logs, and EventBridge.
-    You can filter events, encrypt log files with KMS, and set up SNS notifications for log delivery.
-    """)
+    <div class="aws-card">
+        <p>CloudTrail logs, monitors, and retains account activity related to actions across your AWS infrastructure.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Records user activity and API calls across your AWS account</li>
+            <li>Enables auditing, security monitoring, and operational troubleshooting</li>
+            <li>Logs can be stored in S3, CloudWatch Logs, or analyzed with Athena</li>
+            <li>Helps prove compliance with regulatory standards</li>
+        </ul>
+        <h4>What are trails?</h4>
+        <p>A trail is a configuration that enables delivery of CloudTrail events to an S3 bucket, CloudWatch Logs, and EventBridge.
+        You can filter events, encrypt log files with KMS, and set up SNS notifications for log delivery.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     st.header("AWS WAF (Web Application Firewall)")
     st.markdown("""
-    AWS WAF is a web application firewall that protects web applications from common web exploits.
-
-    **Key Features:**
-    - Configure rules to allow, block, or monitor web requests
-    - Protects against common attacks like SQL injection and XSS
-    - Integrates with CloudFront, Application Load Balancer, API Gateway, and AppSync
-    - When used with CloudFront, rules run in all AWS Edge Locations globally
-    
-    **Protection Capabilities:**
-    - Block specific IP addresses
-    - Block specific countries
-    - Block specific request patterns
-    - Rate limiting to prevent DDoS attacks
-    """)
+    <div class="aws-card">
+        <p>AWS WAF is a web application firewall that protects web applications from common web exploits.</p>
+        <h4>Key Features:</h4>
+        <ul>
+            <li>Configure rules to allow, block, or monitor web requests</li>
+            <li>Protects against common attacks like SQL injection and XSS</li>
+            <li>Integrates with CloudFront, Application Load Balancer, API Gateway, and AppSync</li>
+            <li>When used with CloudFront, rules run in all AWS Edge Locations globally</li>
+        </ul>
+        <h4>Protection Capabilities:</h4>
+        <ul>
+            <li>Block specific IP addresses</li>
+            <li>Block specific countries</li>
+            <li>Block specific request patterns</li>
+            <li>Rate limiting to prevent DDoS attacks</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.header("AWS Shield")
         st.markdown("""
-        AWS Shield is a managed DDoS protection service that safeguards applications on AWS.
-
-        **Shield Standard (Free):**
-        - Automatically enabled for all AWS customers
-        - Protects against common layer 3/4 attacks
-        - Supports high availability of applications
-
-        **Shield Advanced (Paid):**
-        - Enhanced protection for EC2, ELB, CloudFront, Global Accelerator, and Route 53
-        - Real-time monitoring and notifications
-        - 24/7 access to the Shield Response Team (with Business/Enterprise Support)
-        - DDoS cost protection
-        """)
+        <div class="aws-feature-card">
+            <h4>AWS Shield</h4>
+            <p>AWS Shield is a managed DDoS protection service that safeguards applications on AWS.</p>
+            <p><strong>Shield Standard (Free):</strong></p>
+            <ul>
+                <li>Automatically enabled for all AWS customers</li>
+                <li>Protects against common layer 3/4 attacks</li>
+                <li>Supports high availability of applications</li>
+            </ul>
+            <p><strong>Shield Advanced (Paid):</strong></p>
+            <ul>
+                <li>Enhanced protection for EC2, ELB, CloudFront, Global Accelerator, and Route 53</li>
+                <li>Real-time monitoring and notifications</li>
+                <li>24/7 access to the Shield Response Team (with Business/Enterprise Support)</li>
+                <li>DDoS cost protection</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.header("AWS Firewall Manager")
         st.markdown("""
-        Centrally configure and manage firewall rules across accounts and applications.
+        <div class="aws-feature-card">
+            <h4>AWS Firewall Manager</h4>
+            <p>Centrally configure and manage firewall rules across accounts and applications.</p>
+            <h5>Key Features:</h5>
+            <ul>
+                <li>Set up protections once, automatically applied across accounts</li>
+                <li>Protects resources across accounts in AWS Organizations</li>
+                <li>Automatically protects new resources as they're added</li>
+                <li>Supports multiple security services:
+                    <ul>
+                        <li>AWS WAF</li>
+                        <li>AWS Shield Advanced</li>
+                        <li>Security Groups</li>
+                        <li>AWS Network Firewall</li>
+                        <li>Route 53 Resolver DNS Firewall</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
-        **Key Features:**
-        - Set up protections once, automatically applied across accounts
-        - Protects resources across accounts in AWS Organizations
-        - Automatically protects new resources as they're added
-        - Supports multiple security services:
-          - AWS WAF
-          - AWS Shield Advanced
-          - Security Groups
-          - AWS Network Firewall
-          - Route 53 Resolver DNS Firewall
-        """)
+# Function for Knowledge Checks page
+def knowledge_checks_page():
+    st.title("Knowledge Checks")
     
-    display_quiz("security")
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Test your knowledge</h3>
+        <p>Answer the scenario-based questions below to check your understanding. Your progress is tracked automatically.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Create tabs for each topic's quizzes
+    tabs = st.tabs([
+        "Caching & File Servers", 
+        "Database Services", 
+        "EC2 Basics", 
+        "Placement Groups", 
+        "AMIs & Metadata", 
+        "KMS & Encryption",
+        "Security"
+    ])
+    
+    topic_keys = ["caching", "database", "ec2", "placement_groups", "amis_metadata", "kms", "security"]
+    
+    # Loop through tabs and display corresponding quizzes
+    for i, tab in enumerate(tabs):
+        with tab:
+            topic = topic_keys[i]
+            st.header(f"{topic.upper()} Knowledge Check")
+            
+            if topic in quiz_data:
+                for j, quiz in enumerate(quiz_data[topic]):
+                    handle_quiz(topic, j, quiz)
+    
+    # Progress Summary
+    st.header("Your Progress")
+    
+    # Display chart if there's data
+    chart = create_quiz_results_chart()
+    if chart:
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.info("Complete some knowledge checks to see your progress!")
+    
+    # Calculate and display overall progress
+    total_attempted = sum(st.session_state.quiz_attempted.values()) if st.session_state.quiz_attempted else 0
+    total_correct = sum(st.session_state.quiz_scores.values()) if st.session_state.quiz_scores else 0
+    
+    if total_attempted > 0:
+        percentage = int((total_correct / total_attempted) * 100)
+        
+        st.markdown(f"""
+        <div class="aws-success-card">
+            <h3>Overall Score: {total_correct}/{total_attempted} ({percentage}%)</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Progress bar
+        st.progress(total_correct / total_attempted)
 
-# Sidebar menu
-st.sidebar.title("AWS Solutions Architect")
-st.sidebar.image("https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png", width=200)
 
-menu = st.sidebar.radio(
-    "Navigation",
-    ["Home", 
-     "AWS Caching & File Servers", 
-     "AWS Database Offerings", 
-     "EC2 Overview", 
-     "EC2 Placement Groups", 
-     "EC2 AMIs & Metadata", 
-     "KMS & EBS Encryption",
-     "AWS Security"]
-)
+# Session management in sidebar
+st.sidebar.subheader("⚙️ Session Management")
 
-# Display selected page
-if menu == "Home":
+# Reset button
+if st.sidebar.button("🔄 Reset Quiz Data", key="reset_button"):
+    reset_session()
+
+# Show session ID
+st.sidebar.caption(f"Session ID: {st.session_state.session_id[:8]}...")
+
+# Main tabs navigation with emojis
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "🏠 Home",
+    "💾 Caching & File Servers",
+    "🗄️ Database Services",
+    "🖥️ EC2 Basics",
+    "📋 Placement Groups",
+    "💿 AMIs & Metadata",
+    "🔐 KMS & Encryption",
+    "🛡️ Security",
+    "📝 Knowledge Checks"
+])
+
+# Content for each tab
+with tab1:
     home_page()
-elif menu == "AWS Caching & File Servers":
+
+with tab2:
     caching_page()
-elif menu == "AWS Database Offerings":
+
+with tab3:
     database_page()
-elif menu == "EC2 Overview":
+
+with tab4:
     ec2_page()
-elif menu == "EC2 Placement Groups":
+
+with tab5:
     placement_groups_page()
-elif menu == "EC2 AMIs & Metadata":
+
+with tab6:
     amis_metadata_page()
-elif menu == "KMS & EBS Encryption":
+
+with tab7:
     kms_ebs_page()
-elif menu == "AWS Security":
+
+with tab8:
     security_page()
+    
+with tab9:
+    knowledge_checks_page()
 
 # Footer
-st.sidebar.divider()
-st.sidebar.markdown("© 2025 AWS Partner Certification Readiness")
-st.sidebar.info("This application is designed to help you prepare for the AWS Solutions Architect - Associate certification.")
+st.markdown("""
+<div class="footer">
+    © 2025 AWS Partner Certification Readiness. This application is designed to help you prepare for the AWS Solutions Architect - Associate certification.
+</div>
+""", unsafe_allow_html=True)
