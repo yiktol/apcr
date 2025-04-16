@@ -1,14 +1,26 @@
 #!/usr/bin/bash
 
-cd /home/ubuntu/environment/apcr/aip/session4
+directory=/home/ubuntu/environment/apcr/aip/session4
 
-python -m venv .env
+# cd /home/ubuntu/environment/apcr/aip/session4/
+cd $directory
 
-source .env/bin/activate
+if [ -d $directory/.env ]; 
+    then
+        echo "Directory exists."
+        source $directory/.env/bin/activate
+    else
+        echo "Directory does not exists."
 
-pip install -r requirements.txt
+        echo "Creating Virtual Environment"
+        python -m venv .env
+        source $directory/.env/bin/activate
 
-# streamlit run Home.py --server.port 8082 &
+        echo "Installing dependencies"
+        pip install -U pip
+        pip install -r requirements.txt
+        
+fi
 
+$directory/.env/bin/streamlit run $directory/Home.py --server.port 8091 &
 deactivate
-

@@ -629,9 +629,34 @@ with tab2:
         horizontal=True
     )
     
+    # In the "Summary Plot" section, replace the existing code with this:
     if viz_type == "Summary Plot":
-        if 'model' not in locals():  # Check if model exists
-            st.error("Please train or load a model first")
+        # Use the already trained model from session state
+        if 'shap_model' not in st.session_state or 'shap_values' not in st.session_state or st.session_state.shap_values is None:
+            st.error("SHAP values haven't been calculated yet. Please calculate SHAP values first.")
+            
+            calculate_shap = st.button("Calculate SHAP Values")
+            if calculate_shap:
+                with st.spinner("Training model and calculating SHAP values..."):
+                    # Train the model if not already done
+                    if 'shap_model' not in st.session_state:
+                        model = RandomForestClassifier(n_estimators=100, random_state=42)
+                        model.fit(st.session_state.X_train, st.session_state.y_train)
+                        st.session_state.shap_model = model
+                    
+                    # Create a small subset for demonstration
+                    X_sample = st.session_state.X_test[:100]
+                    
+                    # Calculate SHAP values
+                    explainer = shap.Explainer(st.session_state.shap_model, st.session_state.X_train)
+                    shap_values = explainer(X_sample)
+                    
+                    # Store in session state
+                    st.session_state.shap_explainer = explainer
+                    st.session_state.shap_values = shap_values
+                    st.session_state.X_sample = X_sample
+                    
+                    st.rerun()
         else:
             st.markdown("""
             <div class="highlight">
@@ -640,40 +665,43 @@ with tab2:
             </div>
             """, unsafe_allow_html=True)
 
-            # First, calculate SHAP values and create an Explanation object
-            explainer = shap.Explainer(model, feature_names=feature_names)
-            shap_explanation = explainer(X)  # X is your feature dataset
-
-            # For multi-class/multi-output models, select a specific output class
-            # Usually class 1 for binary classification
-            if len(shap_explanation.shape) > 2:
-                shap_values_plot = shap_explanation[:, :, 1]  # Select class 1
-            else:
-                shap_values_plot = shap_explanation
-
-            # Create summary plot using the updated SHAP API
+            # Handle dimensionality issue with SHAP values
+            # If shap_values is multi-dimensional (for multi-class), select the class 1 values
+            shap_values_to_plot = st.session_state.shap_values
+            
+            # Check if these are multi-class SHAP values (with >2 dimensions)
+            if hasattr(shap_values_to_plot, 'shape') and len(shap_values_to_plot.shape) > 2:
+                # For multi-class models, select class 1 (positive class in binary classification)
+                shap_values_to_plot = shap_values_to_plot[:, :, 1]
+            
+            # Create summary plot using the properly formatted SHAP values
             fig, ax = plt.subplots(figsize=(10, 8))
             shap.plots.beeswarm(
-                # st.session_state.shap_values,
-                shap_explanation,
+                shap_values_to_plot,
                 show=False,
                 max_display=10
             )
             st.pyplot(fig)
-        
-        st.markdown("""
-        <div class="card">
-        <h4 class="aws-orange">Interpretation</h4>
-        <p>
-        <ul>
-            <li>Features at the top have the highest impact on predictions</li>
-            <li>Red points represent high feature values, blue points represent low values</li>
-            <li>Points to the right indicate a positive impact on the prediction (increasing the probability)</li>
-            <li>Points to the left indicate a negative impact (decreasing the probability)</li>
-        </ul>
-        </p>
-        </div>
-        """, unsafe_allow_html=True)
+            
+            # Add an option to recalculate SHAP values if needed
+            if st.button("Recalculate SHAP Values"):
+                st.session_state.shap_values = None
+                st.session_state.shap_explainer = None
+                st.rerun()
+            
+            st.markdown("""
+            <div class="card">
+            <h4 class="aws-orange">Interpretation</h4>
+            <p>
+            <ul>
+                <li>Features at the top have the highest impact on predictions</li>
+                <li>Red points represent high feature values, blue points represent low values</li>
+                <li>Points to the right indicate a positive impact on the prediction (increasing the probability)</li>
+                <li>Points to the left indicate a negative impact (decreasing the probability)</li>
+            </ul>
+            </p>
+            </div>
+            """, unsafe_allow_html=True)
         
     elif viz_type == "Feature Importance":
         st.markdown("""
@@ -708,87 +736,133 @@ with tab2:
         """, unsafe_allow_html=True)
         
     else:  # Single Prediction Explanation
-        st.markdown("""
-        <div class="highlight">
-        <strong>Single Prediction Explanation</strong> shows how each feature contributes to a specific prediction,
-        helping understand why the model made a particular decision for an individual case.
-        </div>
-        """, unsafe_allow_html=True)
+        # Check if SHAP values exist
+        if 'shap_model' not in st.session_state or 'shap_values' not in st.session_state or st.session_state.shap_values is None:
+            st.error("SHAP values haven't been calculated yet. Please calculate SHAP values first.")
+            
+            calculate_shap = st.button("Calculate SHAP Values")
+            if calculate_shap:
+                with st.spinner("Training model and calculating SHAP values..."):
+                    # Train the model if not already done
+                    if 'shap_model' not in st.session_state:
+                        model = RandomForestClassifier(n_estimators=100, random_state=42)
+                        model.fit(st.session_state.X_train, st.session_state.y_train)
+                        st.session_state.shap_model = model
+                    
+                    # Create a small subset for demonstration
+                    X_sample = st.session_state.X_test[:100]
+                    
+                    # Calculate SHAP values
+                    explainer = shap.Explainer(st.session_state.shap_model, st.session_state.X_train)
+                    shap_values = explainer(X_sample)
+                    
+                    # Store in session state
+                    st.session_state.shap_explainer = explainer
+                    st.session_state.shap_values = shap_values
+                    st.session_state.X_sample = X_sample
+                    
+                    st.rerun()
+        else:
+            st.markdown("""
+            <div class="highlight">
+            <strong>Single Prediction Explanation</strong> shows how each feature contributes to a specific prediction,
+            helping understand why the model made a particular decision for an individual case.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Let user select a sample to explain
+            sample_index = st.slider(
+                "Select a sample to explain:",
+                min_value=0,
+                max_value=len(st.session_state.X_sample)-1,
+                value=0
+            )
+            
+            # Get the prediction
+            sample = st.session_state.X_sample[sample_index:sample_index+1]
+            prediction = st.session_state.shap_model.predict_proba(sample)[0, 1]
+            actual = st.session_state.y_test[sample_index]
+            
+            # Display prediction info
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Predicted Probability", f"{prediction:.4f}")
+            with col2:
+                st.metric("Actual Class", "Positive" if actual == 1 else "Negative")
+            
+            # Create waterfall plot using the selected sample index directly
+            try:
+                # For modern SHAP versions that return Explanation objects
+                fig, ax = plt.subplots(figsize=(10, 8))
+                shap.plots.waterfall(st.session_state.shap_values[sample_index], show=False, max_display=10)
+                st.pyplot(fig)
+                
+                # Create force plot
+                fig, ax = plt.subplots(figsize=(10, 3))
+                shap.plots.force(st.session_state.shap_values[sample_index], matplotlib=True, show=False)
+                st.pyplot(fig)
+            except Exception as e:
+                st.error(f"Error creating SHAP plots: {str(e)}")
+                st.write("Let's try an alternative approach:")
+                
+                # Alternative approach: Create a new explainer and calculate values for just this sample
+                with st.spinner("Calculating SHAP values for this sample..."):
+                    explainer = shap.Explainer(st.session_state.shap_model, st.session_state.X_train)
+                    single_shap_values = explainer(sample)
+                    
+                    # Plot using direct single sample calculation
+                    fig, ax = plt.subplots(figsize=(10, 8))
+                    shap.plots.waterfall(single_shap_values[0], show=False, max_display=10)
+                    st.pyplot(fig)
+                    
+                    # Force plot
+                    fig, ax = plt.subplots(figsize=(10, 3))
+                    shap.plots.force(single_shap_values[0], matplotlib=True, show=False)
+                    st.pyplot(fig)
+            
+            # Add an option to recalculate SHAP values if needed
+            if st.button("Recalculate SHAP Values"):
+                st.session_state.shap_values = None
+                st.session_state.shap_explainer = None
+                st.rerun()
+            
+            st.markdown("""
+            <div class="card">
+            <h4 class="aws-orange">Interpretation</h4>
+            <p>
+            <ul>
+                <li>Red features push the prediction higher (toward positive class)</li>
+                <li>Blue features push the prediction lower (toward negative class)</li>
+                <li>The base value represents the average model output over the training dataset</li>
+                <li>The final prediction is the sum of the base value and all SHAP values</li>
+            </ul>
+            </p>
+            </div>
+            """, unsafe_allow_html=True)
+
         
-        # Let user select a sample to explain
-        sample_index = st.slider(
-            "Select a sample to explain:",
-            min_value=0,
-            max_value=len(st.session_state.X_sample)-1,
-            value=0
-        )
+        # SHAP practical applications
+        st.markdown("---")
+        st.markdown("<h3 class='aws-orange'>Practical Applications of SHAP</h3>", unsafe_allow_html=True)
         
-        # Get the prediction
-        sample = st.session_state.X_sample[sample_index:sample_index+1]
-        prediction = st.session_state.shap_model.predict_proba(sample)[0, 1]
-        actual = st.session_state.y_test[sample_index]
-        
-        # Display prediction info
         col1, col2 = st.columns(2)
+        
         with col1:
-            st.metric("Predicted Probability", f"{prediction:.4f}")
-        with col2:
-            st.metric("Actual Class", "Positive" if actual == 1 else "Negative")
-        
-        # Create waterfall plot using the updated SHAP API
-        fig, ax = plt.subplots(figsize=(10, 8))
-        shap.plots.waterfall(
-            st.session_state.shap_values[sample_index],
-            show=False,
-            max_display=10
-        )
-        st.pyplot(fig)
-        
-        # Create force plot using the updated SHAP API
-        fig, ax = plt.subplots(figsize=(10, 3))
-        shap.plots.force(
-            st.session_state.shap_values[sample_index],
-            matplotlib=True,
-            show=False
-        )
-        st.pyplot(fig)
-        
-        st.markdown("""
-        <div class="card">
-        <h4 class="aws-orange">Interpretation</h4>
-        <p>
-        <ul>
-            <li>Red features push the prediction higher (toward positive class)</li>
-            <li>Blue features push the prediction lower (toward negative class)</li>
-            <li>The base value represents the average model output over the training dataset</li>
-            <li>The final prediction is the sum of the base value and all SHAP values</li>
-        </ul>
-        </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # SHAP practical applications
-    st.markdown("---")
-    st.markdown("<h3 class='aws-orange'>Practical Applications of SHAP</h3>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class="card">
-        <h4>Identifying Bias</h4>
-        <p>SHAP values can reveal if sensitive attributes like gender or race are significantly influencing predictions,
-        helping detect and address algorithmic bias.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="card">
-        <h4>Model Debugging</h4>
-        <p>By understanding which features drive predictions, data scientists can identify potential issues in the model
-        and refine feature engineering or model architecture.</p>
-        </div>
-        """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="card">
+            <h4>Identifying Bias</h4>
+            <p>SHAP values can reveal if sensitive attributes like gender or race are significantly influencing predictions,
+            helping detect and address algorithmic bias.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="card">
+            <h4>Model Debugging</h4>
+            <p>By understanding which features drive predictions, data scientists can identify potential issues in the model
+            and refine feature engineering or model architecture.</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
