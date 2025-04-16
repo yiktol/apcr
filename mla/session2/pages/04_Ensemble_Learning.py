@@ -8,101 +8,92 @@ from sklearn.datasets import make_classification, make_regression, load_breast_c
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, StackingClassifier, BaggingClassifier
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor, StackingRegressor, BaggingRegressor
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR
 from sklearn.metrics import accuracy_score, mean_squared_error, r2_score, classification_report, confusion_matrix
-from sklearn.tree import DecisionTreeClassifier
 import plotly.express as px
 import plotly.graph_objects as go
 import time
 from PIL import Image
 import base64
 import io
-from st_clickable_images import clickable_images
-
-# AWS Color Palette
-AWS_COLORS = {
-    "squid_ink": "#232F3E",
-    "anchor": "#0073BB",
-    "anchor_light": "#00A1C9",
-    "activation": "#FF9900",
-    "activation_light": "#FFAC31",
-    "lime": "#7AA116",
-    "slate": "#687078",
-    "red": "#D13212",
-    "white": "#FFFFFF",
-    "background": "#F8F8F8"
-}
 
 # Set page configuration
 st.set_page_config(
     page_title="Ensemble Learning Explorer",
-    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# CSS styling for modern UI
+# AWS Color Scheme
+AWS_COLORS = {
+    "orange": "#FF9900",
+    "light_orange": "#FFAC31",
+    "dark_blue": "#232F3E",
+    "light_blue": "#1A73E8",
+    "teal": "#00A1C9",
+    "red": "#D13212",
+    "green": "#7AA116",
+    "purple": "#8C4FFF",
+    "light_grey": "#F2F3F3",
+    "slate": "#687078",
+    "white": "#FFFFFF",
+    "background": "#F8F8F8"
+}
+
+# Custom CSS for AWS styling
 st.markdown("""
-<style>
+    <style>
     .main {
-        background-color: #F8F8F8;
+        background-color: #FFFFFF;
+    }
+    .sidebar .sidebar-content {
+        background-color: #232F3E;
+        color: white;
+    }
+    h1, h2 {
+        color: #232F3E;
+    }
+    h3, h4, h5 {
+        color: #FF9900;
+    }
+    .stButton>button {
+        background-color: #FF9900;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #FFAC31;
+    }
+    .highlight {
+        background-color: #FFAC31;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
     }
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 2px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: pre-wrap;
-        background-color: #FFFFFF;
-        border-radius: 4px;
-        padding: 10px 16px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        background-color: #F2F3F3;
+        border-radius: 4px 4px 0px 0px;
+        padding: 10px 20px;
+        color: #232F3E;
     }
     .stTabs [aria-selected="true"] {
         background-color: #FF9900 !important;
         color: white !important;
     }
-    h1, h2, h3 {
-        color: #232F3E;
-    }
-    .highlight {
-        background-color: #0073BB;
-        color: white;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
-    }
-    .card {
-        background-color: white;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-    }
-    .button {
-        background-color: #FF9900;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 8px 16px;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        transition-duration: 0.4s;
-    }
-    .button:hover {
-        background-color: #FFAC31;
-    }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
 # Initialize session state
-if 'page' not in st.session_state:
-    st.session_state.page = 'home'
 if 'dataset' not in st.session_state:
     st.session_state.dataset = None
 if 'X_train' not in st.session_state:
@@ -118,22 +109,19 @@ if 'task_type' not in st.session_state:
 if 'model_results' not in st.session_state:
     st.session_state.model_results = {}
 
-# Sidebar for session management
+# Sidebar
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png", width=200)
-    st.title("E-Learning Session")
-    st.markdown("---")
     
     # Session management
-    st.subheader("🔄 Session Management")
-    if st.button("Reset Session"):
+    st.subheader("⚙️ Session Management")
+    if st.button("🔄 Reset Session"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
-        st.session_state.page = 'home'
         st.rerun()
     
     # Data generation options
-    st.subheader("🛠️ Configuration")
+    st.markdown("---")
+    st.subheader("🛠️ Data Configuration")
     task = st.radio("Select Task Type:", ["Classification", "Regression"])
     st.session_state.task_type = task.lower()
     
@@ -142,7 +130,7 @@ with st.sidebar:
         ["Generated Data", "Breast Cancer (Classification)", "Diabetes (Regression)"]
     )
     
-    if st.button("Generate Data"):
+    if st.button("Generate Data", key="generate_data_btn"):
         with st.spinner("Generating dataset..."):
             if dataset_option == "Generated Data":
                 if st.session_state.task_type == 'classification':
@@ -179,28 +167,39 @@ with st.sidebar:
             st.success("✅ Data generated successfully!")
     
     st.markdown("---")
-    st.info("📚 This application provides interactive examples of ensemble learning methods in machine learning.")
+    st.markdown("### About This App")
+    st.info("""
+    This interactive explorer demonstrates various ensemble learning techniques 
+    used in machine learning to improve model performance.
+    
+    Learn about:
+    - Bagging
+    - Boosting
+    - Stacking
+    
+    Try the interactive examples to see how each technique affects model performance!
+    """)
 
 # Main content
-st.title("🤖 Ensemble Learning Explorer")
+st.title("Ensemble Learning Explorer")
+
 st.markdown("""
 <div class="card">
-    <h3>Welcome to the Interactive Ensemble Learning Explorer!</h3>
-    <p>Explore different ensemble learning techniques through interactive examples and visualizations. 
-    Use the tabs below to navigate between different methods.</p>
-    <p><strong>First step:</strong> Generate a dataset using the sidebar options.</p>
+<p>Ensemble learning is a powerful machine learning paradigm where multiple models (often called "weak learners") 
+are trained to solve the same problem and combined to get better results. This approach frequently produces more 
+accurate solutions than a single model would.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Create tabs for different ensemble methods
+# Create tabs
 tabs = st.tabs([
-    "🏠 Home", 
+    "📊 Overview", 
     "🌲 Bagging", 
     "🚀 Boosting", 
     "🏗️ Stacking"
 ])
 
-# Home tab
+# Tab 1: Overview
 with tabs[0]:
     st.header("Understanding Ensemble Learning")
     
@@ -208,43 +207,88 @@ with tabs[0]:
     
     with col1:
         st.markdown("""
-        <div class="card">
-            <h3>What is Ensemble Learning?</h3>
-            <p>Ensemble learning is a machine learning paradigm where multiple models (called "weak learners") 
-            are trained to solve the same problem and combined to get better results. The main hypothesis is that 
-            when weak models are correctly combined, we can obtain more accurate and/or robust models.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        ### What is Ensemble Learning? 🤔
         
-        st.markdown("""
-        <div class="card">
-            <h3>Why Use Ensemble Methods?</h3>
-            <ul>
-                <li><strong>Improved accuracy:</strong> Combining multiple models often yields better predictions</li>
-                <li><strong>Reduced overfitting:</strong> Ensembles help in reducing model variance</li>
-                <li><strong>Increased stability:</strong> Less sensitive to peculiarities of the data</li>
-                <li><strong>Better insights:</strong> Different models may capture different aspects of the data</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        Ensemble learning combines multiple models to improve predictions, reduce overfitting,
+        and increase model stability. By aggregating the predictions of multiple models, 
+        ensemble methods can achieve better performance than any single model.
+        
+        The key principle behind ensemble learning is that a group of "weak learners" 
+        can come together to form a "strong learner".
+        
+        ### Why Use Ensemble Methods?
+        """)
+        
+        benefits = {
+            "Improved Accuracy": "Multiple models often yield better predictions than any single model",
+            "Reduced Overfitting": "Ensembles help in reducing model variance and generalization error",
+            "Increased Stability": "Less sensitive to peculiarities of the data",
+            "Better Insights": "Different models may capture different aspects of the data"
+        }
+        
+        for benefit, description in benefits.items():
+            st.markdown(f"""
+            <div style="margin-bottom: 10px; padding: 10px; border-radius: 5px; background-color: {AWS_COLORS['light_grey']}; border-left: 5px solid {AWS_COLORS['orange']}">
+                <strong style="color: {AWS_COLORS['dark_blue']};">{benefit}:</strong> {description}
+            </div>
+            """, unsafe_allow_html=True)
     
     with col2:
+        # Show ensemble learning concept image
         st.image("https://miro.medium.com/max/1200/1*4G__SV580CxFj-xlBw_Zvg.png", caption="Ensemble Learning Concept")
         
         st.markdown("""
+        <div style="text-align: center; font-style: italic; margin-top: 10px;">
+            Visual representation of how ensemble learning combines multiple models
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
         <div class="card">
-            <h3>Main Categories:</h3>
-            <ul>
-                <li><strong>Bagging:</strong> Train models in parallel on random subsets</li>
-                <li><strong>Boosting:</strong> Train models sequentially, each focusing on previous errors</li>
-                <li><strong>Stacking:</strong> Combine predictions using another learning algorithm</li>
-            </ul>
+        <h4>Main Categories of Ensemble Methods</h4>
+        <ul>
+        <li><strong>Bagging:</strong> Train models in parallel on random subsets</li>
+        <li><strong>Boosting:</strong> Train models sequentially, each focusing on previous errors</li>
+        <li><strong>Stacking:</strong> Combine predictions using another learning algorithm</li>
+        </ul>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     st.subheader("Getting Started")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div class="card" style="background-color: #E9F5FF;">
+            <h3 style="color: #00A1C9;">🌲 Bagging</h3>
+            <p>Bootstrap Aggregating - trains multiple instances of the same model on different random subsets of the training data.</p>
+            <p><strong>Examples:</strong> Random Forests, Bagging Classifier</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="card" style="background-color: #FFF8F0;">
+            <h3 style="color: #FF9900;">🚀 Boosting</h3>
+            <p>Trains models sequentially, with each new model focusing on the errors of previous ones.</p>
+            <p><strong>Examples:</strong> AdaBoost, Gradient Boosting, XGBoost</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="card" style="background-color: #F0FFF4;">
+            <h3 style="color: #7AA116;">🏗️ Stacking</h3>
+            <p>Combines multiple models using another meta-model to optimize the outputs.</p>
+            <p><strong>Examples:</strong> Stacking Classifier, Blending</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    st.subheader("How to Use This App")
     st.markdown("""
     <ol>
         <li>Use the sidebar to select a dataset and task type (classification or regression)</li>
@@ -254,78 +298,80 @@ with tabs[0]:
     </ol>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div class="card" style="background-color: #F0F7FF;">
-            <h3 style="color: #0073BB;">🌲 Bagging</h3>
-            <p>Bootstrap Aggregating - trains multiple models on random subsets of the training data.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="card" style="background-color: #FFF8F0;">
-            <h3 style="color: #FF9900;">🚀 Boosting</h3>
-            <p>Sequentially trains models, with each new model focusing on the errors of previous ones.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class="card" style="background-color: #F0FFF4;">
-            <h3 style="color: #7AA116;">🏗️ Stacking</h3>
-            <p>Combines multiple models using another meta-model to optimize the outputs.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Show warning if data is not generated yet
+    if st.session_state.X_train is None:
+        st.warning("👆 Please generate a dataset first using the sidebar options.")
 
-# Bagging tab
+# Tab 2: Bagging
 with tabs[1]:
-    st.header("🌲 Bagging (Bootstrap Aggregating)")
+    st.header("Bagging (Bootstrap Aggregating)")
+    
+    st.markdown("""
+    <div class="card">
+    <h3>What is Bagging? 🌲</h3>
+    <p>Bagging (Bootstrap Aggregating) is an ensemble technique that involves training multiple instances 
+    of the same model on different random subsets of the training data and then combining their predictions.</p>
+    
+    <h4>When to use Bagging:</h4>
+    <ul>
+    <li>When you want to reduce variance and overfitting</li>
+    <li>When your base model is sensitive to variations in the training data</li>
+    <li>When you have a complex model with high variance (like decision trees)</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-            <h3>What is Bagging?</h3>
-            <p>Bagging, short for Bootstrap Aggregating, is an ensemble technique that involves training multiple instances 
-            of the same model on different subsets of the training data and then combining their predictions.</p>
-            <p>The key idea is to reduce variance and avoid overfitting by creating multiple versions of the base model 
-            that are different due to the randomness in the bootstrap sampling.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Bagging Works
+
+        Bagging works by following these steps:
+
+        1. Create multiple random subsets (bootstrap samples) of the training data
+        2. Train a base model on each subset
+        3. Combine predictions by voting (classification) or averaging (regression)
+
+        ### Code Example
+        ```python
+        # Using BaggingClassifier with decision trees
+        from sklearn.ensemble import BaggingClassifier
+        from sklearn.tree import DecisionTreeClassifier
+
+        bagging_model = BaggingClassifier(
+            estimator=DecisionTreeClassifier(max_depth=3),
+            n_estimators=100,
+            max_samples=0.8,
+            max_features=0.8,
+            bootstrap=True,
+            random_state=42
+        )
         
-        st.markdown("""
-        <div class="card">
-            <h3>How Bagging Works:</h3>
-            <ol>
-                <li>Create multiple random subsets (bootstrap samples) of the training data</li>
-                <li>Train a base model on each subset</li>
-                <li>Combine predictions by voting (classification) or averaging (regression)</li>
-            </ol>
-            <p>Popular examples include Random Forests, which use bagging with decision trees.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        bagging_model.fit(X_train, y_train)
+        ```
+
+        Popular implementations include Random Forests, which combine bagging with feature randomization.
+        """)
     
     with col2:
+        # Show bagging process image
         st.image("https://miro.medium.com/max/1200/1*_NJ9oPKK1BnCYLMxmVgA_w.png", caption="Bagging Process")
         
         st.markdown("""
         <div class="card">
-            <h3>Advantages of Bagging:</h3>
-            <ul>
-                <li>Reduces variance without increasing bias</li>
-                <li>Reduces overfitting</li>
-                <li>Provides more stable predictions</li>
-                <li>Models can be trained in parallel</li>
-            </ul>
+        <h4>Advantages of Bagging:</h4>
+        <ul>
+        <li>Reduces variance without increasing bias</li>
+        <li>Reduces overfitting</li>
+        <li>Provides more stable predictions</li>
+        <li>Models can be trained in parallel</li>
+        </ul>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Interactive Bagging Demo
     st.subheader("Interactive Bagging Demo")
     
     if st.session_state.X_train is not None:
@@ -438,7 +484,7 @@ with tabs[1]:
                         y=[results["base_accuracy"] * 100, results["bagging_accuracy"] * 100],
                         text=[f'{results["base_accuracy"]:.2%}', f'{results["bagging_accuracy"]:.2%}'],
                         textposition='auto',
-                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["anchor"]]
+                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["teal"]]
                     ))
                     fig.update_layout(
                         title='Model Accuracy Comparison',
@@ -484,7 +530,7 @@ with tabs[1]:
                             y=[results["base_mse"], results["bagging_mse"]],
                             text=[f'{results["base_mse"]:.4f}', f'{results["bagging_mse"]:.4f}'],
                             textposition='auto',
-                            marker_color=[AWS_COLORS["slate"], AWS_COLORS["anchor"]]
+                            marker_color=[AWS_COLORS["slate"], AWS_COLORS["teal"]]
                         ))
                         fig.update_layout(
                             title='Mean Squared Error (Lower is Better)',
@@ -501,7 +547,7 @@ with tabs[1]:
                             y=[results["base_r2"], results["bagging_r2"]],
                             text=[f'{results["base_r2"]:.4f}', f'{results["bagging_r2"]:.4f}'],
                             textposition='auto',
-                            marker_color=[AWS_COLORS["slate"], AWS_COLORS["anchor"]]
+                            marker_color=[AWS_COLORS["slate"], AWS_COLORS["teal"]]
                         ))
                         fig.update_layout(
                             title='R² Score (Higher is Better)',
@@ -539,9 +585,9 @@ with tabs[1]:
             <p>Random Forests are the most popular implementation of bagging. They combine bagging with random feature selection 
             to create diverse decision trees.</p>
             <ul>
-                <li>Used in finance for credit risk assessment</li>
-                <li>Medical diagnosis and disease prediction</li>
-                <li>Customer churn prediction in telecommunications</li>
+            <li>Used in finance for credit risk assessment</li>
+            <li>Medical diagnosis and disease prediction</li>
+            <li>Customer churn prediction in telecommunications</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -552,56 +598,79 @@ with tabs[1]:
             <h3>Pasting</h3>
             <p>A variation of bagging that samples without replacement instead of bootstrap sampling</p>
             <ul>
-                <li>Image classification tasks</li>
-                <li>Text categorization systems</li>
-                <li>Anomaly detection in network security</li>
+            <li>Image classification tasks</li>
+            <li>Text categorization systems</li>
+            <li>Anomaly detection in network security</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
 
-# Boosting Tab
+# Tab 3: Boosting
 with tabs[2]:
-    st.header("🚀 Boosting")
+    st.header("Boosting")
+    
+    st.markdown("""
+    <div class="card">
+    <h3>What is Boosting? 🚀</h3>
+    <p>Boosting is an ensemble technique that combines multiple weak learners into a strong learner by training models 
+    sequentially, with each new model focusing on the errors of the previous ones.</p>
+    
+    <h4>When to use Boosting:</h4>
+    <ul>
+    <li>When you want to reduce bias and improve predictive accuracy</li>
+    <li>When you have a weak model that performs slightly better than random guessing</li>
+    <li>When you need to give more importance to certain observations</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-            <h3>What is Boosting?</h3>
-            <p>Boosting is an ensemble technique that combines multiple weak learners into a strong learner 
-            by training models sequentially, with each new model focusing on the errors of the previous ones.</p>
-            <p>The key idea is to give more weight to observations that were previously misclassified, 
-            forcing subsequent models to focus on difficult cases.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Boosting Works
+
+        Boosting works by following these steps:
+
+        1. Train a base model on the original data
+        2. Identify misclassified instances
+        3. Increase the weight of misclassified instances
+        4. Train a new model on the weighted data
+        5. Continue this process sequentially
+        6. Combine models using weighted voting
+
+        ### Code Example
+        ```python
+        # Using AdaBoost for classification
+        from sklearn.ensemble import AdaBoostClassifier
+        from sklearn.tree import DecisionTreeClassifier
+
+        boosting_model = AdaBoostClassifier(
+            estimator=DecisionTreeClassifier(max_depth=1),
+            n_estimators=50,
+            learning_rate=0.1,
+            random_state=42
+        )
         
-        st.markdown("""
-        <div class="card">
-            <h3>How Boosting Works:</h3>
-            <ol>
-                <li>Train a base model on the original data</li>
-                <li>Identify misclassified instances</li>
-                <li>Increase the weight of misclassified instances</li>
-                <li>Train a new model on the weighted data</li>
-                <li>Continue this process sequentially</li>
-                <li>Combine models using weighted voting</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        boosting_model.fit(X_train, y_train)
+        ```
+
+        Popular boosting algorithms include AdaBoost, Gradient Boosting, XGBoost, and LightGBM.
+        """)
     
     with col2:
+        # Show boosting process image
         st.image("https://miro.medium.com/max/1200/1*Vc4vmEPwQfPP1qkDzFGnMQ.png", caption="Boosting Process")
         
         st.markdown("""
         <div class="card">
-            <h3>Popular Boosting Algorithms:</h3>
-            <ul>
-                <li><strong>AdaBoost:</strong> One of the first boosting algorithms</li>
-                <li><strong>Gradient Boosting:</strong> Uses gradient descent to minimize errors</li>
-                <li><strong>XGBoost:</strong> Optimized implementation with regularization</li>
-                <li><strong>LightGBM:</strong> Faster implementation focused on efficiency</li>
-            </ul>
+        <h4>Advantages of Boosting:</h4>
+        <ul>
+        <li>Often provides higher accuracy than single models</li>
+        <li>Can create strong predictors from relatively weak learners</li>
+        <li>Reduces bias in the learning algorithm</li>
+        <li>Works well on a variety of problems</li>
+        </ul>
         </div>
         """, unsafe_allow_html=True)
     
@@ -755,7 +824,7 @@ with tabs[2]:
                         y=[results["base_accuracy"] * 100, results["boosting_accuracy"] * 100],
                         text=[f'{results["base_accuracy"]:.2%}', f'{results["boosting_accuracy"]:.2%}'],
                         textposition='auto',
-                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["activation"]]
+                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["orange"]]
                     ))
                     fig.update_layout(
                         title='Model Accuracy Comparison',
@@ -773,7 +842,7 @@ with tabs[2]:
                             labels={'x': 'Number of Trees', 'y': 'Accuracy'},
                             title='Learning Curve: Effect of Adding More Trees'
                         )
-                        fig.update_traces(line_color=AWS_COLORS["anchor"])
+                        fig.update_traces(line_color=AWS_COLORS["light_blue"])
                         st.plotly_chart(fig, use_container_width=True)
                     
                 else:  # regression
@@ -784,7 +853,7 @@ with tabs[2]:
                         y=[results["base_mse"], results["boosting_mse"]],
                         text=[f'{results["base_mse"]:.4f}', f'{results["boosting_mse"]:.4f}'],
                         textposition='auto',
-                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["activation"]]
+                        marker_color=[AWS_COLORS["slate"], AWS_COLORS["orange"]]
                     ))
                     fig.update_layout(
                         title='Mean Squared Error (Lower is Better)',
@@ -801,7 +870,7 @@ with tabs[2]:
                             labels={'x': 'Number of Trees', 'y': 'MSE'},
                             title='Learning Curve: Effect of Adding More Trees'
                         )
-                        fig.update_traces(line_color=AWS_COLORS["anchor"])
+                        fig.update_traces(line_color=AWS_COLORS["light_blue"])
                         st.plotly_chart(fig, use_container_width=True)
                 
                 # Feature importance
@@ -815,7 +884,7 @@ with tabs[2]:
                     title='Top 10 Feature Importance',
                     labels={'x': 'Importance', 'y': 'Feature'},
                 )
-                fig.update_traces(marker_color=AWS_COLORS["activation"])
+                fig.update_traces(marker_color=AWS_COLORS["orange"])
                 st.plotly_chart(fig, use_container_width=True)
                 
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -837,9 +906,9 @@ with tabs[2]:
             <p>Adaptive Boosting focuses on misclassified samples by increasing their weights.</p>
             <p><strong>Best for:</strong></p>
             <ul>
-                <li>Datasets with moderate dimensions</li>
-                <li>Problems where interpretability matters</li>
-                <li>Clean datasets with minimal noise</li>
+            <li>Datasets with moderate dimensions</li>
+            <li>Problems where interpretability matters</li>
+            <li>Clean datasets with minimal noise</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -851,9 +920,9 @@ with tabs[2]:
             <p>Uses gradient descent optimization to minimize the loss function.</p>
             <p><strong>Best for:</strong></p>
             <ul>
-                <li>Regression problems</li>
-                <li>Complex relationships in data</li>
-                <li>Datasets where you need very high accuracy</li>
+            <li>Regression problems</li>
+            <li>Complex relationships in data</li>
+            <li>Datasets where you need very high accuracy</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -865,67 +934,84 @@ with tabs[2]:
             <p>Optimized implementations with advanced regularization and efficiency features.</p>
             <p><strong>Best for:</strong></p>
             <ul>
-                <li>Production systems that need high performance</li>
-                <li>Large-scale machine learning problems</li>
-                <li>Kaggle competitions and real-world applications</li>
+            <li>Production systems that need high performance</li>
+            <li>Large-scale machine learning problems</li>
+            <li>Kaggle competitions and real-world applications</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
+# Tab 4: Stacking
+with tabs[3]:
+    st.header("Stacking (Stacked Generalization)")
     
     st.markdown("""
     <div class="card">
-        <h3>Real-World Applications:</h3>
-        <ul>
-            <li><strong>Finance:</strong> Credit scoring, fraud detection, stock price prediction</li>
-            <li><strong>Retail:</strong> Sales forecasting, customer segmentation, recommendation systems</li>
-            <li><strong>Healthcare:</strong> Disease prediction, patient risk stratification</li>
-            <li><strong>Marketing:</strong> Click-through rate prediction, customer churn prediction</li>
-        </ul>
+    <h3>What is Stacking? 🏗️</h3>
+    <p>Stacking, or Stacked Generalization, is an ensemble technique that combines multiple classification or 
+    regression models via a meta-model. The base models are trained on the original dataset, then 
+    a meta-model is trained on the outputs of the base models.</p>
+    
+    <h4>When to use Stacking:</h4>
+    <ul>
+    <li>When you have diverse models that perform well on different subsets of data</li>
+    <li>When you're looking for the best possible predictive performance</li>
+    <li>When you have enough data to train multiple models and a meta-model</li>
+    </ul>
     </div>
     """, unsafe_allow_html=True)
-
-# Stacking Tab
-with tabs[3]:
-    st.header("🏗️ Stacking (Stacked Generalization)")
     
     col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-            <h3>What is Stacking?</h3>
-            <p>Stacking, or Stacked Generalization, is an ensemble technique that combines multiple classification or 
-            regression models via a meta-model. The base models are trained on the original dataset, then 
-            a meta-model is trained on the outputs of the base models.</p>
-            <p>Unlike bagging and boosting, stacking uses different types of models and combines them using another learning algorithm.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Stacking Works
+
+        Stacking works by following these steps:
+
+        1. Split the dataset into training and validation sets
+        2. Train multiple base models on the training data
+        3. Make predictions on the validation data with each base model
+        4. Use these predictions as features for a meta-model
+        5. Train the meta-model to optimally combine the base models
+
+        ### Code Example
+        ```python
+        # Using StackingClassifier
+        from sklearn.ensemble import StackingClassifier
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.svm import SVC
+
+        estimators = [
+            ('rf', RandomForestClassifier(n_estimators=100)),
+            ('svc', SVC(probability=True)),
+            ('gb', GradientBoostingClassifier())
+        ]
+
+        stacking_model = StackingClassifier(
+            estimators=estimators,
+            final_estimator=LogisticRegression(),
+            cv=5
+        )
         
-        st.markdown("""
-        <div class="card">
-            <h3>How Stacking Works:</h3>
-            <ol>
-                <li>Split the dataset into training and validation sets</li>
-                <li>Train multiple base models on the training data</li>
-                <li>Make predictions on the validation data with each base model</li>
-                <li>Use these predictions as features for a meta-model</li>
-                <li>Train the meta-model to optimally combine the base models</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        stacking_model.fit(X_train, y_train)
+        ```
+        """)
     
     with col2:
+        # Show stacking architecture image
         st.image("https://miro.medium.com/max/1400/1*7WySMBrq9A13Zkq7Q_o3uw.jpeg", caption="Stacking Architecture")
         
         st.markdown("""
         <div class="card">
-            <h3>Advantages of Stacking:</h3>
-            <ul>
-                <li>Leverages strengths of different algorithms</li>
-                <li>Often provides better predictions than any single model</li>
-                <li>Reduces the risk of selecting the wrong model</li>
-                <li>Can capture different aspects of the underlying patterns</li>
-            </ul>
+        <h4>Advantages of Stacking:</h4>
+        <ul>
+        <li>Leverages strengths of different algorithms</li>
+        <li>Often provides better predictions than any single model</li>
+        <li>Reduces the risk of selecting the wrong model</li>
+        <li>Can capture different aspects of the underlying patterns</li>
+        </ul>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1102,7 +1188,7 @@ with tabs[3]:
                     scores = list(all_scores.values())
                     
                     # Highlight stacking model with different color
-                    colors = [AWS_COLORS["anchor"] if model != "stacking" else AWS_COLORS["activation"] for model in models]
+                    colors = [AWS_COLORS["light_blue"] if model != "stacking" else AWS_COLORS["green"] for model in models]
                     
                     fig = go.Figure()
                     fig.add_trace(go.Bar(
@@ -1148,7 +1234,7 @@ with tabs[3]:
                     r2_scores = list(all_scores_r2.values())
                     
                     # Highlight stacking model with different color
-                    colors = [AWS_COLORS["anchor"] if model != "stacking" else AWS_COLORS["activation"] for model in models]
+                    colors = [AWS_COLORS["light_blue"] if model != "stacking" else AWS_COLORS["green"] for model in models]
                     
                     # MSE comparison
                     fig = go.Figure()
@@ -1214,10 +1300,10 @@ with tabs[3]:
         <div class="card">
             <h3>When to Use Stacking</h3>
             <ul>
-                <li>When you have models with complementary strengths</li>
-                <li>For critical applications where accuracy is paramount</li>
-                <li>In competitions like Kaggle, where small improvements matter</li>
-                <li>When you have sufficient data to train multiple models</li>
+            <li>When you have models with complementary strengths</li>
+            <li>For critical applications where accuracy is paramount</li>
+            <li>In competitions like Kaggle, where small improvements matter</li>
+            <li>When you have sufficient data to train multiple models</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -1227,47 +1313,19 @@ with tabs[3]:
         <div class="card">
             <h3>Real-World Applications</h3>
             <ul>
-                <li><strong>Healthcare:</strong> Combining multiple diagnostic models for better disease prediction</li>
-                <li><strong>Finance:</strong> Credit default prediction with multiple risk assessments</li>
-                <li><strong>Natural Language Processing:</strong> Ensemble of different text classifiers</li>
-                <li><strong>Computer Vision:</strong> Combining different object detection approaches</li>
+            <li><strong>Healthcare:</strong> Combining multiple diagnostic models for better disease prediction</li>
+            <li><strong>Finance:</strong> Credit default prediction with multiple risk assessments</li>
+            <li><strong>Natural Language Processing:</strong> Ensemble of different text classifiers</li>
+            <li><strong>Computer Vision:</strong> Combining different object detection approaches</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-        <h3>Tips for Effective Stacking:</h3>
-        <ol>
-            <li><strong>Use diverse base models</strong> that capture different aspects of the data</li>
-            <li><strong>Include both high-bias and high-variance models</strong> in your ensemble</li>
-            <li><strong>Use cross-validation</strong> when generating meta-features to avoid overfitting</li>
-            <li><strong>Consider feature selection</strong> to reduce dimensionality at the meta-level</li>
-            <li><strong>Start simple</strong> with a linear meta-model before trying more complex approaches</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center">
-    <p>Ensemble Learning Explorer | Created with ❤️ using Streamlit | 2023</p>
+    <p>© 2023 Ensemble Learning Explorer | Created with Streamlit</p>
+    <p><small>For educational purposes only</small></p>
 </div>
 """, unsafe_allow_html=True)
-# ```
-
-# This Streamlit application provides a comprehensive and interactive exploration of ensemble learning techniques with the following features:
-
-# 1. **Modern UI with tab-based navigation** using emojis (🏠 Home, 🌲 Bagging, 🚀 Boosting, 🏗️ Stacking)
-# 2. **Session management** in the sidebar allowing users to reset their session
-# 3. **Interactive data generation** with options for classification and regression tasks
-# 4. **Detailed explanations** of each ensemble method with visuals and real-world applications
-# 5. **Interactive examples** where users can:
-#    - Select different parameters
-#    - Train models
-#    - Visualize results with modern charts and comparisons
-# 6. **Engaging visuals** using Plotly for interactive charts with the AWS color scheme
-# 7. **Helpful insights** about when and how to use each technique
-
-# The application has been optimized for web responsiveness with clean layouts and mobile-friendly design principles. It's structured to provide a seamless learning experience while allowing users to experiment with different ensemble techniques and see their effects on model performance.

@@ -140,7 +140,7 @@ with st.sidebar:
 
 # Main content
 st.title("Machine Learning Encoding Techniques")
-st.markdown("#### An Interactive Guide to Converting Categorical Data for ML Models")
+# st.markdown("#### An Interactive Guide to Converting Categorical Data for ML Models")
 
 st.markdown("""
 <div class="card">

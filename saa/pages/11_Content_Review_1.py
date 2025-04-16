@@ -7,6 +7,23 @@ from io import BytesIO
 import json
 import random
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
+import altair as alt
+import uuid
+
+# Define AWS color scheme
+AWS_COLORS = {
+    "primary": "#232F3E",     # AWS Navy
+    "secondary": "#FF9900",   # AWS Orange
+    "light": "#FFFFFF",       # White
+    "dark_gray": "#545B64",   # Dark Gray
+    "light_gray": "#D5DBDB",  # Light Gray
+    "success": "#008296",     # Teal
+    "warning": "#EC7211",     # Orange
+    "error": "#D13212",       # Red
+    "info": "#1E88E5",        # Blue
+}
 
 # Set page configuration
 st.set_page_config(
@@ -16,12 +33,292 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Apply AWS color scheme with CSS
+st.markdown(f"""
+<style>
+    /* Main colors */
+    :root {{
+        --primary: {AWS_COLORS["primary"]};
+        --secondary: {AWS_COLORS["secondary"]};
+        --light: {AWS_COLORS["light"]};
+        --dark-gray: {AWS_COLORS["dark_gray"]};
+        --light-gray: {AWS_COLORS["light_gray"]};
+        --success: {AWS_COLORS["success"]};
+        --warning: {AWS_COLORS["warning"]};
+        --error: {AWS_COLORS["error"]};
+        --info: {AWS_COLORS["info"]};
+    }}
+    
+    /* General styling */
+    .stApp {{
+        background-color: var(--light);
+    }}
+    
+    .main {{
+        background-color: var(--light);
+    }}
+    
+    h1, h2, h3, h4 {{
+        color: var(--primary);
+        font-family: 'Amazon Ember', 'Helvetica Neue', Arial, sans-serif;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        background-color: var(--light-gray);
+        border-radius: 4px 4px 0px 0px;
+        padding: 10px 20px;
+        height: 50px;
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {{
+        background-color: var(--secondary);
+        color: var(--light);
+    }}
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {{
+        background-color: var(--light);
+        padding: 1rem;
+    }}
+    
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+        color: var(--primary);
+    }}
+    
+    /* Card styling */
+    .aws-card {{
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }}
+    
+    .aws-info-card {{
+        background-color: #f0f7fb;
+        border-left: 5px solid var(--info);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-warning-card {{
+        background-color: #fff8f0;
+        border-left: 5px solid var(--warning);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-success-card {{
+        background-color: #f0f9f8;
+        border-left: 5px solid var(--success);
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }}
+    
+    .aws-feature-card {{
+        background-color: white;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .aws-feature-card:hover {{
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }}
+    
+    /* Button styling */
+    .stButton>button {{
+        background-color: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 600;
+    }}
+    
+    .stButton>button:hover {{
+        background-color: #e67e00;
+    }}
+    
+    /* Table styling */
+    .dataframe {{
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+    }}
+    
+    .dataframe th {{
+        background-color: var(--primary);
+        color: white;
+        text-align: left;
+        padding: 12px 8px;
+    }}
+    
+    .dataframe td {{
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }}
+    
+    .dataframe tr:nth-child(even) {{
+        background-color: #f2f2f2;
+    }}
+    
+    /* Progress indicators */
+    .stProgress > div > div > div > div {{
+        background-color: var(--secondary);
+    }}
+    
+    /* Alert boxes */
+    .alert-success {{
+        background-color: #e6f4f1;
+        color: var(--success);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-warning {{
+        background-color: #fdf2e9;
+        color: var(--warning);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-error {{
+        background-color: #fdedec;
+        color: var(--error);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    .alert-info {{
+        background-color: #e8f4f8;
+        color: var(--info);
+        padding: 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+    }}
+    
+    /* Topic icons */
+    .topic-icon {{
+        font-size: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }}
+    
+    /* Footer */
+    .footer {{
+        text-align: center;
+        padding: 20px 0;
+        font-size: 12px;
+        color: var(--dark-gray);
+        border-top: 1px solid var(--light-gray);
+        margin-top: 40px;
+    }}
+    
+    /* Sidebar buttons */
+    .sidebar-button {{
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        text-align: left;
+        width: 100%;
+        margin: 5px 0;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }}
+    
+    .sidebar-button:hover {{
+        background-color: rgba(255, 255, 255, 0.2);
+    }}
+    
+    .sidebar-button.active {{
+        background-color: var(--secondary);
+    }}
+    
+    /* Knowledge Check Section */
+    .quiz-section {{
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--light-gray);
+    }}
+    
+    .quiz-section h4 {{
+        border-bottom: 1px solid var(--light-gray);
+        padding-bottom: 10px;
+    }}
+    
+    .quiz-header {{
+        background-color: var(--secondary);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px 5px 0 0;
+        margin-bottom: 0;
+    }}
+    
+    .quiz-container {{
+        border: 1px solid var(--secondary);
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }}
+    
+    .quiz-body {{
+        padding: 15px;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
+# Initialize session state
+def init_session_state():
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    
+    # Initialize tracking for quizzes
+    if "quiz_scores" not in st.session_state:
+        st.session_state.quiz_scores = {}
+    
+    if "quiz_attempted" not in st.session_state:
+        st.session_state.quiz_attempted = {}
+    
+    if "quiz_answers" not in st.session_state:
+        st.session_state.quiz_answers = {}
+
+# Reset session state
+def reset_session():
+    for key in list(st.session_state.keys()):
+        if key != "session_id":
+            del st.session_state[key]
+    init_session_state()
+    st.success("✅ Session data has been reset successfully!")
+
+# Initialize session state at app startup
+init_session_state()
+
 # Function to load and cache images from URL
 @st.cache_data
 def load_image_from_url(url):
-    response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
-    return img
+    try:
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        return img
+    except Exception as e:
+        st.warning(f"Could not load image: {str(e)}")
+        return None
 
 # Define AWS stock images URLs
 aws_images = {
@@ -36,7 +333,7 @@ aws_images = {
     "sts": "https://d1.awsstatic.com/security-center/Security-STS.58d8dc26b43b2d5e5a3312afd45d02869a1e7577.png",
 }
 
-# Scenario-based quiz questions
+# Scenario-based quiz questions (using from the original code)
 quiz_data = {
     "global_infrastructure": [
         {
@@ -95,7 +392,6 @@ quiz_data = {
             "answer": "Deploy the application across multiple Availability Zones in a single Region"
         }
     ],
-    
     "cloudfront": [
         {
             "question": "An international news website experiences traffic spikes when breaking news occurs. The site consists of static HTML, CSS, JavaScript files, and dynamic API calls to fetch personalized content. Users have reported slow page loads during high-traffic events. Which CloudFront configuration would BEST improve performance while managing costs?",
@@ -153,7 +449,6 @@ quiz_data = {
             "answer": "Use MediaLive to encode streams, MediaStore as origin, and CloudFront with real-time logging and minimal TTL settings"
         }
     ],
-    
     "iam": [
         {
             "question": "A large enterprise is implementing a new AWS environment and needs to design their IAM strategy. They have multiple departments with different access requirements, and security audit requirements mandate separation of duties and least privilege access. Which approach should they take?",
@@ -211,7 +506,6 @@ quiz_data = {
             "answer": "Set up AWS IAM Identity Center (successor to AWS SSO) integrated with AWS Managed Microsoft AD, create permission sets aligned with job functions, and map to appropriate OUs in the directory"
         }
     ],
-    
     "iam_policies": [
         {
             "question": "A security team needs to implement a policy that allows developers to create and manage EC2 instances but prevents them from stopping or terminating instances tagged as 'Environment: Production'. Which policy statement would accomplish this requirement?",
@@ -269,7 +563,6 @@ quiz_data = {
             "answer": "Create a customer managed policy that allows athena:StartQueryExecution and athena:GetQueryResults, but denies s3:PutObject and glue:UpdateTable, and use Lake Formation for fine-grained access control on the underlying data"
         }
     ],
-    
     "s3": [
         {
             "question": "A video streaming service stores original high-resolution video files that are rarely accessed after the initial processing but must be retained indefinitely for legal reasons. The files average 10GB in size, and about 100 new videos are added daily. Which S3 storage class and lifecycle configuration would be most cost-effective while maintaining compliance requirements?",
@@ -327,7 +620,6 @@ quiz_data = {
             "answer": "Implement server-side encryption with KMS customer managed keys, enable S3 Access Logs to a separate logging bucket, enable Versioning, implement MFA Delete, and configure appropriate bucket policies and IAM policies"
         }
     ],
-    
     "organizations": [
         {
             "question": "A company is designing their AWS Organizations structure for their expanding cloud footprint. They have development, testing, and production workloads, along with separate teams for security, networking, and operations. Which organizational structure would provide the best balance of governance and flexibility?",
@@ -385,7 +677,6 @@ quiz_data = {
             "answer": "Create a dedicated security account, enable organization-wide features for AWS Config, GuardDuty, and Security Hub with delegated administration to the security account, implement SCPs to prevent disabling these services, and establish automated remediation workflows"
         }
     ],
-    
     "sts": [
         {
             "question": "A company uses AWS Organizations with multiple accounts. A data analytics team needs temporary access to data stored in S3 buckets across different accounts for processing. The security team requires that all access be logged and credentials should expire after the minimum necessary time. Which approach provides the most secure cross-account access?",
@@ -445,59 +736,135 @@ quiz_data = {
     ]
 }
 
-# Function to display quiz
-def display_quiz(topic):
-    if topic in quiz_data and quiz_data[topic]:
-        st.subheader("💡 Scenario-Based Knowledge Check")
+# Function to create a pretty chart for quiz results
+def create_quiz_results_chart():
+    if not st.session_state.quiz_attempted:
+        return None
         
-        # Initialize session state for quiz results if not exists
-        if f"{topic}_score" not in st.session_state:
-            st.session_state[f"{topic}_score"] = 0
-            st.session_state[f"{topic}_attempted"] = 0
-            st.session_state[f"{topic}_answers"] = {}
+    # Prepare data for visualization
+    topics = []
+    scores = []
+    attempted = []
+    
+    for topic, attempted_count in st.session_state.quiz_attempted.items():
+        if attempted_count > 0:
+            topics.append(topic.upper())
+            scores.append(st.session_state.quiz_scores.get(topic, 0))
+            attempted.append(attempted_count)
+    
+    if not topics:  # No quiz data yet
+        return None
+    
+    # Create a DataFrame for the chart
+    data = {
+        'Topic': topics,
+        'Correct': scores,
+        'Attempted': attempted
+    }
+    df = pd.DataFrame(data)
+    
+    # Calculate percentage correct
+    df['Percentage'] = (df['Correct'] / df['Attempted'] * 100).round(0).astype(int)
+    
+    # Create a bar chart with Altair
+    source = pd.melt(df, id_vars=['Topic', 'Percentage'], value_vars=['Correct', 'Attempted'], 
+                  var_name='Type', value_name='Questions')
+    
+    chart = alt.Chart(source).mark_bar().encode(
+        x=alt.X('Topic:N', sort=None, title=None),
+        y=alt.Y('Questions:Q', title='Questions'),
+        color=alt.Color('Type:N', scale=alt.Scale(
+            domain=['Correct', 'Attempted'],
+            range=[AWS_COLORS["success"], AWS_COLORS["light_gray"]]
+        )),
+        tooltip=['Topic', 'Type', 'Questions', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    ).properties(
+        title='Quiz Results by Topic',
+        height=350
+    )
+    
+    text = alt.Chart(df).mark_text(
+        align='center',
+        baseline='bottom',
+        dy=-5,
+        color='black',
+        fontSize=14
+    ).encode(
+        x='Topic:N',
+        y=alt.Y('Attempted:Q'),
+        text=alt.Text('Percentage:Q', format='.0f', title='Success Rate %'),
+        tooltip=['Topic', 'Correct', 'Attempted', alt.Tooltip('Percentage:Q', title='Success Rate %')]
+    )
+    
+    return (chart + text).interactive()
+
+# Function to handle quiz in knowledge checks page
+def handle_quiz(topic, index, quiz):
+    question = quiz["question"]
+    options = quiz["options"]
+    correct_answer = quiz["answer"]
+    
+    # Create a unique key for each quiz component
+    question_key = f"{topic}_{index}"
+    radio_key = f"{topic}_radio_{index}"
+    check_key = f"check_{topic}_{index}"
+    
+    # Create a container for this quiz question
+    with st.container():
+        st.markdown(f"""
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h4>{topic.upper()} - Scenario {index+1}</h4>
+            </div>
+            <div class="quiz-body">
+                <p>{question}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Display each quiz question
-        for i, quiz in enumerate(quiz_data[topic]):
-            question = quiz["question"]
-            options = quiz["options"]
-            correct_answer = quiz["answer"]
-            
-            st.write(f"**Scenario {i+1}:** {question}")
-            
-            # Create a unique key for each radio button
-            key = f"{topic}_quiz_{i}"
-            answer_key = f"{topic}_answer_{i}"
-            
-            # Display radio buttons for quiz options
-            selected_answer = st.radio(
-                "Select your answer:",
-                options,
-                key=key,
-                index=None
-            )
-            
-            # Check button
-            check_key = f"check_{topic}_{i}"
-            
-            if st.button("Check Answer", key=check_key):
+        # Display radio buttons for options
+        selected_answer = st.radio(
+            "Select your answer:",
+            options,
+            key=radio_key,
+            index=None
+        )
+        
+        # Check button
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            check_clicked = st.button("Check Answer", key=check_key)
+        
+        # Result display
+        with col2:
+            if check_clicked:
                 if selected_answer is None:
                     st.warning("Please select an answer first.")
                 else:
-                    st.session_state[f"{topic}_attempted"] += 1
-                    if selected_answer == correct_answer:
+                    # Initialize topic in session state if it doesn't exist
+                    if topic not in st.session_state.quiz_attempted:
+                        st.session_state.quiz_attempted[topic] = 0
+                    if topic not in st.session_state.quiz_scores:
+                        st.session_state.quiz_scores[topic] = 0
+                    
+                    # Check if this specific question has been answered correctly before
+                    answer_key = f"{topic}_answer_{index}"
+                    already_correct = st.session_state.quiz_answers.get(answer_key, False)
+                    
+                    # Update tracking
+                    st.session_state.quiz_attempted[topic] += 1
+                    
+                    if selected_answer == correct_answer and not already_correct:
                         st.success(f"✅ Correct! {correct_answer} is the right answer.")
-                        if answer_key not in st.session_state[f"{topic}_answers"] or not st.session_state[f"{topic}_answers"][answer_key]:
-                            st.session_state[f"{topic}_score"] += 1
-                            st.session_state[f"{topic}_answers"][answer_key] = True
+                        st.session_state.quiz_scores[topic] += 1
+                        st.session_state.quiz_answers[answer_key] = True
+                    elif selected_answer == correct_answer and already_correct:
+                        st.success(f"✅ Correct! {correct_answer} is the right answer.")
                     else:
                         st.error(f"❌ Incorrect. The correct answer is: {correct_answer}")
-                        st.session_state[f"{topic}_answers"][answer_key] = False
-            
-            st.divider()
+                        st.session_state.quiz_answers[answer_key] = False
         
-        # Display score if any questions have been attempted
-        if st.session_state[f"{topic}_attempted"] > 0:
-            st.info(f"Your score: {st.session_state[f'{topic}_score']} out of {st.session_state[f'{topic}_attempted']} questions attempted")
+        st.divider()
 
 # Function for home page
 def home_page():
@@ -505,7 +872,9 @@ def home_page():
     
     with col1:
         try:
-            st.image(aws_images["home"], width=300)
+            image = load_image_from_url(aws_images["home"])
+            if image:
+                st.image(image, width=300)
         except:
             st.error("Unable to load image")
     
@@ -514,262 +883,521 @@ def home_page():
         st.header("Content Review – Session 1")
         st.markdown("""
         Welcome to the AWS Partner Certification Readiness program. This interactive guide will help you prepare 
-        for the Solutions Architect - Associate certification. Navigate through the topics using the sidebar menu.
+        for the Solutions Architect - Associate certification. Navigate through the topics using the tabs above.
         
-        Each section contains key concepts, important takeaways, and interactive quizzes to reinforce your learning.
-        
-        **Topics covered:**
-        - AWS Global Infrastructure
-        - Amazon CloudFront
-        - Identity and Access Management (IAM)
-        - IAM Policies
-        - Amazon S3
-        - AWS Organizations
-        - Security Token Service (STS)
+        Each section contains key concepts and important takeaways. Test your understanding with the Knowledge Checks tab.
         """)
     
-    st.info("""
-    **Certification Preparation Tip:** Practice hands-on with the services covered in this guide. 
-    The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services 
-    and how they can be used together to design resilient, cost-effective solutions.
-    """)
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Topics covered</h3>
+        <p>
+            • AWS Global Infrastructure<br>
+            • Amazon CloudFront<br>
+            • Identity and Access Management (IAM)<br>
+            • IAM Policies<br>
+            • Amazon S3<br>
+            • AWS Organizations<br>
+            • Security Token Service (STS)
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Display tips
+    st.markdown("""
+    <div class="aws-card">
+        <h3>📝 Certification Preparation Tips</h3>
+        <p>Practice hands-on with the services covered in this guide. The AWS Solutions Architect - Associate exam focuses on practical knowledge of AWS services and how they can be used together to design resilient, cost-effective solutions.</p>
+        <ul>
+            <li><strong>Focus on scenario-based learning:</strong> The exam tests your ability to apply AWS services to real-world scenarios</li>
+            <li><strong>Understand service integrations:</strong> Know how different AWS services work together</li>
+            <li><strong>Master IAM concepts:</strong> Security and access control are critical components of the exam</li>
+            <li><strong>Know global infrastructure:</strong> Understand regions, availability zones, and edge locations</li>
+            <li><strong>Practice with hands-on labs:</strong> Reinforce concepts with practical experience</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Overview section
+    st.header("Overview")
+    
+    # Create a grid of service cards
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🌐 Global Infrastructure</h4>
+            <ul>
+                <li><strong>Regions:</strong> Physical locations around the world</li>
+                <li><strong>Availability Zones:</strong> Isolated data centers in a region</li>
+                <li><strong>Edge Locations:</strong> Content delivery network endpoints</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🔐 Identity & Access Management</h4>
+            <ul>
+                <li><strong>Users & Groups:</strong> Entity management</li>
+                <li><strong>Roles:</strong> Temporary security credentials</li>
+                <li><strong>Policies:</strong> Define permissions for resources</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🗄️ Amazon S3</h4>
+            <ul>
+                <li><strong>Storage Classes:</strong> Options for different use cases</li>
+                <li><strong>Security Features:</strong> Encryption, policies, and access control</li>
+                <li><strong>Performance:</strong> Transfer acceleration and multi-part uploads</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🌍 Amazon CloudFront</h4>
+            <ul>
+                <li><strong>Content Delivery:</strong> Global distribution of content</li>
+                <li><strong>Origin Shield:</strong> Reducing load on origin servers</li>
+                <li><strong>Security:</strong> Protecting content and applications</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Function for Global Infrastructure page
 def global_infrastructure_page():
     st.title("AWS Global Infrastructure")
     
     try:
-        st.image(aws_images["global_infrastructure"], width=800)
+        image = load_image_from_url(aws_images["global_infrastructure"])
+        if image:
+            st.image(image, width=800)
     except:
         st.warning("Image could not be displayed")
     
     st.header("AWS Regions")
     st.markdown("""
     A physical location around the world where AWS clusters data centers.
-    
-    **Key Points:**
-    - Each AWS Region consists of multiple, isolated, and physically separate Availability Zones
-    - Currently 34 AWS Regions worldwide with 99+ Availability Zones
-    - Factors to consider when selecting a Region:
-      - **Compliance:** Local regulations and data residency laws
-      - **Latency:** Proximity to users for better experience
-      - **Cost:** Pricing varies between Regions
-      - **Service availability:** Newer services and features may not be available in all Regions
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Points</h3>
+        <ul>
+            <li>Each AWS Region consists of multiple, isolated, and physically separate Availability Zones</li>
+            <li>Currently 34 AWS Regions worldwide with 99+ Availability Zones</li>
+            <li>Factors to consider when selecting a Region:
+                <ul>
+                    <li><strong>Compliance:</strong> Local regulations and data residency laws</li>
+                    <li><strong>Latency:</strong> Proximity to users for better experience</li>
+                    <li><strong>Cost:</strong> Pricing varies between Regions</li>
+                    <li><strong>Service availability:</strong> Newer services and features may not be available in all Regions</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Availability Zones (AZs)")
     
     try:
-        st.image(aws_images["regions"], width=700)
+        image = load_image_from_url(aws_images["regions"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
         
     st.markdown("""
     One or more discrete data centers with redundant power, networking, and connectivity in an AWS Region.
-    
-    **Key Points:**
-    - AZs are physically separated (several kilometers apart, but within 100km)
-    - Connected via low-latency, high-bandwidth, redundant networking
-    - Enable high availability through multi-AZ deployments
-    - Protect applications from datacenter-level failures
-    
-    **Service Scopes:**
-    - **Zonal services:** Resources tied to specific AZs (EC2 instances, RDS, etc.)
-    - **Regional services:** Automatically span multiple AZs (S3, DynamoDB, etc.)
-    - **Global services:** Single instance serving all regions (IAM, Route 53, CloudFront)
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Points</h3>
+        <ul>
+            <li>AZs are physically separated (several kilometers apart, but within 100km)</li>
+            <li>Connected via low-latency, high-bandwidth, redundant networking</li>
+            <li>Enable high availability through multi-AZ deployments</li>
+            <li>Protect applications from datacenter-level failures</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Service Scopes</h3>
+        <ul>
+            <li><strong>Zonal services:</strong> Resources tied to specific AZs (EC2 instances, RDS, etc.)</li>
+            <li><strong>Regional services:</strong> Automatically span multiple AZs (S3, DynamoDB, etc.)</li>
+            <li><strong>Global services:</strong> Single instance serving all regions (IAM, Route 53, CloudFront)</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Points of Presence (PoP)")
     st.markdown("""
     Edge locations and regional edge caches that bring content closer to end users.
-    
-    **Key Points:**
-    - 600+ Edge Locations and 13 regional mid-tier regional cache servers worldwide
-    - Enable Amazon CloudFront to deliver content with low latency
-    - Used by CloudFront, Route 53, AWS WAF, and AWS Shield
-    - Help reduce latency for global users by caching content closer to them
     """)
     
-    display_quiz("global_infrastructure")
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Points</h3>
+        <ul>
+            <li>600+ Edge Locations and 13 regional mid-tier regional cache servers worldwide</li>
+            <li>Enable Amazon CloudFront to deliver content with low latency</li>
+            <li>Used by CloudFront, Route 53, AWS WAF, and AWS Shield</li>
+            <li>Help reduce latency for global users by caching content closer to them</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for CloudFront page
 def cloudfront_page():
     st.title("Amazon CloudFront")
     
     try:
-        st.image(aws_images["cloudfront"], width=800)
+        image = load_image_from_url(aws_images["cloudfront"])
+        if image:
+            st.image(image, width=800)
     except:
         st.warning("Image could not be displayed")
     
     st.header("Content Delivery Network (CDN)")
     st.markdown("""
     Amazon CloudFront is a fast content delivery network (CDN) service that securely delivers data, videos, applications, and APIs to customers globally with low latency and high transfer speeds.
-    
-    **Key Benefits:**
-    - **Improved Performance:** Delivers content from edge locations closest to users
-    - **High Availability:** Built on AWS's global infrastructure
-    - **Cost-Effective:** Pay only for the content delivered
-    - **Security Integration:** Works with AWS Shield, AWS WAF, and Route 53
-    - **Programmable:** Customize with Lambda@Edge
-    
-    **How CloudFront Works:**
-    1. User requests content from your website/application
-    2. DNS routes request to nearest CloudFront edge location
-    3. CloudFront checks its cache for requested object
-    4. If object is in cache, CloudFront returns it to user
-    5. If not in cache, CloudFront forwards request to origin server
-    6. Origin server sends object to edge location
-    7. CloudFront delivers object to user and caches it for future requests
     """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🚀 Key Benefits</h4>
+            <ul>
+                <li><strong>Improved Performance:</strong> Delivers content from edge locations closest to users</li>
+                <li><strong>High Availability:</strong> Built on AWS's global infrastructure</li>
+                <li><strong>Cost-Effective:</strong> Pay only for the content delivered</li>
+                <li><strong>Security Integration:</strong> Works with AWS Shield, AWS WAF, and Route 53</li>
+                <li><strong>Programmable:</strong> Customize with Lambda@Edge</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🔄 How CloudFront Works</h4>
+            <ol>
+                <li>User requests content from your website/application</li>
+                <li>DNS routes request to nearest CloudFront edge location</li>
+                <li>CloudFront checks its cache for requested object</li>
+                <li>If object is in cache, CloudFront returns it to user</li>
+                <li>If not in cache, CloudFront forwards request to origin server</li>
+                <li>Origin server sends object to edge location</li>
+                <li>CloudFront delivers object to user and caches it for future requests</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Regional Edge Caches")
     st.markdown("""
     Regional edge caches sit between your origin servers and global edge locations.
-    
-    **Key Points:**
-    - Larger than individual edge locations
-    - Help cache content that isn't popular enough to stay at edge locations
-    - Reduce load on origin servers
-    - Content stays in regional edge caches longer
-    - Particularly useful for:
-      - User-generated content
-      - E-commerce assets
-      - News and event-related content
-    
-    **How Regional Edge Caches Work:**
-    1. If content isn't at the edge location, request goes to nearest regional edge cache
-    2. If content is at regional edge cache, it's forwarded to the edge location
-    3. If not at regional cache, request goes to origin server
-    4. Content is cached at both regional edge cache and edge location for future requests
     """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h3>Key Points</h3>
+            <ul>
+                <li>Larger than individual edge locations</li>
+                <li>Help cache content that isn't popular enough to stay at edge locations</li>
+                <li>Reduce load on origin servers</li>
+                <li>Content stays in regional edge caches longer</li>
+                <li>Particularly useful for:
+                    <ul>
+                        <li>User-generated content</li>
+                        <li>E-commerce assets</li>
+                        <li>News and event-related content</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h3>How Regional Edge Caches Work</h3>
+            <ol>
+                <li>If content isn't at the edge location, request goes to nearest regional edge cache</li>
+                <li>If content is at regional edge cache, it's forwarded to the edge location</li>
+                <li>If not at regional cache, request goes to origin server</li>
+                <li>Content is cached at both regional edge cache and edge location for future requests</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Key Features")
-    st.markdown("""
-    - **Origin Shield:** Additional caching layer to reduce load on origins
-    - **Cache Behaviors:** Different caching strategies for different content paths
-    - **Security Features:** 
-      - Origin Access Identity (OAI)
-      - Signed URLs and Cookies for private content
-      - Field-level encryption
-    - **Real-time Logs:** Monitor and analyze viewer behavior
-    - **Edge Computing:** Lambda@Edge for customized content delivery
-    """)
     
-    display_quiz("cloudfront")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🛡️ Security Features</h4>
+            <ul>
+                <li>Origin Access Identity (OAI)</li>
+                <li>Signed URLs and Cookies for private content</li>
+                <li>Field-level encryption</li>
+                <li>AWS WAF integration</li>
+                <li>AWS Shield integration</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>⚙️ Performance Features</h4>
+            <ul>
+                <li>Origin Shield</li>
+                <li>Cache behaviors</li>
+                <li>Compression support</li>
+                <li>HTTP/2 and HTTP/3 support</li>
+                <li>Origin failover</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>📊 Monitoring & Customization</h4>
+            <ul>
+                <li>Real-time logs</li>
+                <li>Lambda@Edge</li>
+                <li>CloudFront Functions</li>
+                <li>Origin request policies</li>
+                <li>Cache key policies</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-warning-card">
+        <h4>Important Consideration</h4>
+        <p>When using CloudFront with an S3 origin, it's best practice to use Origin Access Identity (OAI) or Origin Access Control (OAC) to restrict access to the S3 bucket, ensuring users can only access content through CloudFront and not directly from S3.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function for IAM page
 def iam_page():
     st.title("Identity and Access Management (IAM)")
     
     try:
-        st.image(aws_images["iam"], width=700)
+        image = load_image_from_url(aws_images["iam"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("What is IAM?")
     st.markdown("""
     AWS Identity and Access Management (IAM) helps you securely control access to AWS resources by managing who is authenticated and authorized to use them.
-    
-    **Key Concepts:**
-    - **Authentication:** Verifying identity (who you are)
-    - **Authorization:** Determining access rights (what you can do)
-    - **Principal:** Entity requesting access (user, role, application)
-    - **Request:** Action on a resource (API call to AWS)
-    - **Evaluation:** Checking permissions for the request
-    - **Decision:** Allow or deny based on policies
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Concepts</h3>
+        <ul>
+            <li><strong>Authentication:</strong> Verifying identity (who you are)</li>
+            <li><strong>Authorization:</strong> Determining access rights (what you can do)</li>
+            <li><strong>Principal:</strong> Entity requesting access (user, role, application)</li>
+            <li><strong>Request:</strong> Action on a resource (API call to AWS)</li>
+            <li><strong>Evaluation:</strong> Checking permissions for the request</li>
+            <li><strong>Decision:</strong> Allow or deny based on policies</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Principle of Least Privilege")
     st.markdown("""
     A core security best practice that involves granting only the permissions required to perform a task.
-    
-    **Key Points:**
-    - Start with minimum permissions and grant additional as needed
-    - Regularly review and remove unused permissions
-    - Use permission boundaries to set maximum permissions
-    - Implement just-in-time access rather than permanent permissions
-    - Helps reduce security risks and potential blast radius
     """)
+    
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Key Points</h3>
+        <ul>
+            <li>Start with minimum permissions and grant additional as needed</li>
+            <li>Regularly review and remove unused permissions</li>
+            <li>Use permission boundaries to set maximum permissions</li>
+            <li>Implement just-in-time access rather than permanent permissions</li>
+            <li>Helps reduce security risks and potential blast radius</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("IAM Users and Groups")
-    st.markdown("""
-    **IAM Users:**
-    - Entities that represent people or applications that interact with AWS
-    - Each user has a unique name and credentials
-    - Can access AWS via:
-      - Console (username/password)
-      - API/CLI (access keys)
-      - SDK (access keys)
     
-    **IAM Groups:**
-    - Collections of IAM users
-    - Used to assign permissions to multiple users at once
-    - Users can belong to multiple groups
-    - Groups cannot be nested (no groups within groups)
-    - Simplify permission management
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>👤 IAM Users</h4>
+            <ul>
+                <li>Entities that represent people or applications that interact with AWS</li>
+                <li>Each user has a unique name and credentials</li>
+                <li>Can access AWS via:
+                    <ul>
+                        <li>Console (username/password)</li>
+                        <li>API/CLI (access keys)</li>
+                        <li>SDK (access keys)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>👥 IAM Groups</h4>
+            <ul>
+                <li>Collections of IAM users</li>
+                <li>Used to assign permissions to multiple users at once</li>
+                <li>Users can belong to multiple groups</li>
+                <li>Groups cannot be nested (no groups within groups)</li>
+                <li>Simplify permission management</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("AWS Organizations")
     
     try:
-        st.image(aws_images["organizations"], width=700)
+        image = load_image_from_url(aws_images["organizations"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
         
     st.markdown("""
     An account management service that enables consolidation and organization of multiple AWS accounts.
-    
-    **Key Features:**
-    - **Centralized Management:** Manage multiple accounts from a single place
-    - **Consolidated Billing:** Single payment for all accounts
-    - **Hierarchical Organization:** Group accounts into organizational units (OUs)
-    - **Service Control Policies (SCPs):** Apply permission guardrails across accounts
-    
-    **Best Practices:**
-    - Organize OUs by function rather than company structure
-    - Create dedicated accounts for security, audit, and billing
-    - Use SCPs to enforce compliance requirements
-    - Implement a multi-account strategy for better isolation and security
     """)
     
-    display_quiz("iam")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>🔑 Key Features</h4>
+            <ul>
+                <li><strong>Centralized Management:</strong> Manage multiple accounts from a single place</li>
+                <li><strong>Consolidated Billing:</strong> Single payment for all accounts</li>
+                <li><strong>Hierarchical Organization:</strong> Group accounts into organizational units (OUs)</li>
+                <li><strong>Service Control Policies (SCPs):</strong> Apply permission guardrails across accounts</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>💼 Best Practices</h4>
+            <ul>
+                <li>Organize OUs by function rather than company structure</li>
+                <li>Create dedicated accounts for security, audit, and billing</li>
+                <li>Use SCPs to enforce compliance requirements</li>
+                <li>Implement a multi-account strategy for better isolation and security</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Function for IAM Policies page
 def iam_policies_page():
     st.title("IAM Policies")
     
     try:
-        st.image(aws_images["iam_policies"], width=700)
+        image = load_image_from_url(aws_images["iam_policies"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("Policy Types")
     st.markdown("""
     IAM policies define permissions and are used to manage access in AWS.
-    
-    **Major Policy Types:**
-    - **Identity-based policies:** Attached to IAM users, groups, or roles
-    - **Resource-based policies:** Attached to resources (e.g., S3 bucket policies)
-    - **Permissions boundaries:** Set maximum permissions for an IAM entity
-    - **Service control policies (SCPs):** Used with AWS Organizations to limit permissions
-    - **Access control lists (ACLs):** Legacy, control access to resources
-    - **Session policies:** Passed during role assumption to further restrict permissions
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Major Policy Types</h3>
+        <ul>
+            <li><strong>Identity-based policies:</strong> Attached to IAM users, groups, or roles</li>
+            <li><strong>Resource-based policies:</strong> Attached to resources (e.g., S3 bucket policies)</li>
+            <li><strong>Permissions boundaries:</strong> Set maximum permissions for an IAM entity</li>
+            <li><strong>Service control policies (SCPs):</strong> Used with AWS Organizations to limit permissions</li>
+            <li><strong>Access control lists (ACLs):</strong> Legacy, control access to resources</li>
+            <li><strong>Session policies:</strong> Passed during role assumption to further restrict permissions</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Policy Evaluation Logic")
     st.markdown("""
     How AWS evaluates policies to determine if a request should be allowed or denied:
-    
-    1. **Default denial:** All requests start as implicitly denied
-    2. **Evaluate applicable policies:** Identity-based, resource-based, etc.
-    3. **Any explicit DENY?** If yes, final decision is DENY
-    4. **Any explicit ALLOW?** If yes, final decision is ALLOW, otherwise DENY
-    
-    **Important Rules:**
-    - There is no "implicit allow" - access must be explicitly allowed
-    - An explicit deny always overrides any allows
-    - Resource-based policies are evaluated in parallel with identity-based policies
     """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Evaluation Steps</h4>
+            <ol>
+                <li>Default denial: All requests start as implicitly denied</li>
+                <li>Evaluate applicable policies: Identity-based, resource-based, etc.</li>
+                <li>Any explicit DENY? If yes, final decision is DENY</li>
+                <li>Any explicit ALLOW? If yes, final decision is ALLOW, otherwise DENY</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Important Rules</h4>
+            <ul>
+                <li>There is no "implicit allow" - access must be explicitly allowed</li>
+                <li>An explicit deny always overrides any allows</li>
+                <li>Resource-based policies are evaluated in parallel with identity-based policies</li>
+                <li>Permissions boundaries limit the maximum permissions an identity can have</li>
+                <li>SCPs limit the maximum permissions for accounts in an organization</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.header("Example IAM Policy")
+    
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>This policy allows S3 list and read operations on a specific bucket but denies access to the confidential folder</h4>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.code('''
     {
@@ -798,74 +1426,126 @@ def iam_policies_page():
     st.header("Amazon Resource Names (ARNs)")
     st.markdown("""
     Unique identifiers for AWS resources that are used in IAM policies.
-    
-    **ARN Format:**
-    ```
-    arn:partition:service:region:account-id:resource-type/resource-id
-    ```
-    
-    **Examples:**
-    - S3 bucket: `arn:aws:s3:::my-bucket`
-    - EC2 instance: `arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0`
-    - IAM user: `arn:aws:iam::123456789012:user/username`
-    
-    **Note:** Some global resources omit region and/or account ID in their ARNs.
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>ARN Format</h3>
+        <code>arn:partition:service:region:account-id:resource-type/resource-id</code>
+        
+        <h4>Examples</h4>
+        <ul>
+            <li>S3 bucket: <code>arn:aws:s3:::my-bucket</code></li>
+            <li>EC2 instance: <code>arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0</code></li>
+            <li>IAM user: <code>arn:aws:iam::123456789012:user/username</code></li>
+        </ul>
+        
+        <p><strong>Note:</strong> Some global resources omit region and/or account ID in their ARNs.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("IAM Roles")
     st.markdown("""
     IAM roles provide temporary security credentials for AWS resources or external identities.
-    
-    **Key Characteristics:**
-    - Not associated with a specific person
-    - Assumed by users, applications, or services
-    - Temporary credentials with defined lifetime
-    - No long-term credentials like passwords or access keys
-    
-    **Common Use Cases:**
-    - EC2 instance roles
-    - Lambda execution roles
-    - Cross-account access
-    - Federation with external identity providers
     """)
     
-    display_quiz("iam_policies")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Key Characteristics</h4>
+            <ul>
+                <li>Not associated with a specific person</li>
+                <li>Assumed by users, applications, or services</li>
+                <li>Temporary credentials with defined lifetime</li>
+                <li>No long-term credentials like passwords or access keys</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Common Use Cases</h4>
+            <ul>
+                <li>EC2 instance roles</li>
+                <li>Lambda execution roles</li>
+                <li>Cross-account access</li>
+                <li>Federation with external identity providers</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Function for STS page
 def sts_page():
     st.title("AWS Security Token Service (STS)")
     
     try:
-        st.image(aws_images["sts"], width=700)
+        image = load_image_from_url(aws_images["sts"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("What is STS?")
     st.markdown("""
     AWS Security Token Service (STS) enables you to request temporary, limited-privilege credentials for AWS IAM users or users from external identity providers.
-    
-    **Key Features:**
-    - **Temporary Credentials:** Short-lived access keys that expire automatically
-    - **Limited Privileges:** Define specific permissions for the session
-    - **Secure Federation:** Integrate with external identity systems
-    - **Delegation:** Allow services to act on your behalf
     """)
+    
+    st.markdown("""
+    <div class="aws-feature-card">
+        <h4>Key Features</h4>
+        <ul>
+            <li><strong>Temporary Credentials:</strong> Short-lived access keys that expire automatically</li>
+            <li><strong>Limited Privileges:</strong> Define specific permissions for the session</li>
+            <li><strong>Secure Federation:</strong> Integrate with external identity systems</li>
+            <li><strong>Delegation:</strong> Allow services to act on your behalf</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Common STS Operations")
-    st.markdown("""
-    - **AssumeRole:** Get temporary credentials to access AWS resources
-    - **AssumeRoleWithWebIdentity:** Federation with OIDC providers like Google, Facebook, etc.
-    - **AssumeRoleWithSAML:** Federation with SAML 2.0 providers
-    - **GetSessionToken:** Get temporary credentials for an IAM user
-    - **GetFederationToken:** Get temporary credentials for a federated user
-    """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-card">
+            <h3>Role-Based Operations</h3>
+            <ul>
+                <li><strong>AssumeRole:</strong> Get temporary credentials to access AWS resources</li>
+                <li><strong>AssumeRoleWithWebIdentity:</strong> Federation with OIDC providers like Google, Facebook, etc.</li>
+                <li><strong>AssumeRoleWithSAML:</strong> Federation with SAML 2.0 providers</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-card">
+            <h3>User-Based Operations</h3>
+            <ul>
+                <li><strong>GetSessionToken:</strong> Get temporary credentials for an IAM user</li>
+                <li><strong>GetFederationToken:</strong> Get temporary credentials for a federated user</li>
+                <li><strong>GetCallerIdentity:</strong> Returns details about the IAM identity making the call</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("Trust Policies")
     st.markdown("""
     A trust policy defines which principals (users, services, accounts) can assume a role.
+    """)
     
-    **Example Trust Policy:**
-    ```json
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Example Trust Policy</h4>
+        <p>This policy allows a specific AWS account to assume this role when providing the correct external ID:</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.code('''
     {
       "Version": "2012-10-17",
       "Statement": [
@@ -883,26 +1563,43 @@ def sts_page():
         }
       ]
     }
-    ```
+    ''', language="json")
     
-    **Security Best Practices:**
-    - Use external IDs for third-party access
-    - Apply conditions like source IP restrictions
-    - Set appropriate maximum session duration
-    - Implement MFA for role assumption
-    """)
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Security Best Practices</h3>
+        <ul>
+            <li>Use external IDs for third-party access</li>
+            <li>Apply conditions like source IP restrictions</li>
+            <li>Set appropriate maximum session duration</li>
+            <li>Implement MFA for role assumption</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("Revoking Temporary Credentials")
     st.markdown("""
     How to handle situations where temporary credentials need to be revoked before expiration:
+    """)
     
-    **Options:**
-    1. **Modify trust policy** to prevent new role assumptions (doesn't affect active sessions)
-    2. **Add inline deny policy** with the `AWSRevokeOlderSessions` condition key
-    3. **Change permissions** attached to the role (affects all new and existing sessions)
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Options</h3>
+        <ol>
+            <li><strong>Modify trust policy</strong> to prevent new role assumptions (doesn't affect active sessions)</li>
+            <li><strong>Add inline deny policy</strong> with the <code>AWSRevokeOlderSessions</code> condition key</li>
+            <li><strong>Change permissions</strong> attached to the role (affects all new and existing sessions)</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Example Deny Policy for Revocation:**
-    ```json
+    st.markdown("""
+    <div class="aws-warning-card">
+        <h4>Example Deny Policy for Revocation</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.code('''
     {
       "Version": "2012-10-17",
       "Statement": [
@@ -918,60 +1615,143 @@ def sts_page():
         }
       ]
     }
-    ```
-    """)
-    
-    display_quiz("sts")
+    ''', language="json")
 
 # Function for S3 page
 def s3_page():
     st.title("Amazon Simple Storage Service (S3)")
     
     try:
-        st.image(aws_images["s3"], width=700)
+        image = load_image_from_url(aws_images["s3"])
+        if image:
+            st.image(image, width=700)
     except:
         st.warning("Image could not be displayed")
     
     st.header("S3 Overview")
     st.markdown("""
     Amazon S3 (Simple Storage Service) provides infinitely scalable, highly durable object storage in the AWS Cloud.
-    
-    **Key Concepts:**
-    - **Object-based storage:** Store any type of file up to 5TB
-    - **Buckets:** Containers for objects with globally unique names
-    - **Objects:** Files and metadata stored in S3
-    - **Keys:** Unique identifiers for objects within a bucket
-    - **Durability:** 99.999999999% (11 nines) durability
-    - **Availability:** Varies by storage class (typically 99.99%)
     """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Concepts</h3>
+        <ul>
+            <li><strong>Object-based storage:</strong> Store any type of file up to 5TB</li>
+            <li><strong>Buckets:</strong> Containers for objects with globally unique names</li>
+            <li><strong>Objects:</strong> Files and metadata stored in S3</li>
+            <li><strong>Keys:</strong> Unique identifiers for objects within a bucket</li>
+            <li><strong>Durability:</strong> 99.999999999% (11 nines) durability</li>
+            <li><strong>Availability:</strong> Varies by storage class (typically 99.99%)</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("S3 Storage Classes")
     st.markdown("""
-    | Storage Class | Use Case | Availability | Retrieval Time | Minimum Storage Duration |
-    |---------------|----------|--------------|----------------|-------------------------|
-    | S3 Standard | Active, frequently accessed data | 99.99% | Milliseconds | None |
-    | S3 Intelligent-Tiering | Data with changing access patterns | 99.9% | Milliseconds | None |
-    | S3 Standard-IA | Infrequently accessed data | 99.9% | Milliseconds | 30 days |
-    | S3 One Zone-IA | Re-creatable, infrequently accessed | 99.5% | Milliseconds | 30 days |
-    | S3 Glacier Instant Retrieval | Archive data needing immediate access | 99.9% | Milliseconds | 90 days |
-    | S3 Glacier Flexible Retrieval | Archive data with flexible retrieval | 99.99% | Minutes to hours | 90 days |
-    | S3 Glacier Deep Archive | Long-term archiving, rare access | 99.99% | Hours | 180 days |
-    | S3 Express One Zone | High-performance data, single AZ | 99.5% | Single-digit ms | None |
+    Different storage classes to optimize costs based on access patterns.
     """)
+    
+    st.markdown("""
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Storage Class</th>
+                    <th>Use Case</th>
+                    <th>Availability</th>
+                    <th>Retrieval Time</th>
+                    <th>Minimum Storage Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>S3 Standard</td>
+                    <td>Active, frequently accessed data</td>
+                    <td>99.99%</td>
+                    <td>Milliseconds</td>
+                    <td>None</td>
+                </tr>
+                <tr>
+                    <td>S3 Intelligent-Tiering</td>
+                    <td>Data with changing access patterns</td>
+                    <td>99.9%</td>
+                    <td>Milliseconds</td>
+                    <td>None</td>
+                </tr>
+                <tr>
+                    <td>S3 Standard-IA</td>
+                    <td>Infrequently accessed data</td>
+                    <td>99.9%</td>
+                    <td>Milliseconds</td>
+                    <td>30 days</td>
+                </tr>
+                <tr>
+                    <td>S3 One Zone-IA</td>
+                    <td>Re-creatable, infrequently accessed</td>
+                    <td>99.5%</td>
+                    <td>Milliseconds</td>
+                    <td>30 days</td>
+                </tr>
+                <tr>
+                    <td>S3 Glacier Instant Retrieval</td>
+                    <td>Archive data needing immediate access</td>
+                    <td>99.9%</td>
+                    <td>Milliseconds</td>
+                    <td>90 days</td>
+                </tr>
+                <tr>
+                    <td>S3 Glacier Flexible Retrieval</td>
+                    <td>Archive data with flexible retrieval</td>
+                    <td>99.99%</td>
+                    <td>Minutes to hours</td>
+                    <td>90 days</td>
+                </tr>
+                <tr>
+                    <td>S3 Glacier Deep Archive</td>
+                    <td>Long-term archiving, rare access</td>
+                    <td>99.99%</td>
+                    <td>Hours</td>
+                    <td>180 days</td>
+                </tr>
+                <tr>
+                    <td>S3 Express One Zone</td>
+                    <td>High-performance data, single AZ</td>
+                    <td>99.5%</td>
+                    <td>Single-digit ms</td>
+                    <td>None</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.header("S3 Bucket Policies")
     st.markdown("""
     Resource-based policies attached to S3 buckets that grant or deny access permissions.
+    """)
     
-    **Key Elements:**
-    - **Principal:** Who the policy applies to (users, roles, accounts)
-    - **Effect:** Allow or Deny
-    - **Action:** S3 operations (GetObject, PutObject, etc.)
-    - **Resource:** Buckets and objects the policy applies to
-    - **Condition:** Optional restrictions on when policy applies
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Elements</h3>
+        <ul>
+            <li><strong>Principal:</strong> Who the policy applies to (users, roles, accounts)</li>
+            <li><strong>Effect:</strong> Allow or Deny</li>
+            <li><strong>Action:</strong> S3 operations (GetObject, PutObject, etc.)</li>
+            <li><strong>Resource:</strong> Buckets and objects the policy applies to</li>
+            <li><strong>Condition:</strong> Optional restrictions on when policy applies</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
-    **Example Policy:**
-    ```json
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Example Policy</h4>
+        <p>This policy allows a specific IAM user to list and get objects from a bucket:</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.code('''
     {
         "Version": "2012-10-17",
         "Statement": [
@@ -986,96 +1766,318 @@ def s3_page():
             }
         ]
     }
-    ```
-    """)
+    ''', language="json")
     
-    st.header("S3 Transfer Acceleration")
-    st.markdown("""
-    Feature that enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket.
+    st.header("S3 Performance Features")
     
-    **Key Points:**
-    - Uses AWS CloudFront's globally distributed edge locations
-    - Routes data through AWS backbone network
-    - Optimizes network protocols for long-distance transfers
-    - Especially useful for:
-      - Global uploads to centralized buckets
-      - Regular transfers across continents
-      - Utilizing available bandwidth
-      - Applications uploading from many global locations
-    """)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>S3 Transfer Acceleration</h4>
+            <p>Feature that enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket.</p>
+            <ul>
+                <li>Uses AWS CloudFront's globally distributed edge locations</li>
+                <li>Routes data through AWS backbone network</li>
+                <li>Optimizes network protocols for long-distance transfers</li>
+                <li>Especially useful for global uploads to centralized buckets</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Multipart Upload</h4>
+            <p>Feature that allows uploading large objects in parts for improved throughput and resilience.</p>
+            <ul>
+                <li>Parallel uploads of parts for faster performance</li>
+                <li>Improved recovery from network issues</li>
+                <li>Pause and resume uploads</li>
+                <li>Required for objects over 5GB</li>
+                <li>Recommended for objects larger than 100MB</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.header("S3 Security Features")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Access Management</h4>
+            <ul>
+                <li>Bucket policies</li>
+                <li>ACLs (less recommended now)</li>
+                <li>IAM policies</li>
+                <li>Block Public Access settings</li>
+                <li>Access Points</li>
+                <li>VPC Endpoints</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Data Protection</h4>
+            <ul>
+                <li>Encryption (SSE-S3, SSE-KMS, SSE-C)</li>
+                <li>Object Lock</li>
+                <li>Versioning</li>
+                <li>MFA Delete</li>
+                <li>S3 Object Lambda</li>
+                <li>CORS configuration</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Monitoring & Logging</h4>
+            <ul>
+                <li>Access Logs</li>
+                <li>Event notifications</li>
+                <li>AWS CloudTrail integration</li>
+                <li>S3 Storage Lens</li>
+                <li>S3 Inventory</li>
+                <li>S3 Analytics</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Function for Organizations page
+def organizations_page():
+    st.title("AWS Organizations")
+    
+    try:
+        image = load_image_from_url(aws_images["organizations"])
+        if image:
+            st.image(image, width=700)
+    except:
+        st.warning("Image could not be displayed")
+    
+    st.header("What are AWS Organizations?")
     st.markdown("""
-    - **Bucket policies:** Resource-based policies for access control
-    - **ACLs:** Legacy access control (less recommended now)
-    - **IAM policies:** Identity-based policies for access control
-    - **Block Public Access:** Settings to prevent public access
-    - **Encryption:** Server-side (SSE-S3, SSE-KMS, SSE-C) and client-side options
-    - **Object Lock:** Prevent deletion or overwriting for fixed time or indefinitely
-    - **Versioning:** Maintain multiple versions of objects
-    - **Access Points:** Named network endpoints with specific permissions
-    - **VPC Endpoints:** Private connections from VPC to S3
+    AWS Organizations is an account management service that enables you to consolidate multiple AWS accounts into an organization that you create and centrally manage.
     """)
     
-    display_quiz("s3")
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Core Components</h3>
+        <ul>
+            <li><strong>Organization:</strong> Entity that consolidates AWS accounts</li>
+            <li><strong>Management account:</strong> The account that created the organization (formerly called "master account")</li>
+            <li><strong>Member accounts:</strong> All other accounts in the organization</li>
+            <li><strong>Organizational Units (OUs):</strong> Containers for accounts to group them in a hierarchy</li>
+            <li><strong>Root:</strong> The parent container for all accounts and OUs in the organization</li>
+            <li><strong>Service Control Policies (SCPs):</strong> Policies that control permissions for accounts within the organization</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.header("Key Features")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Management Features</h4>
+            <ul>
+                <li><strong>Centralized account management:</strong> Create and manage accounts from a central location</li>
+                <li><strong>Hierarchical organization:</strong> Group accounts into OUs for easier management</li>
+                <li><strong>Automated account creation:</strong> Use APIs to automate account provisioning</li>
+                <li><strong>Delegated administration:</strong> Assign administrative responsibilities for specific AWS services</li>
+                <li><strong>API access:</strong> Programmatically manage your organization</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="aws-feature-card">
+            <h4>Control Features</h4>
+            <ul>
+                <li><strong>Service Control Policies (SCPs):</strong> Set permission guardrails that apply to all accounts</li>
+                <li><strong>Tag policies:</strong> Standardize tags across resources in your organization</li>
+                <li><strong>Backup policies:</strong> Define backup schedules and retention periods</li>
+                <li><strong>AI services opt-out policies:</strong> Control AI service data usage</li>
+                <li><strong>Consolidated billing:</strong> Single payment for all accounts with volume discounts</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.header("Service Control Policies (SCPs)")
+    st.markdown("""
+    SCPs offer central control over the maximum available permissions for all accounts in your organization.
+    """)
+    
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Key Points</h3>
+        <ul>
+            <li>SCPs don't grant permissions; they define guardrails</li>
+            <li>Accounts still need IAM permissions to perform actions</li>
+            <li>SCPs affect all users and roles in attached accounts, including the root user</li>
+            <li>SCPs don't affect service-linked roles</li>
+            <li>SCPs don't affect the management account (limitations can only be applied to member accounts)</li>
+            <li>SCPs use the same language format as IAM policies</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="aws-info-card">
+        <h4>Example SCP</h4>
+        <p>This SCP prevents member accounts from leaving the organization:</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.code('''
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Deny",
+                "Action": [
+                    "organizations:LeaveOrganization"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }
+    ''', language="json")
+    
+    st.header("Best Practices")
+    st.markdown("""
+    <div class="aws-card">
+        <h3>Organization Structure</h3>
+        <ul>
+            <li>Create dedicated accounts for shared services, security, and logging</li>
+            <li>Use OUs based on function, not organizational structure</li>
+            <li>Apply SCPs based on the principle of least privilege</li>
+            <li>Start with "Deny lists" rather than "Allow lists" for SCPs</li>
+            <li>Use AWS Control Tower to set up and govern a secure, multi-account environment</li>
+            <li>Implement standardized tagging strategy across the organization</li>
+            <li>Enable AWS CloudTrail in all accounts with centralized logging</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Sidebar menu
-st.sidebar.title("AWS Solutions Architect")
-st.sidebar.image("https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png", width=200)
+# Function for Knowledge Checks page
+def knowledge_checks_page():
+    st.title("Knowledge Checks")
+    
+    st.markdown("""
+    <div class="aws-info-card">
+        <h3>Test your knowledge</h3>
+        <p>Answer the scenario-based questions below to check your understanding. Your progress is tracked automatically.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Display quiz section tabs
+    tab_names = ["Global Infrastructure", "CloudFront", "IAM", "IAM Policies", "S3", "Organizations", "STS"]
+    topic_keys = ["global_infrastructure", "cloudfront", "iam", "iam_policies", "s3", "organizations", "sts"]
+    
+    tabs = st.tabs(tab_names)
+    
+    # Loop through each tab and display corresponding quiz
+    for i, tab in enumerate(tabs):
+        with tab:
+            st.header(f"{tab_names[i]} Knowledge Check")
+            topic = topic_keys[i]
+            if topic in quiz_data:
+                for j, quiz in enumerate(quiz_data[topic]):
+                    handle_quiz(topic, j, quiz)
+    
+    # Progress Summary
+    st.header("Your Progress")
+    
+    # Display chart if there's data
+    chart = create_quiz_results_chart()
+    if chart:
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.info("Complete some knowledge checks to see your progress!")
+    
+    # Calculate and display overall progress
+    total_attempted = sum(st.session_state.quiz_attempted.values()) if st.session_state.quiz_attempted else 0
+    total_correct = sum(st.session_state.quiz_scores.values()) if st.session_state.quiz_scores else 0
+    
+    if total_attempted > 0:
+        percentage = int((total_correct / total_attempted) * 100)
+        
+        st.markdown(f"""
+        <div class="aws-success-card">
+            <h3>Overall Score: {total_correct}/{total_attempted} ({percentage}%)</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Progress bar
+        st.progress(total_correct / total_attempted)
 
-menu = st.sidebar.radio(
-    "Navigation",
-    ["Home", 
-     "AWS Global Infrastructure", 
-     "Amazon CloudFront", 
-     "Identity and Access Management", 
-     "IAM Policies",
-     "Amazon S3", 
-    #  "AWS Organizations", 
-     "Security Token Service (STS)"]
-)
+# Sidebar for session management
+st.sidebar.subheader("⚙️ Session Management")
 
-# Display selected page
-if menu == "Home":
-    home_page()
-elif menu == "AWS Global Infrastructure":
-    global_infrastructure_page()
-elif menu == "Amazon CloudFront":
-    cloudfront_page()
-elif menu == "Identity and Access Management":
-    iam_page()
-elif menu == "IAM Policies":
-    iam_policies_page()
-elif menu == "Amazon S3":
-    s3_page()
-# elif menu == "AWS Organizations":
-#     organizations_page()
-elif menu == "Security Token Service (STS)":
-    sts_page()
+# Reset button for session data
+if st.sidebar.button("🔄 Reset Progress", key="reset_button"):
+    reset_session()
 
-# Footer
+# Show session ID
+st.sidebar.caption(f"Session ID: {st.session_state.session_id[:8]}...")
+
 st.sidebar.divider()
 
-# Progress tracking
-if "total_score" not in st.session_state:
-    st.session_state["total_score"] = 0
-    st.session_state["total_attempted"] = 0
+# Main navigation with tabs using emojis
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "🏠 Home", 
+    "🌐 Global Infrastructure", 
+    "🌍 CloudFront", 
+    "🔐 IAM", 
+    "📜 IAM Policies",
+    "🗄️ S3", 
+    "🏢 Organizations", 
+    "🔑 STS",
+    "📝 Knowledge Check"
+])
 
-topics = ["global_infrastructure", "cloudfront", "iam", "iam_policies", "s3", "organizations", "sts"]
-total_score = 0
-total_attempted = 0
 
-for topic in topics:
-    if f"{topic}_score" in st.session_state:
-        total_score += st.session_state[f"{topic}_score"]
-        total_attempted += st.session_state[f"{topic}_attempted"]
+# Display content based on selected tab
+with tab1:
+    home_page()
 
-if total_attempted > 0:
-    st.sidebar.markdown(f"**Your overall progress:** {total_score}/{total_attempted} questions ({int(total_score/total_attempted*100)}%)")
-    
-    # Visual progress bar
-    progress = total_score / (total_attempted if total_attempted > 0 else 1)
-    st.sidebar.progress(progress)
+with tab2:
+    global_infrastructure_page()
 
-st.sidebar.markdown("© 2025 AWS Partner Certification Readiness")
-st.sidebar.info("This application is designed to help you prepare for the AWS Solutions Architect - Associate certification.")
+with tab3:
+    cloudfront_page()
+
+with tab4:
+    iam_page()
+
+with tab5:
+    iam_policies_page()
+
+with tab6:
+    s3_page()
+
+with tab7:
+    organizations_page()
+
+with tab8:
+    sts_page()
+
+with tab9:
+    knowledge_checks_page()
+
+# Footer
+st.markdown("""
+<div class="footer">
+    © 2025 AWS Partner Certification Readiness. All rights reserved.
+</div>
+""", unsafe_allow_html=True)

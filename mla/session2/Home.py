@@ -7,11 +7,12 @@ from matplotlib.patches import Ellipse, Rectangle
 import seaborn as sns
 from PIL import Image
 import base64
+import io
 
-# Set page configuration
+# Set page config
 st.set_page_config(
-    page_title="AWS ML Engineer - Domain 2 Training",
-    page_icon="🧠",
+    page_title="ML Engineer - Associate Learning",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -21,229 +22,308 @@ if 'quiz_score' not in st.session_state:
     st.session_state['quiz_score'] = 0
 if 'quiz_attempted' not in st.session_state:
     st.session_state['quiz_attempted'] = False
-if 'username' not in st.session_state:
-    st.session_state['username'] = ""
-if 'answers' not in st.session_state:
-    st.session_state['answers'] = {}
+if 'name' not in st.session_state:
+    st.session_state['name'] = ""
+if 'visited_ML_Lifecycle' not in st.session_state:
+    st.session_state['visited_ML_Lifecycle'] = False
+if 'visited_Modeling_Approaches' not in st.session_state:
+    st.session_state['visited_Modeling_Approaches'] = False
+if 'visited_Amazon_Bedrock' not in st.session_state:
+    st.session_state['visited_Amazon_Bedrock'] = False
+if 'visited_Neural_Networks' not in st.session_state:
+    st.session_state['visited_Neural_Networks'] = False
+if 'visited_Model_Training' not in st.session_state:
+    st.session_state['visited_Model_Training'] = False
 
-# Custom CSS for styling with AWS Color Scheme
+# Custom CSS for styling
 st.markdown("""
 <style>
-    /* AWS Color Scheme */
-    :root {
-        --aws-orange: #FF9900;
-        --aws-blue: #232F3E;
-        --aws-light-blue: #1E88E5;
-        --aws-light-gray: #F8F9FA;
-        --aws-dark-gray: #545B64;
-    }
-    
-    .main-title {
-        color: var(--aws-blue);
-        font-size: 32px;
+    .main-header {
+        font-size: 2.5rem;
         font-weight: bold;
-        margin-bottom: 20px;
-        border-bottom: 2px solid var(--aws-orange);
-        padding-bottom: 10px;
+        color: #FF9900;
+        margin-bottom: 1rem;
     }
-    
-    .section-title {
-        color: var(--aws-blue);
-        font-size: 24px;
+    .sub-header {
+        font-size: 1.8rem;
         font-weight: bold;
-        margin-top: 15px;
-        margin-bottom: 15px;
+        color: #232F3E;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
     }
-    
-    .subsection-title {
-        color: var(--aws-blue);
-        font-size: 20px;
+    .section-header {
+        font-size: 1.5rem;
         font-weight: bold;
-        margin-top: 15px;
+        color: #232F3E;
+        margin-top: 0.8rem;
+        margin-bottom: 0.3rem;
     }
-    
-    .aws-card {
-        background-color: white;
+    .info-box {
+        background-color: #F0F2F6;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 20px;
-        border: 1px solid #E0E0E0;
+    }
+    .success-box {
+        background-color: #D1FAE5;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .warning-box {
+        background-color: #FEF3C7;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .tip-box {
+        background-color: #E0F2FE;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 5px solid #0EA5E9;
+    }
+    .step-box {
+        background-color: #FFFFFF;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #E5E7EB;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        transition: transform 0.3s;
     }
-    
-    .orange-highlight {
-        color: var(--aws-orange);
-        font-weight: bold;
+    .card:hover {
+        transform: translateY(-5px);
     }
-    
-    .important-note {
-        background-color: #FFEFD5;
-        border-left: 5px solid var(--aws-orange);
-        padding: 10px 15px;
-        margin: 15px 0;
-        border-radius: 5px;
+    .aws-orange {
+        color: #FF9900;
     }
-    
-    .code-box {
-        background-color: var(--aws-light-gray);
-        padding: 10px;
-        border-radius: 5px;
-        border-left: 3px solid var(--aws-orange);
-        font-family: monospace;
-        margin: 10px 0;
-        overflow-x: auto;
+    .aws-blue {
+        color: #232F3E;
     }
-    
-    .infobox {
-        background-color: #E1F5FE;
-        border-left: 5px solid var(--aws-light-blue);
-        padding: 10px 15px;
-        margin: 15px 0;
-        border-radius: 5px;
+    hr {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
     }
-    
-    /* Button styling */
-    .stButton>button {
-        background-color: var(--aws-orange);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 24px;
-        font-weight: bold;
-    }
-    
-    .stButton>button:hover {
-        background-color: #E68A00;
-    }
-    
-    /* Progress bar styling */
-    .stProgress > div > div > div > div {
-        background-color: var(--aws-orange);
-    }
-    
-    /* Custom expander styling */
-    .streamlit-expanderHeader {
-        background-color: var(--aws-light-gray);
-        border-radius: 5px;
-    }
-    
-    /* Tab styling */
+    /* Make the tab content container take full height */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 8px;
     }
-    
     .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        font-size: 1rem;
-        border-radius: 5px 5px 0 0;
-        background-color: #EEEEEE;
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: #F8F9FA;
+        border-radius: 4px 4px 0px 0px;
+        gap: 1px;
+        padding-left: 16px;
+        padding-right: 16px;
     }
-    
     .stTabs [aria-selected="true"] {
-        background-color: var(--aws-orange);
-        color: white;
-        font-weight: bold;
+        background-color: #FF9900 !important;
+        color: white !important;
     }
-    
-    /* Highlight row styling */
-    .highlight-row {
-        background-color: #FFE4B5;
-        font-weight: bold;
+    .definition {
+        background-color: #EFF6FF;
+        border-left: 5px solid #3B82F6;
+        padding: 10px 15px;
+        margin: 15px 0;
+        border-radius: 0 5px 5px 0;
+    }
+    .code-box {
+        background-color: #F8F9FA;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        margin: 15px 0;
+        border: 1px solid #E5E7EB;
+    }
+    .stButton>button {
+        background-color: #FF9900;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #FFAC31;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Functions for formatted content
-def main_title(text):
-    st.markdown(f'<div class="main-title">{text}</div>', unsafe_allow_html=True)
+# Function to display custom header
+def custom_header(text, level="main"):
+    if level == "main":
+        st.markdown(f'<div class="main-header">{text}</div>', unsafe_allow_html=True)
+    elif level == "sub":
+        st.markdown(f'<div class="sub-header">{text}</div>', unsafe_allow_html=True)
+    elif level == "section":
+        st.markdown(f'<div class="section-header">{text}</div>', unsafe_allow_html=True)
 
-def section_title(text):
-    st.markdown(f'<div class="section-title">{text}</div>', unsafe_allow_html=True)
+# Function to create custom info box
+def info_box(text, box_type="info"):
+    if box_type == "info":
+        st.markdown(f"""
+            <div class="info-box">
+                <div markdown="1">
+                    {text}
+            """, unsafe_allow_html=True)
+    elif box_type == "success":
+        st.markdown(f"""
+            <div class="success-box">
+                <div markdown="1">
+                    {text}
+            """, unsafe_allow_html=True)
+    elif box_type == "warning":
+        st.markdown(f"""
+            <div class="warning-box">
+                <div markdown="1">
+                    {text}
+            """, unsafe_allow_html=True)
+    elif box_type == "tip":
+        st.markdown(f"""
+            <div class="tip-box">
+                <div markdown="1">
+                    {text}
 
-def subsection_title(text):
-    st.markdown(f'<div class="subsection-title">{text}</div>', unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
-def aws_card(content):
-    st.markdown(f'<div class="aws-card">{content}</div>', unsafe_allow_html=True)
+# Function for definition box
+def definition_box(term, definition):
+    st.markdown(f"""
+    <div class="definition">
+        <strong>{term}:</strong> {definition}
+    </div>
+    """, unsafe_allow_html=True)
 
-def important_note(text):
-    st.markdown(f'<div class="important-note">{text}</div>', unsafe_allow_html=True)
-
-def info_box(text):
-    st.markdown(f'<div class="infobox">{text}</div>', unsafe_allow_html=True)
-
+# Function to reset session
 def reset_session():
-    """Reset all session state variables"""
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
     st.session_state['quiz_score'] = 0
     st.session_state['quiz_attempted'] = False
-    st.session_state['username'] = ""
-    st.session_state['answers'] = {}
+    st.session_state['name'] = ""
+    st.session_state['visited_ML_Lifecycle'] = False
+    st.session_state['visited_Modeling_Approaches'] = False
+    st.session_state['visited_Amazon_Bedrock'] = False
+    st.session_state['visited_Neural_Networks'] = False
+    st.session_state['visited_Model_Training'] = False
     st.rerun()
 
 # Sidebar for session management
 with st.sidebar:
-    st.image("https://d1.awsstatic.com/training-and-certification/certification-badges/AWS-Certified-Machine-Learning-Specialty_badge.c17197d13b33ec8b9c62causagesh2bfca7df511cb2eb98c8becce5121d45ff.png", width=150)
-    st.markdown("### AWS ML Engineer - Associate")
+    st.image("images/mla_badge.png", width=150)
+    st.markdown("### ML Engineer - Associate")
     st.markdown("#### Domain 2: ML Model Development")
     
-    # Session management
-    if st.session_state['username']:
-        st.success(f"Welcome, {st.session_state['username']}!")
+    # If user has provided their name, greet them
+    if st.session_state['name']:
+        st.success(f"Welcome, {st.session_state['name']}! 👋")
     else:
-        username = st.text_input("Enter your name to begin:")
-        if username:
-            st.session_state['username'] = username
+        name = st.text_input("Enter your name:")
+        if name:
+            st.session_state['name'] = name
             st.rerun()
     
-    st.markdown("---")
-    
-    # Reset session button
-    if st.button("Reset Session 🔄"):
+    # Reset button
+    if st.button("🔄 Reset Session"):
         reset_session()
     
-    # Resources
+    # Progress tracking
+    if st.session_state['name']:
+        st.markdown("---")
+        st.markdown("### Your Progress")
+        
+        # Track visited pages
+        visited_pages = [page for page in ["ML_Lifecycle", "Modeling_Approaches", "Amazon_Bedrock", "Neural_Networks", "Model_Training"] 
+                         if st.session_state.get(f"visited_{page}", False)]
+        
+        progress = len(visited_pages) / 5
+        st.progress(progress)
+        st.markdown(f"**{len(visited_pages)}/5 sections completed**")
+        
+        # Track quiz score if attempted
+        if st.session_state['quiz_attempted']:
+            st.markdown(f"**Quiz Score: {st.session_state['quiz_score']}/5**")
+        
+        # Learning outcomes reminder
+        st.markdown("---")
+        st.markdown("### Learning Outcomes")
+        st.markdown("""
+        - Understand the ML lifecycle
+        - Choose appropriate modeling approaches
+        - Utilize Amazon Bedrock for generative AI
+        - Implement hyperparameter tuning
+        - Apply distributed training techniques
+        """)
+    
     st.markdown("---")
     st.markdown("### Resources")
     st.markdown("""
     - [AWS ML Documentation](https://docs.aws.amazon.com/machine-learning)
-    - [AWS SageMaker Developer Guide](https://docs.aws.amazon.com/sagemaker)
+    - [SageMaker Developer Guide](https://docs.aws.amazon.com/sagemaker)
     - [Amazon Bedrock Documentation](https://docs.aws.amazon.com/bedrock)
-    - [ML Engineer Certification](https://aws.amazon.com/certification/certified-machine-learning-specialty)
     """)
 
-# Content rendering functions
-def render_introduction():
-    main_title("AWS Partner Certification Readiness: ML Engineer - Associate")
-    st.markdown("## Session 2: Domain 2 - ML Model Development")
+# Main content with tabs
+tabs = st.tabs([
+    "🏠 Home", 
+    "🔄 ML Lifecycle", 
+    "🧠 Modeling Approaches", 
+    "🤖 Amazon Bedrock", 
+    "🔬 Neural Networks", 
+    "🚂 Model Training", 
+    "⚙️ Hyperparameters", 
+    "❓ Knowledge Check", 
+    "📚 Resources"
+])
+
+# Home tab
+with tabs[0]:
+    custom_header("AWS Partner Certification Readiness")
+    st.markdown("## Machine Learning Engineer - Associate")
+    
+    st.markdown("### Domain 2: ML Model Development")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("""
-        Welcome to Session 2 of the AWS Partner Certification Readiness program for ML Engineer - Associate certification.
-        
-        In this session, we will focus on Domain 2: ML Model Development, covering:
-        
-        - Task Statement 2.1: Choose a modeling approach
-        - Task Statement 2.2: Train and refine models
-        
-        This interactive module will help you understand key concepts about machine learning models, development approaches,
-        and refinement techniques on AWS.
-        """)
-        
         info_box("""
-        <b>Learning Objectives:</b><br>
-        • Understand the ML lifecycle and where model development fits<br>
-        • Learn about different modeling approaches on AWS<br>
-        • Understand hyperparameters and tuning techniques<br>
-        • Explore model training and refinement techniques<br>
-        • Learn about Amazon Bedrock and Foundation Models
+        This interactive e-learning application covers the main topics of Domain 2 from the AWS Machine Learning Engineer - Associate certification.
+        
+        Domain 2 focuses on **ML Model Development**, which accounts for a significant portion of the certification exam.
+        
+        Navigate through the content using the tabs above to learn about:
+        - Machine Learning Lifecycle
+        - Modeling Approaches
+        - Amazon Bedrock
+        - Neural Networks
+        - Model Training and Hyperparameter Tuning
+        
+        Test your knowledge with the quiz when you're ready!
+        """, "info")
+        
+        st.markdown("### Learning Outcomes")
+        st.markdown("""
+        By the end of this module, you will be able to:
+        - Understand the ML lifecycle and where model development fits
+        - Select appropriate modeling approaches based on requirements
+        - Utilize Amazon Bedrock for foundation model applications
+        - Implement effective hyperparameter tuning techniques
+        - Apply distributed training for large-scale models
+        - Choose the right ensemble learning strategy
         """)
     
     with col2:
-        st.image("https://d1.awsstatic.com/re19/centauri2/Diagram_machine-learning-on-aws-services-2.0e6267be7d34ce5d6305be9a3debf1268a460947.png", caption="AWS ML Services")
+        st.image("images/mla_badge_big.png", width=250)
+        
+        if st.session_state['quiz_attempted']:
+            st.success(f"Current Quiz Score: {st.session_state['quiz_score']}/5")
+        
+        st.info("Use the tabs above to navigate through different sections!")
+    
+    st.markdown("---")
     
     st.markdown("### Session Roadmap")
     
@@ -267,33 +347,37 @@ def render_introduction():
     
     st.markdown("---")
     
-    st.markdown("""
-    ### Weekly Digital Training Curriculum
+    st.markdown("### Task Statements in Domain 2")
     
-    Make sure you go through this week's training content:
-    """)
+    task_col1, task_col2 = st.columns(2)
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### AWS Skill Builder Learning Plan Courses")
+    with task_col1:
+        st.markdown("#### Task 2.1: Choose a modeling approach")
         st.markdown("""
-        - AWS Glue Getting Started
-        - Fundamentals of Machine Learning and Artificial Intelligence
-        - Planning a Machine Learning Project
-        - Introduction to Amazon SageMaker
-        - Amazon Bedrock Getting Started
+        - Understand business requirements
+        - Select appropriate machine learning algorithm
+        - Determine training approach
+        - Choose validation strategy
+        - Implement supervised, unsupervised, or custom model development
         """)
     
-    with col2:
-        st.markdown("#### Enhanced Exam Prep Plan (Optional)")
+    with task_col2:
+        st.markdown("#### Task 2.2: Train and refine models")
         st.markdown("""
-        - Continue AWS Cloud Quest: Machine Learning
-        - Complete – Domain 1 Courses
+        - Set up distributed training jobs
+        - Apply hyperparameter optimization
+        - Evaluate model quality
+        - Implement ensemble learning strategies
+        - Use transfer learning and fine-tuning
+        - Improve models iteratively
         """)
 
-def render_ml_lifecycle():
-    main_title("Machine Learning Lifecycle")
+# ML Lifecycle tab
+with tabs[1]:
+    # Mark as visited
+    st.session_state['visited_ML_Lifecycle'] = True
+    
+    custom_header("Machine Learning Lifecycle")
     
     col1, col2 = st.columns([3, 1])
     
@@ -330,7 +414,7 @@ In this phase, you'll focus on:
 - Built-in algorithms
 - Automated model development
 - Distributed training
-        """)
+        """, "tip")
     
     st.markdown("""
     In the **Model Development** phase, your data processing is complete, and your data is typically stored in S3.
@@ -355,7 +439,7 @@ In this phase, you'll focus on:
     """)
     
     # AWS AI/ML Stack
-    section_title("AWS AI/ML Stack")
+    custom_header("AWS AI/ML Stack", "section")
     
     stack_data = {
         'Layer': ['AI Services', 'ML Services', 'ML Frameworks & Infrastructure'],
@@ -374,9 +458,110 @@ In this phase, you'll focus on:
     
     stack_df = pd.DataFrame(stack_data)
     st.table(stack_df)
+    
+    custom_header("Model Development in the ML Process", "sub")
+    
+    st.markdown("""
+    Model development is a critical phase in the machine learning lifecycle, consisting of several steps:
+    """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        ### 1. Problem Framing
+        - Understand the business problem
+        - Define the ML objectives clearly
+        - Determine success criteria
+        - Select appropriate ML approach (supervised, unsupervised, etc.)
+        
+        ### 2. Algorithm Selection
+        - Choose algorithm based on data type and problem
+        - Consider built-in algorithms vs. custom models
+        - Evaluate tradeoffs between accuracy, interpretability, and speed
+        - Consider ensemble methods when appropriate
+        """)
+    
+    with col2:
+        st.markdown("""
+        ### 3. Model Training
+        - Configure training jobs
+        - Select appropriate compute resources
+        - Set hyperparameters
+        - Implement cross-validation strategies
+        
+        ### 4. Model Evaluation
+        - Assess model performance using validation datasets
+        - Fine-tune hyperparameters
+        - Compare different approaches
+        - Select final model for deployment
+        """)
+    
+    custom_header("SageMaker Components for Model Development", "section")
+    
+    # st.image("images/sagemaker_workflow.png", caption="Amazon SageMaker Workflow", width=800)
+    
+    st.markdown("""
+    SageMaker provides a comprehensive suite of tools and capabilities specifically for the model development phase:
+    """)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("### SageMaker Training")
+        st.markdown("""
+        - Configure and run training jobs
+        - Specify instance types and counts
+        - Set hyperparameters
+        - Use different data input modes
+        - Enable distributed training
+        - Support for spot instances
+        """)
+    
+    with col2:
+        st.markdown("### SageMaker Built-in Algorithms")
+        st.markdown("""
+        - Pre-implemented, optimized algorithms
+        - Multiple algorithm categories:
+          - Linear Learner
+          - XGBoost
+          - Image Classification
+          - Object Detection
+          - Seq2Seq
+          - DeepAR
+          - K-Means
+        """)
+    
+    with col3:
+        st.markdown("### SageMaker Model Development")
+        st.markdown("""
+        - Automated ML with Autopilot
+        - Pre-trained models with JumpStart
+        - Experiments for tracking trials
+        - Debugger for monitoring training
+        - Feature Store for feature management
+        - Model Registry for versioning
+        """)
+    
+    info_box("""
+    **The Iterative Nature of ML Development**
+    
+    Machine learning is highly iterative. You may need to revisit earlier phases as you discover new insights:
+    
+    - If model performance is poor, you might need better features
+    - Different algorithms may need to be tried
+    - Hyperparameter tuning may need multiple iterations
+    - Error analysis often leads to data improvements
+    
+    This is why SageMaker offers tools like Experiments to track multiple trials and versions.
+    """, "info")
 
-def render_modeling_approaches():
-    main_title("Modeling Approaches")
+# Modeling Approaches tab
+with tabs[2]:
+    # Mark as visited
+    st.session_state['visited_Modeling_Approaches'] = True
+    
+    custom_header("Modeling Approaches")
     
     st.markdown("""
     When developing ML models on AWS, you have several approaches to choose from, depending on your requirements,
@@ -386,7 +571,7 @@ def render_modeling_approaches():
     # Create a comparison of model development methods
     st.image("https://miro.medium.com/max/1400/1*xmxe288KJ7WB5xiR_W6jcg.png", caption="Spectrum of AWS Machine Learning Options", use_container_width=True)
     
-    subsection_title("SageMaker Model Development Methods")
+    custom_header("SageMaker Model Development Methods", "sub")
     
     col1, col2, col3 = st.columns(3)
     
@@ -428,13 +613,13 @@ def render_modeling_approaches():
         **Best for:** Highly specialized models or non-standard frameworks
         """)
     
-    important_note("""
+    info_box("""
     <b>Note:</b> All these methods rely on containerization. The container includes the training code,
     dependencies, and runtime environment needed to train your model.
-    """)
+    """, "warning")
     
     # Supervised Learning Algorithms section
-    section_title("Supervised Learning Algorithms")
+    custom_header("Supervised Learning Algorithms", "section")
     
     st.markdown("""
     Supervised learning algorithms learn from labeled training data to make predictions or classifications.
@@ -483,7 +668,7 @@ def render_modeling_approaches():
     st.pyplot(fig)
     
     # Unsupervised learning
-    section_title("Unsupervised Learning Algorithms")
+    custom_header("Unsupervised Learning Algorithms", "section")
     
     col1, col2 = st.columns(2)
     
@@ -530,10 +715,10 @@ def render_modeling_approaches():
 - Image Classification: Multi-class classification
 - Object Detection: Localize and classify objects
 - Semantic Segmentation: Pixel-level classification
-    """)
+    """, "info")
     
     # Special data types
-    section_title("Algorithms for Specialized Data Types")
+    custom_header("Algorithms for Specialized Data Types", "section")
     
     st.markdown("""
     SageMaker offers specialized algorithms for specific data types:
@@ -598,8 +783,12 @@ def render_modeling_approaches():
           - Auto-handles seasonality and missing values
         """)
 
-def render_amazon_bedrock():
-    main_title("Amazon Bedrock")
+# Amazon Bedrock tab
+with tabs[3]:
+    # Mark as visited
+    st.session_state['visited_Amazon_Bedrock'] = True
+    
+    custom_header("Amazon Bedrock")
     
     st.markdown("""
     Amazon Bedrock is a fully managed service that offers a choice of high-performing foundation models (FMs) 
@@ -641,9 +830,9 @@ def render_amazon_bedrock():
         info_box("""<b>Foundation models (FMs)</b> are large AI models pre-trained on vast amounts of data that can be adapted to a wide range of tasks.
         
 Unlike traditional ML models built for specific tasks, FMs provide a versatile foundation that can be customized for various applications.
-        """)
+        """, "tip")
     
-    section_title("Customizing Foundation Models")
+    custom_header("Customizing Foundation Models", "section")
     
     # Create a visualization comparing foundation model customization methods
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -711,7 +900,7 @@ Unlike traditional ML models built for specific tasks, FMs provide a versatile f
        - Maximum customization for specialized domains
     """)
     
-    section_title("Knowledge Bases for Amazon Bedrock")
+    custom_header("Knowledge Bases for Amazon Bedrock", "section")
     
     st.markdown("""
     Knowledge Bases for Amazon Bedrock enable you to implement Retrieval Augmented Generation (RAG) 
@@ -812,10 +1001,14 @@ Unlike traditional ML models built for specific tasks, FMs provide a versatile f
 4. <b>Context enrichment:</b> The original query is augmented with retrieved information.<br>
 5. <b>Foundation model processing:</b> The enriched prompt is sent to the foundation model.<br>
 6. <b>Response:</b> The model generates an answer based on both its training and the supplied context.
-    """)
+    """, "success")
 
-def render_neural_networks():
-    main_title("Neural Network Architecture")
+# Neural Networks tab
+with tabs[4]:
+    # Mark as visited
+    st.session_state['visited_Neural_Networks'] = True
+    
+    custom_header("Neural Network Architecture")
     
     col1, col2 = st.columns([3, 2])
     
@@ -907,11 +1100,11 @@ def render_neural_networks():
        - The process repeats with new training examples
     """)
     
-    important_note("""
+    info_box("""
     <b>Deep Learning</b> refers to neural networks with multiple hidden layers. These deep architectures can learn hierarchical features from data, with early layers learning simple features and deeper layers learning more complex, abstract features.
-    """)
+    """, "info")
     
-    section_title("Types of Neural Networks")
+    custom_header("Types of Neural Networks", "section")
     
     col1, col2, col3 = st.columns(3)
     
@@ -946,16 +1139,126 @@ def render_neural_networks():
         - LSTM and GRU variants address vanishing gradients
         - Used for time series, NLP
         """)
+    
+    custom_header("Common Neural Network Architectures", "sub")
+    
+    st.markdown("""
+    Each neural network architecture is designed to handle specific types of problems and data formats. Understanding these architectures helps in selecting the right one for your task.
+    """)
+    
+    with st.expander("Multilayer Perceptron (MLP)"):
+        st.markdown("""
+        **Multilayer Perceptron (MLP)** is the most basic type of feedforward neural network.
+        
+        - **Structure**: Input layer, one or more hidden layers, output layer
+        - **Characteristics**: Fully connected layers with non-linear activation functions
+        - **Use cases**: 
+          - Tabular data classification and regression
+          - Simple pattern recognition
+          - Feature learning
+        - **Strengths**:
+          - Simple to implement and understand
+          - Can approximate any continuous function with enough neurons
+          - Works well for structured data
+        - **Weaknesses**:
+          - Doesn't capture spatial or temporal relationships well
+          - May require more parameters compared to specialized architectures
+        """)
+    
+    with st.expander("Convolutional Neural Networks (CNN) - Detailed"):
+        st.markdown("""
+        **Convolutional Neural Networks (CNNs)** are specialized for processing grid-like data, such as images.
+        
+        - **Key Components**:
+          - **Convolutional layers**: Apply filters to detect features
+          - **Pooling layers**: Reduce dimensionality while preserving important information
+          - **Fully connected layers**: Final classification/regression based on extracted features
+        
+        - **Popular CNN Architectures**:
+          - **LeNet**: Early pioneering CNN for digit recognition
+          - **AlexNet**: Breakthrough architecture for image classification
+          - **VGG**: Simple architecture with small filters but many layers
+          - **ResNet**: Introduced skip connections to train very deep networks
+          - **Inception/GoogleNet**: Uses multi-scale processing
+        
+        - **Use cases**:
+          - Image classification
+          - Object detection and localization
+          - Image segmentation
+          - Face recognition
+          - Medical image analysis
+        """)
+    
+    with st.expander("Recurrent Neural Networks (RNN) - Detailed"):
+        st.markdown("""
+        **Recurrent Neural Networks (RNNs)** are specialized for sequential data, where the order of inputs matters.
+        
+        - **Key Variants**:
+          - **Vanilla RNN**: Basic recurrent structure (rarely used due to vanishing gradients)
+          - **LSTM (Long Short-Term Memory)**: Better at capturing long-range dependencies
+          - **GRU (Gated Recurrent Unit)**: Simplified LSTM with fewer parameters
+          - **Bidirectional RNN**: Processes sequences in both forward and backward directions
+        
+        - **Use cases**:
+          - Natural language processing
+          - Speech recognition
+          - Time series prediction
+          - Machine translation
+          - Sentiment analysis
+        
+        - **Limitations**:
+          - Can be difficult to train due to vanishing/exploding gradients
+          - Computationally expensive for very long sequences
+          - Has been increasingly replaced by transformer architectures for many NLP tasks
+        """)
+    
+    with st.expander("Transformer Architecture"):
+        st.markdown("""
+        **Transformers** have revolutionized NLP and are increasingly used in other domains.
+        
+        - **Key Components**:
+          - **Self-attention mechanisms**: Allow the model to focus on different parts of the input sequence
+          - **Multi-head attention**: Multiple attention mechanisms in parallel
+          - **Positional encoding**: Adds position information to inputs
+          - **Feed-forward neural networks**: Process the attention outputs
+        
+        - **Popular Transformer Models**:
+          - **BERT**: Bidirectional Encoder Representations from Transformers
+          - **GPT (1-4)**: Generative Pre-trained Transformer series
+          - **T5**: Text-to-Text Transfer Transformer
+          - **BART**: Bidirectional and Auto-Regressive Transformers
+        
+        - **Use cases**:
+          - Language understanding and generation
+          - Document summarization
+          - Translation
+          - Question answering
+          - Now expanding to vision, audio, and multimodal tasks
+        
+        - **Advantages**:
+          - Captures long-range dependencies effectively
+          - Highly parallelizable (unlike RNNs)
+          - Scales well with more data and compute
+          - State-of-the-art performance on many tasks
+        """)
+    
+    definition_box("Neural Network", "A computational model inspired by the human brain, consisting of layers of interconnected nodes (neurons) that process and transform data, capable of learning complex patterns from examples.")
 
-def render_model_training():
-    main_title("Model Training")
+# Model Training tab
+with tabs[5]:
+    # Mark as visited
+    st.session_state['visited_Model_Training'] = True
+    
+    custom_header("Model Training and Hyperparameters")
     
     st.markdown("""
     Model training is the process of teaching a machine learning model to make accurate predictions by showing it examples.
     The model learns patterns from the data and adjusts its internal parameters to minimize errors.
+    
+    Hyperparameters are external configuration variables that control the behavior of a machine learning algorithm and significantly impact model performance.
     """)
     
-    section_title("Overview of Amazon SageMaker Training Jobs")
+    custom_header("Amazon SageMaker Training Jobs", "sub")
     
     col1, col2 = st.columns([3, 2])
     
@@ -997,9 +1300,9 @@ def render_model_training():
 • Training metrics<br>
 • Debug and profile training jobs<br>
 • Custom algorithms and containers
-        """)
+        """, "tip")
     
-    section_title("Loading Training Data from Amazon S3")
+    custom_header("Loading Training Data from Amazon S3", "section")
     
     st.markdown("""
     Amazon SageMaker provides multiple options for loading training data into your training job.
@@ -1041,12 +1344,11 @@ def render_model_training():
         - Higher throughput for sequential access
         """)
     
-    important_note("""
+    info_box("""
     <b>Recommendation:</b> Fast File Mode is generally the best option for most modern workflows, as it combines the benefits of immediately starting training with the convenience of file system access.
-    """)
-
-def render_hyperparameters():
-    main_title("Hyperparameters")
+    """, "warning")
+    
+    custom_header("Key Hyperparameters", "sub")
     
     st.markdown("""
     Hyperparameters are external configuration variables that control the behavior of a machine learning algorithm.
@@ -1076,9 +1378,9 @@ def render_hyperparameters():
 • Affect training speed and convergence<br>
 • Influence model complexity and overfitting<br>
 • Can make the difference between a successful and failed model
-        """)
+        """, "info")
     
-    section_title("Learning Rate")
+    custom_header("Learning Rate", "section")
     
     st.markdown("""
     The learning rate is one of the most important hyperparameters. It controls how much the model parameters
@@ -1143,72 +1445,49 @@ def render_hyperparameters():
         st.pyplot(fig)
         st.markdown("**Large Learning Rate**: Fast updates but may overshoot minimum")
     
-    st.markdown("""
-    ### Impact of Learning Rate
-    
-    - **Too small**: Training will be slow and may get stuck in local minima
-    - **Too large**: Training may diverge or oscillate around the minimum
-    - **Just right**: Training converges efficiently to a good solution
-    
-    Modern approaches often use learning rate schedules that adjust the learning rate during training, 
-    typically starting with a larger rate and decreasing it over time.
-    """)
-    
-    section_title("Other Key Hyperparameters")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        ### Network Architecture Hyperparameters
-        
-        - **Number of hidden layers**: Controls model depth
-          - More layers can capture more complex patterns
-          - Too many can lead to vanishing gradients and overfitting
-        
-        - **Nodes per layer**: Controls model width
-          - More nodes increase capacity to learn
-          - Increases computational requirements
-        
-        - **Activation functions**: Type of non-linearity
-          - ReLU, Sigmoid, Tanh, etc.
-          - Affects training dynamics and representational capacity
-        
-        - **Batch normalization**: Whether to normalize layer inputs
-          - Improves training stability
-          - Reduces sensitivity to initialization
-        """)
-    
-    with col2:
-        st.markdown("""
-        ### Training Hyperparameters
-        
-        - **Batch size**: Samples per gradient update
-          - Larger batches: more stable but require more memory
-          - Smaller batches: noisier updates but better generalization
-        
-        - **Number of epochs**: Complete passes through the dataset
-          - Too few: underfitting
-          - Too many: potential overfitting
-        
-        - **Optimizer**: Algorithm for weight updates
-          - SGD, Adam, RMSProp, etc.
-          - Each has its own hyperparameters (momentum, beta)
-        
-        - **Dropout rate**: Fraction of nodes to deactivate
-          - Higher rates increase regularization
-          - Too high can prevent learning
-        """)
-
-def render_hyperparameter_tuning():
-    main_title("Hyperparameter Tuning")
+    custom_header("Hyperparameter Tuning", "sub")
     
     st.markdown("""
     Hyperparameter tuning is the process of finding the optimal hyperparameter values for a machine learning model.
     Since hyperparameters cannot be learned directly from the training data, we need special techniques to find the best configuration.
     """)
     
-    section_title("Automatic Model Tuning in Amazon SageMaker")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("### Grid Search")
+        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr1_lrg", width=250)
+        st.markdown("""
+        - Systematically searches all combinations
+        - Divides each hyperparameter range into equally spaced values
+        - Exhaustive but inefficient for high-dimensional spaces
+        - Computationally expensive
+        - Works well for small search spaces
+        """)
+    
+    with col2:
+        st.markdown("### Random Search")
+        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr2_lrg", width=250)
+        st.markdown("""
+        - Randomly samples points from hyperparameter space
+        - More efficient than grid search
+        - Better coverage with same compute budget
+        - Can be more effective at finding optimal values
+        - Works well for spaces with few important parameters
+        """)
+    
+    with col3:
+        st.markdown("### Bayesian Optimization")
+        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr3_lrg", width=250)
+        st.markdown("""
+        - Uses results of previous evaluations
+        - Builds probabilistic model of the objective
+        - Intelligently selects next points to evaluate
+        - More efficient for expensive function evaluations
+        - **Default strategy in SageMaker**
+        """)
+    
+    custom_header("Automatic Model Tuning in Amazon SageMaker", "section")
     
     col1, col2 = st.columns([3, 2])
     
@@ -1232,6 +1511,35 @@ def render_hyperparameter_tuning():
         4. **Maximum parallel jobs**
            - Number of concurrent training jobs
         """)
+        
+        st.code("""
+# Setup the hyperparameter ranges
+hyperparameter_ranges = {
+    'eta': ContinuousParameter(0, 1),
+    'min_child_weight': ContinuousParameter(1, 10),
+    'alpha': ContinuousParameter(0, 2),
+    'max_depth': IntegerParameter(1, 10),
+    'num_round': IntegerParameter(100, 1000)
+}
+
+# Define the target metric and the objective type (max/min)
+objective_metric_name = 'validation:auc'
+objective_type='Maximize'
+
+# Define the HyperparameterTuner
+tuner = HyperparameterTuner(
+    estimator = xgb,
+    objective_metric_name = objective_metric_name,
+    hyperparameter_ranges = hyperparameter_ranges,
+    objective_type = objective_type,
+    max_jobs=9,
+    max_parallel_jobs=3,
+    early_stopping_type='Auto'
+)
+
+# Start the tuning job
+tuner.fit({'training': inputs})
+""", language="python")
     
     with col2:
         # Create diagram for hyperparameter tuning
@@ -1275,124 +1583,274 @@ def render_hyperparameter_tuning():
 • Scales to thousands of hyperparameter combinations<br>
 • Supports early stopping to save on compute costs<br>
 • Tracks all experiments automatically
-        """)
+        """, "success")
     
-    section_title("Hyperparameter Tuning Techniques")
-    
-    st.markdown("""
-    There are several approaches to search through the hyperparameter space effectively:
-    """)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("### Grid Search")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr1_lrg", width=250)
-        st.markdown("""
-        - Systematically searches all combinations
-        - Divides each hyperparameter range into equally spaced values
-        - Exhaustive but inefficient for high-dimensional spaces
-        - Computationally expensive
-        - Works well for small search spaces
-        """)
-    
-    with col2:
-        st.markdown("### Random Search")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr2_lrg", width=250)
-        st.markdown("""
-        - Randomly samples points from hyperparameter space
-        - More efficient than grid search
-        - Better coverage with same compute budget
-        - Can be more effective at finding optimal values
-        - Works well for spaces with few important parameters
-        """)
-    
-    with col3:
-        st.markdown("### Bayesian Optimization")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr3_lrg", width=250)
-        st.markdown("""
-        - Uses results of previous evaluations
-        - Builds probabilistic model of the objective
-        - Intelligently selects next points to evaluate
-        - More efficient for expensive function evaluations
-        - **Default strategy in SageMaker**
-        """)
-    
-    important_note("""
-    <b>Advanced technique:</b> Amazon SageMaker also supports Hyperband, which dynamically allocates resources to promising configurations and stops underperforming ones early, making it particularly efficient for training deep learning models.
-    """)
-    
-    section_title("Implementing Hyperparameter Tuning in SageMaker")
+    custom_header("Distributed Training", "section")
     
     st.markdown("""
-    Here's how to set up hyperparameter tuning in Amazon SageMaker using the Python SDK:
+    **Distributed training** allows machine learning training to be split across multiple machines or GPUs,
+    enabling faster training of large models and datasets.
     """)
-    
-    st.code("""
-    # Setup the hyperparameter ranges
-    hyperparameter_ranges = {
-        'eta': ContinuousParameter(0, 1),
-        'min_child_weight': ContinuousParameter(1, 10),
-        'alpha': ContinuousParameter(0, 2),
-        'max_depth': IntegerParameter(1, 10),
-        'num_round': IntegerParameter(100, 1000)
-    }
-    
-    # Define the target metric and the objective type (max/min)
-    objective_metric_name = 'validation:auc'
-    objective_type='Maximize'
-    
-    # Define the HyperparameterTuner
-    tuner = HyperparameterTuner(
-        estimator = xgb,
-        objective_metric_name = objective_metric_name,
-        hyperparameter_ranges = hyperparameter_ranges,
-        objective_type = objective_type,
-        max_jobs=9,
-        max_parallel_jobs=3,
-        early_stopping_type='Auto'
-    )
-    
-    # Start the tuning job
-    tuner.fit({'training': inputs})
-    """, language="python")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
         st.markdown("""
-        ### Hyperparameter Ranges
+        ### Data Parallelism
         
-        - **ContinuousParameter**: Float values within a range
-          - Example: learning rate, regularization strength
+        - **How it works**:
+          - Splitting the dataset across multiple nodes
+          - Each node has a copy of the complete model
+          - Nodes process different data batches in parallel
+          - Gradients are synchronized to update the model
         
-        - **IntegerParameter**: Integer values within a range
-          - Example: max_depth, num_round
-        
-        - **CategoricalParameter**: Values from a discrete set
-          - Example: activation function, optimizer
+        - **Best for**:
+          - Large datasets
+          - Models that fit in single device memory
+          - Batch size that can be divided across devices
         """)
     
     with col2:
         st.markdown("""
-        ### Scaling Types
+        ### Model Parallelism
         
-        For numeric hyperparameters, you can specify a scaling type:
+        - **How it works**:
+          - Splitting the model across multiple nodes
+          - Different parts of the model run on different devices
+          - Activations are passed between devices during forward pass
+          - Gradients passed between devices during backward pass
         
-        - **Linear**: Uniform sampling across range
-          - Good for narrow ranges (within one order of magnitude)
-        
-        - **Logarithmic**: Values sampled on log scale
-          - Good for wide ranges (multiple orders of magnitude)
-          - Example: learning rate from 0.0001 to 0.1
-        
-        - **Auto**: SageMaker chooses the appropriate scale
+        - **Best for**:
+          - Large models that don't fit in single device memory
+          - Models with components that can be efficiently partitioned
+          - Giant neural networks with billions of parameters
         """)
     
-    section_title("Warm Start Tuning")
+    custom_header("Early Stopping", "section")
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        st.markdown("""
+        **Early stopping** is a technique that stops training when the model's performance on a validation set stops improving.
+        This helps prevent overfitting and saves compute resources.
+        
+        ### How Early Stopping Works
+        
+        1. Monitor a validation metric during training
+        2. Stop training when the metric stops improving for a specified number of iterations
+        3. Use the best model from the training process
+        
+        ### Benefits of Early Stopping
+        
+        - **Prevents overfitting**: Stops before model starts memorizing training data
+        - **Reduces training time**: Avoids unnecessary additional epochs
+        - **Automatic optimal epoch selection**: No need to manually determine the ideal number of epochs
+        - **Resource efficiency**: Saves compute resources by not running unnecessary iterations
+        """)
+    
+    with col2:
+        # Create visualization for early stopping
+        epochs = np.arange(1, 101)
+        train_loss = 1 / (1 + 0.1*epochs) + 0.1*np.random.randn(100)
+        val_loss = 1 / (1 + 0.1*epochs) + 0.2/(1 + 0.04*epochs) + 0.1*np.random.randn(100)
+        
+        # Make validation loss start increasing after epoch 50
+        val_loss[50:] = val_loss[50:] + 0.005 * (epochs[50:] - 50)
+        
+        best_epoch = np.argmin(val_loss)
+        
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.plot(epochs, train_loss, 'b-', label='Training Loss')
+        ax.plot(epochs, val_loss, 'r-', label='Validation Loss')
+        ax.axvline(x=best_epoch, color='g', linestyle='--', label=f'Early Stopping (Epoch {best_epoch})')
+        
+        # Highlight overfitting region
+        ax.fill_between(epochs[best_epoch:], val_loss[best_epoch:], train_loss[best_epoch:], 
+                       alpha=0.3, color='orange', label='Overfitting Region')
+        
+        ax.set_xlabel('Epochs')
+        ax.set_ylabel('Loss')
+        ax.set_title('Early Stopping to Prevent Overfitting')
+        ax.legend()
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        st.pyplot(fig)
+        
+        info_box("""<b>SageMaker Early Stopping:</b><br><br>
+        
+SageMaker automatically implements early stopping for hyperparameter tuning jobs, saving time and resources by terminating poorly performing training jobs early.
+        """, "tip")
+    
+    custom_header("Ensemble Learning", "section")
     
     st.markdown("""
-    Amazon SageMaker also supports **Warm Start Tuning**, which lets you start a new hyperparameter tuning job using one or more previous tuning jobs as a starting point.
+    Ensemble learning combines multiple machine learning models to produce a more powerful model that has better predictive performance than any individual model in the ensemble.
+    """)
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        st.markdown("""
+        ### Key Benefits of Ensemble Methods
+        
+        - **Improved accuracy**: Combined models often outperform individual models
+        - **Reduced overfitting**: Ensembles tend to generalize better to new data
+        - **Increased stability**: Less variance in predictions across different datasets
+        - **Better handling of complex problems**: Capture different aspects of the data
+        
+        ### When to Use Ensembles
+        
+        - When you need the highest possible accuracy
+        - When you have computational resources for multiple models
+        - When individual models have complementary strengths
+        - When you want to reduce the risk of selecting a poor model
+        """)
+    
+    with col2:
+        info_box("""<b>Types of Ensemble Methods:</b><br><br>
+        
+• <b>Stacking</b>: Trains a meta-model on the predictions of base models<br>
+• <b>Bagging</b>: Trains models on random subsets of the data (e.g., Random Forest)<br>
+• <b>Boosting</b>: Builds models sequentially, each correcting the errors of previous models (e.g., XGBoost)<br>
+• <b>Voting</b>: Combines predictions through majority vote (classification) or averaging (regression)
+        """, "info")
+    
+    with st.expander("Stacking (Stacked Generalization)"):
+        st.markdown("""
+        ### Stacking (Stacked Generalization)
+        
+        Stacking trains a meta-model to combine the predictions of several base models.
+        
+        - **How it works**:
+          - Train multiple base models on the training data
+          - Use predictions from these models as inputs to a meta-model
+          - Meta-model learns to combine base predictions optimally
+        
+        - **Strengths**:
+          - Can combine very different types of models
+          - Often achieves higher accuracy than any single model
+          - Leverages strengths of different algorithms
+        
+        - **Implementation**:
+          - Base layer: diverse models (e.g., random forest, SVM, neural network)
+          - Meta-model: simple model to combine predictions (e.g., logistic regression)
+        
+        **Example in Python:**
+        ```python
+        from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+        from sklearn.svm import SVC
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.model_selection import train_test_split
+        
+        # Train base models
+        rf = RandomForestClassifier()
+        gb = GradientBoostingClassifier()
+        svm = SVC(probability=True)
+        
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3)
+        
+        # Get predictions from base models
+        rf.fit(X_train, y_train)
+        rf_preds = rf.predict_proba(X_val)
+        
+        gb.fit(X_train, y_train)
+        gb_preds = gb.predict_proba(X_val)
+        
+        svm.fit(X_train, y_train)
+        svm_preds = svm.predict_proba(X_val)
+        
+        # Combine predictions as new features
+        stacked_features = np.column_stack([rf_preds, gb_preds, svm_preds])
+        
+        # Train meta-model
+        meta_model = LogisticRegression()
+        meta_model.fit(stacked_features, y_val)
+        ```
+        """)
+    
+    with st.expander("Bagging (Bootstrap Aggregating)"):
+        st.markdown("""
+        ### Bagging (Bootstrap Aggregating)
+        
+        Bagging reduces variance by training the same algorithm on different subsets of the training data.
+        
+        - **How it works**:
+          - Create multiple training sets by sampling with replacement
+          - Train the same algorithm on each sample
+          - Combine predictions (majority vote or average)
+        
+        - **Strengths**:
+          - Reduces variance and helps avoid overfitting
+          - Improves stability and accuracy
+          - Works well with high-variance models (e.g., decision trees)
+        
+        - **Examples**:
+          - Random Forest (bagging with decision trees)
+          - Bagged SVM
+          - Extra Trees (extremely randomized trees)
+        
+        **Example: Random Forest**
+        ```python
+        from sklearn.ensemble import RandomForestClassifier
+        
+        # Random Forest is an implementation of bagging with decision trees
+        rf = RandomForestClassifier(n_estimators=100, bootstrap=True)
+        rf.fit(X_train, y_train)
+        y_pred = rf.predict(X_test)
+        ```
+        """)
+    
+    with st.expander("Boosting"):
+        st.markdown("""
+        ### Boosting
+        
+        Boosting builds models sequentially, with each model correcting the errors of its predecessors.
+        
+        - **How it works**:
+          - Train models sequentially
+          - Each model focuses on examples previous models got wrong
+          - Weighted combination of all models
+        
+        - **Strengths**:
+          - Often achieves best performance of ensemble methods
+          - Makes weak learners stronger
+          - Can capture complex patterns
+        
+        - **Examples**:
+          - AdaBoost
+          - Gradient Boosting Machines (GBM)
+          - XGBoost
+          - LightGBM
+          - CatBoost
+        
+        **Example: XGBoost**
+        ```python
+        from xgboost import XGBClassifier
+        
+        xgb = XGBClassifier(
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=5
+        )
+        xgb.fit(X_train, y_train)
+        y_pred = xgb.predict(X_test)
+        ```
+        """)
+
+# Hyperparameters tab
+with tabs[6]:
+    # Hyperparameters content removed as it's combined with the Model Training tab
+    custom_header("Hyperparameter Optimization Techniques")
+    
+    st.markdown("""
+    Beyond basic tuning, there are several advanced techniques for optimizing hyperparameters that can help improve model performance and training efficiency.
+    """)
+    
+    custom_header("Warm Start Tuning", "sub")
+    
+    st.markdown("""
+    Amazon SageMaker supports **Warm Start Tuning**, which lets you start a new hyperparameter tuning job using one or more previous tuning jobs as a starting point.
     """)
     
     col1, col2 = st.columns([3, 2])
@@ -1447,450 +1905,159 @@ def render_hyperparameter_tuning():
         ax.legend()
         
         st.pyplot(fig)
-
-def render_distributed_training():
-    main_title("Distributed Training and Early Stopping")
+    
+    custom_header("Transfer Learning and Fine-Tuning", "section")
     
     st.markdown("""
-    When dealing with large models or datasets, distributed training can significantly reduce training time.
-    Additionally, techniques like early stopping can help optimize the training process and prevent overfitting.
-    """)
-    
-    section_title("Early Stopping")
-    
-    col1, col2 = st.columns([3, 2])
-    
-    with col1:
-        st.markdown("""
-        **Early stopping** is a technique that stops training when the model's performance on a validation set stops improving.
-        This helps prevent overfitting and saves compute resources.
-        
-        ### How Early Stopping Works
-        
-        1. Monitor a validation metric during training
-        2. Stop training when the metric stops improving for a specified number of iterations
-        3. Use the best model from the training process
-        
-        ### Benefits of Early Stopping
-        
-        - **Prevents overfitting**: Stops before model starts memorizing training data
-        - **Reduces training time**: Avoids unnecessary additional epochs
-        - **Automatic optimal epoch selection**: No need to manually determine the ideal number of epochs
-        - **Resource efficiency**: Saves compute resources by not running unnecessary iterations
-        """)
-    
-    with col2:
-        # Create visualization for early stopping
-        epochs = np.arange(1, 101)
-        train_loss = 1 / (1 + 0.1*epochs) + 0.1*np.random.randn(100)
-        val_loss = 1 / (1 + 0.1*epochs) + 0.2/(1 + 0.04*epochs) + 0.1*np.random.randn(100)
-        
-        # Make validation loss start increasing after epoch 50
-        val_loss[50:] = val_loss[50:] + 0.005 * (epochs[50:] - 50)
-        
-        best_epoch = np.argmin(val_loss)
-        
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.plot(epochs, train_loss, 'b-', label='Training Loss')
-        ax.plot(epochs, val_loss, 'r-', label='Validation Loss')
-        ax.axvline(x=best_epoch, color='g', linestyle='--', label=f'Early Stopping (Epoch {best_epoch})')
-        
-        # Highlight overfitting region
-        ax.fill_between(epochs[best_epoch:], val_loss[best_epoch:], train_loss[best_epoch:], 
-                       alpha=0.3, color='orange', label='Overfitting Region')
-        
-        ax.set_xlabel('Epochs')
-        ax.set_ylabel('Loss')
-        ax.set_title('Early Stopping to Prevent Overfitting')
-        ax.legend()
-        ax.grid(True, linestyle='--', alpha=0.7)
-        
-        st.pyplot(fig)
-        
-        info_box("""<b>SageMaker Early Stopping:</b><br><br>
-        
-SageMaker automatically implements early stopping for hyperparameter tuning jobs, saving time and resources by terminating poorly performing training jobs early.
-        """)
-    
-    section_title("Distributed Training")
-    
-    st.markdown("""
-    **Distributed training** allows machine learning training to be split across multiple machines or GPUs,
-    enabling faster training of large models and datasets.
+    Transfer learning is a machine learning technique where a model developed for one task is reused as the starting point for a model on a different task.
     """)
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
         st.markdown("""
-        ### Data Parallelism
+        ### Benefits of Transfer Learning
         
-        - **How it works**:
-          - Splitting the dataset across multiple nodes
-          - Each node has a copy of the complete model
-          - Nodes process different data batches in parallel
-          - Gradients are synchronized to update the model
+        - **Reduced training time**
+          - Start with pre-learned features
+          - Requires less data for your specific task
         
-        - **Best for**:
-          - Large datasets
-          - Models that fit in single device memory
-          - Batch size that can be divided across devices
+        - **Better performance**
+          - Leverage knowledge from related domains
+          - Particularly useful for image and text data
+        
+        - **Lower resource requirements**
+          - Doesn't require training large models from scratch
+          - More accessible for smaller teams or projects
         """)
     
     with col2:
         st.markdown("""
-        ### Model Parallelism
+        ### When to Use Transfer Learning
         
-        - **How it works**:
-          - Splitting the model across multiple nodes
-          - Different parts of the model run on different devices
-          - Activations are passed between devices during forward pass
-          - Gradients passed between devices during backward pass
+        - **Limited training data**
+          - When you have insufficient data for your task
         
-        - **Best for**:
-          - Large models that don't fit in single device memory
-          - Models with components that can be efficiently partitioned
-          - Giant neural networks with billions of parameters
+        - **Related tasks**
+          - Source and target tasks share common features
+        
+        - **Specialized domains**
+          - Medical imaging, satellite imagery, etc.
+        
+        - **Complex models**
+          - Large language models, vision transformers
         """)
-
-def render_ensemble_learning():
-    main_title("Ensemble Learning")
     
     st.markdown("""
-    Ensemble learning combines multiple machine learning models to produce a more powerful model that has better predictive performance than any individual model in the ensemble.
+    ### Transfer Learning with SageMaker JumpStart
+    
+    SageMaker JumpStart provides pre-trained models that can be fine-tuned for your specific task:
+    
+    1. **Select a pre-trained model** suitable for your use case
+    2. **Fine-tune the model** with your domain-specific data
+    3. **Deploy the customized model** for inference
+    
+    JumpStart includes models for:
+    - Computer vision
+    - Natural language processing
+    - Tabular data analysis
+    - Time series forecasting
+    """)
+    
+    st.code("""
+    # Import SageMaker and JumpStart modules
+    import sagemaker
+    from sagemaker.jumpstart.model import JumpStartModel
+    
+    # Initialize SageMaker session
+    sagemaker_session = sagemaker.Session()
+    
+    # Select a pre-trained model
+    model_id = "huggingface-sst2-distilbert-base-uncased"
+    
+    # Create model instance
+    model = JumpStartModel(model_id=model_id)
+    
+    # Fine-tune the model with your data
+    model.fit(
+        {"train": "s3://bucket/path/to/train/data",
+         "validation": "s3://bucket/path/to/validation/data"}
+    )
+    
+    # Deploy the fine-tuned model
+    predictor = model.deploy()
+    """, language="python")
+    
+    custom_header("Learning Rate Scheduling", "section")
+    
+    st.markdown("""
+    Learning rate scheduling adjusts the learning rate during training to improve convergence and model performance.
     """)
     
     col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        ### Key Benefits of Ensemble Methods
+        ### Common Learning Rate Schedules
         
-        - **Improved accuracy**: Combined models often outperform individual models
-        - **Reduced overfitting**: Ensembles tend to generalize better to new data
-        - **Increased stability**: Less variance in predictions across different datasets
-        - **Better handling of complex problems**: Capture different aspects of the data
+        - **Step Decay**
+          - Reduce learning rate by a factor at specific epochs
+          - Example: Halve the learning rate every 10 epochs
         
-        ### When to Use Ensembles
+        - **Exponential Decay**
+          - Learning rate decreases exponentially
+          - LR = initial_lr * e^(-k*t)
         
-        - When you need the highest possible accuracy
-        - When you have computational resources for multiple models
-        - When individual models have complementary strengths
-        - When you want to reduce the risk of selecting a poor model
+        - **Cosine Annealing**
+          - Learning rate follows a cosine curve
+          - Smooth transition from high to low values
+        
+        - **Cyclical Learning Rates**
+          - Learning rate cycles between bounds
+          - Helps escape local minima
+        
+        - **One-Cycle Policy**
+          - Learning rate first increases then decreases
+          - Helps faster convergence
         """)
     
     with col2:
-        info_box("""<b>Types of Ensemble Methods:</b><br><br>
+        # Create learning rate schedule visualization
+        epochs = np.arange(0, 100)
         
-• <b>Stacking</b>: Trains a meta-model on the predictions of base models<br>
-• <b>Bagging</b>: Trains models on random subsets of the data (e.g., Random Forest)<br>
-• <b>Boosting</b>: Builds models sequentially, each correcting the errors of previous models (e.g., XGBoost)<br>
-• <b>Voting</b>: Combines predictions through majority vote (classification) or averaging (regression)
-        """)
+        # Different learning rate schedules
+        step_decay = 0.1 * np.power(0.5, np.floor(epochs / 20))
+        exp_decay = 0.1 * np.exp(-0.01 * epochs)
+        cosine_decay = 0.1 * (1 + np.cos(np.pi * epochs / 100)) / 2
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.plot(epochs, step_decay, label="Step Decay", linewidth=2)
+        ax.plot(epochs, exp_decay, label="Exponential Decay", linewidth=2)
+        ax.plot(epochs, cosine_decay, label="Cosine Annealing", linewidth=2)
+        
+        ax.set_xlabel("Epochs")
+        ax.set_ylabel("Learning Rate")
+        ax.set_title("Learning Rate Schedules")
+        ax.grid(True, linestyle='--', alpha=0.7)
+        ax.legend()
+        
+        st.pyplot(fig)
     
-    section_title("Ensemble Learning Techniques")
+    info_box("""
+    <b>Best Practices for Hyperparameter Optimization:</b><br><br>
     
-    tab1, tab2, tab3 = st.tabs(["Stacking", "Bagging", "Boosting"])
-    
-    with tab1:
-        col1, col2 = st.columns([2, 3])
-        
-        with col1:
-            st.markdown("""
-            ### Stacking (Stacked Generalization)
-            
-            - **How it works**:
-              - Train multiple base models on the training data
-              - Use predictions from these models as inputs to a meta-model
-              - Meta-model learns to combine base predictions optimally
-            
-            - **Strengths**:
-              - Can combine very different types of models
-              - Often achieves higher accuracy than any single model
-              - Leverages strengths of different algorithms
-            
-            - **Implementation**:
-              - Base layer: diverse models (e.g., random forest, SVM, neural network)
-              - Meta-model: simple model to combine predictions (e.g., logistic regression)
-            """)
-        
-        with col2:
-            # Stacking visualization
-            fig, ax = plt.subplots(figsize=(8, 6))
-            
-            # Dataset
-            ax.add_patch(plt.Rectangle((1, 9), 8, 1, fill=True, facecolor='#E8F5E9', 
-                                      edgecolor='#388E3C', alpha=0.7))
-            ax.text(5, 9.5, "Training Data", ha='center', va='center', fontsize=12)
-            
-            # Base models
-            base_models = [
-                {"name": "Random Forest", "x": 2, "y": 7, "color": "#E1F5FE"},
-                {"name": "Neural Network", "x": 5, "y": 7, "color": "#FFECB3"},
-                {"name": "SVM", "x": 8, "y": 7, "color": "#F3E5F5"}
-            ]
-            
-            for model in base_models:
-                ax.add_patch(plt.Rectangle((model["x"]-1, model["y"]-0.5), 2, 1, fill=True, 
-                                          facecolor=model["color"], edgecolor='gray', alpha=0.7))
-                ax.text(model["x"], model["y"], model["name"], ha='center', va='center', fontsize=10)
-                
-                # Connect to dataset
-                ax.arrow(model["x"], 9, 0, -1.5, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Predictions
-            for i, model in enumerate(base_models):
-                ax.add_patch(plt.Rectangle((model["x"]-0.75, model["y"]-2.5), 1.5, 1, fill=True, 
-                                          facecolor=model["color"], edgecolor='gray', alpha=0.7))
-                ax.text(model["x"], model["y"]-2, f"Predictions {i+1}", 
-                       ha='center', va='center', fontsize=8)
-                
-                # Connect to model
-                ax.arrow(model["x"], model["y"]-0.5, 0, -0.5, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Meta model
-            ax.add_patch(plt.Rectangle((3, 3), 4, 1, fill=True, facecolor='#FF9900', 
-                                      edgecolor='#E65100', alpha=0.7))
-            ax.text(5, 3.5, "Meta Model (Logistic Regression)", 
-                   ha='center', va='center', fontsize=10)
-            
-            # Connect predictions to meta model
-            for model in base_models:
-                ax.arrow(model["x"], model["y"]-1.5, 5-model["x"], 4.5-model["y"], head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Final prediction
-            ax.add_patch(plt.Rectangle((4, 1), 2, 1, fill=True, facecolor='#DCEDC8', 
-                                      edgecolor='#689F38', alpha=0.7))
-            ax.text(5, 1.5, "Final Prediction", ha='center', va='center', fontsize=10)
-            
-            # Connect meta model to final prediction
-            ax.arrow(5, 3, 0, -0.5, head_width=0.2, head_length=0.2, 
-                    fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            ax.set_xlim(0, 10)
-            ax.set_ylim(0, 10)
-            ax.axis('off')
-            ax.set_title("Stacking Ensemble Method")
-            
-            st.pyplot(fig)
-    
-    with tab2:
-        col1, col2 = st.columns([2, 3])
-        
-        with col1:
-            st.markdown("""
-            ### Bagging (Bootstrap Aggregating)
-            
-            - **How it works**:
-              - Create multiple training sets by sampling with replacement
-              - Train the same algorithm on each sample
-              - Combine predictions (majority vote or average)
-            
-            - **Strengths**:
-              - Reduces variance and helps avoid overfitting
-              - Improves stability and accuracy
-              - Works well with high-variance models (e.g., decision trees)
-            
-            - **Examples**:
-              - Random Forest (bagging with decision trees)
-              - Bagged SVM
-              - Extra Trees (extremely randomized trees)
-            """)
-        
-        with col2:
-            # Bagging visualization
-            fig, ax = plt.subplots(figsize=(8, 6))
-            
-            # Original dataset
-            ax.add_patch(plt.Rectangle((4, 9), 2, 1, fill=True, facecolor='#E8F5E9', 
-                                     edgecolor='#388E3C', alpha=0.7))
-            ax.text(5, 9.5, "Original Dataset", ha='center', va='center', fontsize=12)
-            
-            # Bootstrap samples
-            bootstrap_samples = [
-                {"x": 2, "y": 7, "samples": [1, 2, 2, 4, 5]},
-                {"x": 5, "y": 7, "samples": [1, 3, 3, 4, 6]},
-                {"x": 8, "y": 7, "samples": [2, 2, 3, 5, 6]}
-            ]
-            
-            for i, sample in enumerate(bootstrap_samples):
-                ax.add_patch(plt.Rectangle((sample["x"]-1, sample["y"]-0.5), 2, 1, fill=True, 
-                                         facecolor='#E1F5FE', edgecolor='#1E88E5', alpha=0.7))
-                ax.text(sample["x"], sample["y"], f"Bootstrap Sample {i+1}", 
-                       ha='center', va='center', fontsize=10)
-                
-                # Show some sample numbers
-                ax.text(sample["x"], sample["y"]-0.3, f"Samples: {sample['samples']}", 
-                       ha='center', va='center', fontsize=7)
-                
-                # Connect to original dataset
-                ax.arrow(5, 9, sample["x"]-5, -1.5, head_width=0.2, head_length=0.2, 
-                       fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Models
-            models = [
-                {"x": 2, "y": 5, "name": "Model 1"},
-                {"x": 5, "y": 5, "name": "Model 2"},
-                {"x": 8, "y": 5, "name": "Model 3"}
-            ]
-            
-            for i, model in enumerate(models):
-                ax.add_patch(plt.Rectangle((model["x"]-1, model["y"]-0.5), 2, 1, fill=True, 
-                                         facecolor='#FFECB3', edgecolor='#FFA000', alpha=0.7))
-                ax.text(model["x"], model["y"], model["name"], ha='center', va='center', fontsize=10)
-                
-                # Connect to bootstrap sample
-                sample = bootstrap_samples[i]
-                ax.arrow(sample["x"], sample["y"]-0.5, 0, -1, head_width=0.2, head_length=0.2, 
-                       fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Predictions
-            predictions = [
-                {"x": 2, "y": 3, "pred": "Class A"},
-                {"x": 5, "y": 3, "pred": "Class B"},
-                {"x": 8, "y": 3, "pred": "Class A"}
-            ]
-            
-            for i, pred in enumerate(predictions):
-                ax.add_patch(plt.Rectangle((pred["x"]-0.75, pred["y"]-0.5), 1.5, 1, fill=True, 
-                                          facecolor='#F3E5F5', edgecolor='#9C27B0', alpha=0.7))
-                ax.text(pred["x"], pred["y"], pred["pred"], ha='center', va='center', fontsize=8)
-                
-                # Connect to model
-                model = models[i]
-                ax.arrow(model["x"], model["y"]-0.5, 0, -1, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Aggregation
-            ax.add_patch(plt.Rectangle((3.5, 1), 3, 1, fill=True, facecolor='#FF9900', 
-                                      edgecolor='#E65100', alpha=0.7))
-            ax.text(5, 1.5, "Majority Vote: Class A", ha='center', va='center', fontsize=10)
-            
-            # Connect predictions to aggregation
-            for pred in predictions:
-                ax.arrow(pred["x"], pred["y"]-0.5, 5-pred["x"], 1.5-pred["y"]+0.5, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            ax.set_xlim(0, 10)
-            ax.set_ylim(0, 10)
-            ax.axis('off')
-            ax.set_title("Bagging Ensemble Method")
-            
-            st.pyplot(fig)
-    
-    with tab3:
-        col1, col2 = st.columns([2, 3])
-        
-        with col1:
-            st.markdown("""
-            ### Boosting
-            
-            - **How it works**:
-              - Train models sequentially
-              - Each model focuses on examples previous models got wrong
-              - Weighted combination of all models
-            
-            - **Strengths**:
-              - Often achieves best performance of ensemble methods
-              - Makes weak learners stronger
-              - Can capture complex patterns
-            
-            - **Examples**:
-              - AdaBoost
-              - Gradient Boosting Machines (GBM)
-              - XGBoost
-              - LightGBM
-              - CatBoost
-            """)
-        
-        with col2:
-            # Boosting visualization
-            fig, ax = plt.subplots(figsize=(8, 6))
-            
-            # Dataset
-            ax.add_patch(plt.Rectangle((1, 8.5), 8, 1, fill=True, facecolor='#E8F5E9', 
-                                      edgecolor='#388E3C', alpha=0.7))
-            ax.text(5, 9, "Training Data (with weights)", ha='center', va='center', fontsize=12)
-            
-            # Models in sequence
-            models = [
-                {"x": 2, "y": 6.5, "name": "Model 1", "error_focus": "Initial uniform weights"},
-                {"x": 5, "y": 6.5, "name": "Model 2", "error_focus": "Focus on errors from Model 1"},
-                {"x": 8, "y": 6.5, "name": "Model 3", "error_focus": "Focus on errors from Model 2"}
-            ]
-            
-            for i, model in enumerate(models):
-                # Model box
-                ax.add_patch(plt.Rectangle((model["x"]-1.5, model["y"]-0.5), 3, 1, fill=True, 
-                                         facecolor='#FFECB3', edgecolor='#FFA000', alpha=0.7))
-                ax.text(model["x"], model["y"], model["name"], ha='center', va='center', fontsize=10)
-                
-                # Error focus
-                ax.text(model["x"], model["y"]-0.3, model["error_focus"], 
-                       ha='center', va='center', fontsize=7, fontstyle='italic')
-                
-                # Data to model connection
-                ax.arrow(5, 8.5, model["x"]-5, -1.5, head_width=0.2, head_length=0.2, 
-                       fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Sequential flow between models
-            for i in range(len(models)-1):
-                ax.arrow(models[i]["x"]+1.5, models[i]["y"], 1.5, 0, head_width=0.2, head_length=0.2, 
-                       fc='black', ec='black', width=0.05, alpha=0.7)
-                ax.text(models[i]["x"]+2.25, models[i]["y"]+0.3, "Update weights", 
-                       ha='center', va='center', fontsize=7, fontstyle='italic')
-            
-            # Predictions
-            for model in models:
-                y_pos = model["y"] - 2
-                ax.add_patch(plt.Rectangle((model["x"]-0.75, y_pos-0.5), 1.5, 1, fill=True, 
-                                          facecolor='#F3E5F5', edgecolor='#9C27B0', alpha=0.7))
-                ax.text(model["x"], y_pos, f"Weak Prediction", 
-                       ha='center', va='center', fontsize=8)
-                
-                # Connect model to prediction
-                ax.arrow(model["x"], model["y"]-0.5, 0, -1.5, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            # Final weighted prediction
-            ax.add_patch(plt.Rectangle((3.5, 2), 3, 1, fill=True, facecolor='#FF9900', 
-                                      edgecolor='#E65100', alpha=0.7))
-            ax.text(5, 2.5, "Weighted Combination", ha='center', va='center', fontsize=10)
-            
-            # Connect predictions to weighted combination
-            weights = [0.2, 0.3, 0.5]
-            for i, model in enumerate(models):
-                y_pos = model["y"] - 2
-                ax.arrow(model["x"], y_pos-0.5, 5-model["x"], 2.5-y_pos+0.5, head_width=0.2, head_length=0.2, 
-                        fc='black', ec='black', width=0.05, alpha=0.7)
-                
-                # Weight label
-                mid_x = (model["x"] + 5) / 2
-                mid_y = (y_pos - 0.5 + 2.5 + 0.5) / 2
-                ax.text(mid_x, mid_y, f"w={weights[i]}", ha='center', va='center', 
-                       fontsize=8, bbox=dict(facecolor='white', alpha=0.7))
-            
-            # Final prediction
-            ax.add_patch(plt.Rectangle((4, 0.5), 2, 1, fill=True, facecolor='#DCEDC8', 
-                                      edgecolor='#689F38', alpha=0.7))
-            ax.text(5, 1, "Strong Prediction", ha='center', va='center', fontsize=10)
-            
-            # Connect weighted combination to final prediction
-            ax.arrow(5, 2, 0, -0.5, head_width=0.2, head_length=0.2, 
-                    fc='black', ec='black', width=0.05, alpha=0.7)
-            
-            ax.set_xlim(0, 10)
-            ax.set_ylim(0, 10)
-            ax.axis('off')
-            ax.set_title("Boosting Ensemble Method")
-            
-            st.pyplot(fig)
+    1. Start with a coarse search to identify promising regions, then refine.<br>
+    2. Use logarithmic scales for parameters that span multiple orders of magnitude (e.g., learning rate).<br>
+    3. Monitor both training and validation metrics to detect overfitting.<br>
+    4. Consider the computational budget when designing the search strategy.<br>
+    5. Use warm start tuning when exploring related model architectures.<br>
+    6. Save hyperparameters from successful runs for future reference.
+    """, "tip")
 
-def render_quiz():
-    main_title("Knowledge Check")
+# Knowledge Check tab
+with tabs[7]:
+    custom_header("Knowledge Check")
     
     st.markdown("""
     Test your understanding of Domain 2: ML Model Development concepts with this quiz.
@@ -1930,17 +2097,22 @@ def render_quiz():
     if not st.session_state['quiz_attempted']:
         # Form to collect answers
         with st.form("quiz_form"):
+            st.markdown("### Answer the following questions:")
+            
             user_answers = {}
             
+            # Display 5 questions
             for i, q in enumerate(questions):
-                st.markdown(f"**Question {i+1}**: {q['question']}")
+                st.markdown(f"**Question {i+1}:** {q['question']}")
                 user_answers[i] = st.radio(
                     f"Select your answer for question {i+1}:",
                     q['options'],
+                    index=None,
                     key=f"q{i}"
                 )
                 st.markdown("---")
             
+            # Submit button
             submitted = st.form_submit_button("Submit Quiz")
             
             if submitted:
@@ -1956,7 +2128,7 @@ def render_quiz():
     else:
         # Show results
         score = st.session_state['quiz_score']
-        user_answers = st.session_state['answers']
+        user_answers = st.session_state.get('answers', {})
         
         st.markdown(f"### Your Score: {score}/{len(questions)}")
         
@@ -1981,59 +2153,114 @@ def render_quiz():
                 st.markdown(f"Your answer: **{user_answers[i]}**")
                 
                 if is_correct:
-                    st.markdown("**✅ Correct!**")
+                    st.markdown(f"**✅ Correct!**")
                 else:
                     st.markdown(f"**❌ Incorrect. The correct answer is: {q['correct']}**")
                 
                 st.markdown("---")
         
+        # Option to retake the quiz
         if st.button("Try Again"):
             st.session_state['quiz_attempted'] = False
             st.rerun()
 
-# Main app layout
-main_title("AWS Partner Certification Readiness: ML Engineer - Associate")
-st.markdown("### Domain 2 - ML Model Development")
-
-# Create tabs with emojis for navigation
-tabs = st.tabs([
-    "🏠 Introduction", 
-    "🔄 ML Lifecycle", 
-    "🧠 Modeling Approaches", 
-    "🤖 Amazon Bedrock", 
-    "🔬 Neural Networks", 
-    "🚂 Model Training", 
-    "⚙️ Hyperparameters", 
-    "🎯 Hyperparameter Tuning", 
-    "⚡ Distributed Training", 
-    "🌟 Ensemble Learning", 
-    "❓ Knowledge Check"
-])
-
-# Render content based on tab selection
-with tabs[0]:
-    render_introduction()
-with tabs[1]:
-    render_ml_lifecycle()
-with tabs[2]:
-    render_modeling_approaches()
-with tabs[3]:
-    render_amazon_bedrock()
-with tabs[4]:
-    render_neural_networks()
-with tabs[5]:
-    render_model_training()
-with tabs[6]:
-    render_hyperparameters()
-with tabs[7]:
-    render_hyperparameter_tuning()
+# Resources tab
 with tabs[8]:
-    render_distributed_training()
-with tabs[9]:
-    render_ensemble_learning()
-with tabs[10]:
-    render_quiz()
+    custom_header("Additional Resources")
+    
+    st.markdown("""
+    Explore these resources to deepen your understanding of ML Model Development.
+    These materials provide additional context and practical guidance for implementing the concepts covered in this module.
+    """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### AWS Documentation")
+        st.markdown("""
+        - [Amazon SageMaker Developer Guide](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
+        - [Amazon Bedrock User Guide](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html)
+        - [SageMaker JumpStart](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-jumpstart.html)
+        - [SageMaker Automatic Model Tuning](https://docs.aws.amazon.com/sagemaker/latest/dg/automatic-model-tuning.html)
+        - [Distributed Training with SageMaker](https://docs.aws.amazon.com/sagemaker/latest/dg/distributed-training.html)
+        - [SageMaker Built-in Algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
+        - [Transfer Learning with SageMaker](https://docs.aws.amazon.com/sagemaker/latest/dg/transfer-learning.html)
+        """)
+        
+        st.markdown("### AWS Blog Posts")
+        st.markdown("""
+        - [Building, training, and deploying ML models with Amazon SageMaker](https://aws.amazon.com/blogs/machine-learning/building-training-and-deploying-machine-learning-models-with-amazon-sagemaker/)
+        - [Building RAG applications with Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/build-rag-applications-with-amazon-bedrock/)
+        - [Hyperparameter optimization best practices](https://aws.amazon.com/blogs/machine-learning/hyperparameter-optimization-best-practices/)
+        - [Fine-tuning foundation models with Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/fine-tune-foundation-models-with-amazon-bedrock/)
+        - [Training ML at scale with Amazon SageMaker](https://aws.amazon.com/blogs/machine-learning/train-ml-at-scale-with-amazon-sagemaker/)
+        """)
+    
+    with col2:
+        st.markdown("### Training Courses")
+        st.markdown("""
+        - [Introduction to Amazon SageMaker](https://www.aws.training/Details/eLearning?id=47225)
+        - [Practical Data Science with Amazon SageMaker](https://www.coursera.org/specializations/practical-data-science)
+        - [Getting Started with AWS Machine Learning](https://www.coursera.org/learn/aws-machine-learning)
+        - [AWS Machine Learning Foundations](https://www.udacity.com/course/aws-machine-learning-foundations--ud090)
+        - [Deep Learning on AWS](https://aws.amazon.com/training/learn-about/deep-learning/)
+        """)
+        
+        st.markdown("### Tools and Services")
+        st.markdown("""
+        - [Amazon SageMaker](https://aws.amazon.com/sagemaker/)
+        - [Amazon Bedrock](https://aws.amazon.com/bedrock/)
+        - [Amazon SageMaker JumpStart](https://aws.amazon.com/sagemaker/jumpstart/)
+        - [AWS Deep Learning Containers](https://aws.amazon.com/machine-learning/containers/)
+        - [AWS Deep Learning AMIs](https://aws.amazon.com/machine-learning/amis/)
+        - [Amazon SageMaker Studio](https://aws.amazon.com/sagemaker/studio/)
+        """)
+    
+    custom_header("AWS Machine Learning Resources", "sub")
+    
+    st.markdown("""
+    ### Hands-on Examples and Workshops
+    
+    - [Amazon SageMaker Examples GitHub Repository](https://github.com/aws/amazon-sagemaker-examples)
+    - [AWS ML Workshop](https://github.com/aws-samples/aws-machine-learning-workshop)
+    - [SageMaker Workshop](https://sagemaker-workshop.com/)
+    - [Bedrock Workshop](https://github.com/aws-samples/amazon-bedrock-workshop)
+    
+    ### AWS ML Certification Resources
+    
+    - [AWS Certified Machine Learning - Specialty](https://aws.amazon.com/certification/certified-machine-learning-specialty/)
+    - [AWS Machine Learning Exam Guide](https://d1.awsstatic.com/training-and-certification/docs-ml/AWS-Certified-Machine-Learning-Specialty_Exam-Guide.pdf)
+    - [AWS Machine Learning Practice Questions](https://d1.awsstatic.com/training-and-certification/docs-ml/AWS-Certified-Machine-Learning-Specialty_Sample-Questions.pdf)
+    - [AWS Machine Learning Ramp-Up Guide](https://d1.awsstatic.com/training-and-certification/docs-ml/AWSTrainingCertification_MachineLearning_Ramp-Up_Guide.pdf)
+    """)
+    
+    with st.expander("Amazon SageMaker Example Notebooks"):
+        st.markdown("""
+        Amazon SageMaker Example Notebooks provide end-to-end examples of various machine learning workflows.
+        
+        ### Featured Examples:
+        
+        - **Introduction to SageMaker**
+          - [SageMaker Hello World](https://github.com/aws/amazon-sagemaker-examples/blob/main/introduction_to_amazon_algorithms/xgboost_abalone/xgboost_abalone.ipynb)
+          - [SageMaker with Built-in Algorithms](https://github.com/aws/amazon-sagemaker-examples/tree/main/introduction_to_amazon_algorithms)
+        
+        - **Hyperparameter Tuning**
+          - [HPO for XGBoost](https://github.com/aws/amazon-sagemaker-examples/blob/main/hyperparameter_tuning/xgboost_direct_marketing/hpo_xgboost_direct_marketing.ipynb)
+          - [HPO for Image Classification](https://github.com/aws/amazon-sagemaker-examples/blob/main/hyperparameter_tuning/image_classification_warmstart/hpo_image_classification_warmstart.ipynb)
+        
+        - **Distributed Training**
+          - [Distributed TensorFlow](https://github.com/aws/amazon-sagemaker-examples/blob/main/sagemaker-python-sdk/tensorflow_distributed_mnist/tensorflow_distributed_mnist.ipynb)
+          - [Distributed PyTorch](https://github.com/aws/amazon-sagemaker-examples/blob/main/sagemaker-python-sdk/pytorch_mnist/pytorch_mnist.ipynb)
+        
+        - **Transfer Learning**
+          - [Transfer Learning with TensorFlow](https://github.com/aws/amazon-sagemaker-examples/blob/main/introduction_to_amazon_algorithms/transfer_learning_with_resnet50/transfer_learning_with_resnet50.ipynb)
+          - [Transfer Learning with HuggingFace and BERT](https://github.com/aws/amazon-sagemaker-examples/blob/main/sagemaker-python-sdk/huggingface_sentiment_ipynb)
+        """)
 
 # Footer
 st.markdown("---")
-st.markdown("© 2023 AWS Partner Certification Readiness | ML Engineer - Associate | Domain 2: ML Model Development")
+col1, col2 = st.columns([1, 5])
+with col1:
+    st.image("images/aws_logo.png", width=70)
+with col2:
+    st.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")

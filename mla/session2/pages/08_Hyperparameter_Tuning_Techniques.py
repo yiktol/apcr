@@ -18,8 +18,6 @@ import time
 import base64
 from io import BytesIO
 from PIL import Image
-import requests
-from streamlit_option_menu import option_menu
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -27,61 +25,72 @@ warnings.filterwarnings('ignore')
 # Set page configuration
 st.set_page_config(
     page_title="Hyperparameter Tuning Explorer",
-    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# AWS-inspired color scheme
+# AWS Color Scheme
 AWS_COLORS = {
-    "primary": "#232F3E",        # AWS Dark Blue
-    "secondary": "#FF9900",      # AWS Orange
-    "accent1": "#0073BB",        # AWS Light Blue
-    "accent2": "#D13212",        # AWS Red
-    "light": "#FFFFFF",          # White
-    "dark": "#161E2D",           # Dark Navy
-    "background": "#F2F3F3",     # Light Gray Background
-    "success": "#008296"         # Teal
+    "orange": "#FF9900",
+    "light_orange": "#FFAC31",
+    "dark_blue": "#232F3E",
+    "light_blue": "#1A73E8",
+    "teal": "#00A1C9",
+    "red": "#D13212",
+    "green": "#7AA116",
+    "purple": "#8C4FFF",
+    "light_grey": "#F2F3F3",
+    "slate": "#687078"
 }
 
-# Apply AWS-inspired styling
-def local_css():
-    st.markdown("""
-<style>
-    /* Main styling */
+# Custom CSS for AWS styling
+st.markdown("""
+    <style>
     .main {
         background-color: #FFFFFF;
     }
-    
-    /* Tab styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2px;
-        background-color: #FFFFFF;
+    .sidebar .sidebar-content {
+        background-color: #232F3E;
+        color: white;
     }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: pre-wrap;
-        background-color: #D5DBDB;
-        border-radius: 4px 4px 0px 0px;
-        gap: 1px;
-        padding: 10px 20px;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #FF9900;
+    h1, h2 {
         color: #232F3E;
     }
-    
-    /* Card styling */
-    .card {
-        border-radius: 5px;
-        padding: 20px;
-        margin-bottom: 20px;
-        background-color: #F7F7F7;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    h3, h4, h5 {
+        color: #FF9900;
     }
-    
+    .stButton>button {
+        background-color: #FF9900;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #FFAC31;
+    }
+    .highlight {
+        background-color: #FFAC31;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #F2F3F3;
+        border-radius: 4px 4px 0px 0px;
+        padding: 10px 20px;
+        color: #232F3E;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #FF9900 !important;
+        color: white !important;
+    }
     .metric-card {
         border-radius: 5px;
         padding: 15px;
@@ -90,52 +99,6 @@ def local_css():
         color: white;
         text-align: center;
     }
-    
-    /* Button styling */
-    .stButton>button {
-        background-color: #FF9900;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 8px 16px;
-        font-weight: bold;
-    }
-    
-    .stButton>button:hover {
-        background-color: #E76D0C;
-    }
-    
-    /* Headers */
-    h1, h2, h3 {
-        color: #232F3E;
-    }
-    
-    h1 {
-        font-weight: bold;
-        border-bottom: 2px solid #FF9900;
-        padding-bottom: 10px;
-    }
-    
-    /* Progress bar */
-    .stProgress > div > div {
-        background-color: #FF9900;
-    }
-    
-    /* Sidebar */
-    .sidebar .sidebar-content {
-        background-color: #232F3E;
-        color: white;
-    }
-    
-    /* Info boxes */
-    .info-box {
-        background-color: #F0F8FF;
-        border-left: 5px solid #1A73E8;
-        padding: 10px;
-        margin-bottom: 15px;
-    }
-    
-    /* Algorithm description */
     .algorithm-description {
         background-color: #F5F5F5;
         border-radius: 5px;
@@ -143,15 +106,12 @@ def local_css():
         margin-bottom: 20px;
         border-left: 5px solid #FF9900;
     }
-    
-    /* Code blocks */
     code {
         background-color: #F0F0F0;
         padding: 2px 5px;
         border-radius: 3px;
         font-family: monospace;
     }
-    
     pre {
         background-color: #232F3E;
         color: #FFFFFF;
@@ -159,12 +119,10 @@ def local_css():
         border-radius: 5px;
         overflow-x: auto;
     }
-</style>
+    </style>
     """, unsafe_allow_html=True)
 
-local_css()
-
-# Initialize session state variables
+# Initialize session state
 def init_session_state():
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
@@ -195,17 +153,17 @@ init_session_state()
 
 # Sidebar
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/aws-samples/aws-machine-learning-university-accelerated-tab/main/images/aws-logo-color-pic.jpg", width=100)
-    st.title("Hyperparameter Tuning")
     
-    st.markdown("### Session Management")
+    # Session management
+    st.subheader("⚙️ Session Management")
     if st.button("🔄 Reset Session"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         init_session_state()
         st.success("Session reset successful!")
     
-    st.markdown("### Task Selection")
+    st.markdown("---")
+    st.subheader("🛠️ Task Selection")
     task_type = st.radio(
         "Choose a task type:",
         ["Classification", "Regression"],
@@ -213,41 +171,23 @@ with st.sidebar:
     )
     st.session_state.task_type = task_type.lower()
     
-    st.markdown("### About")
+    st.markdown("---")
+    st.markdown("### About This App")
     st.info("""
     This interactive application demonstrates various hyperparameter tuning techniques 
     for machine learning models. Explore, learn, and compare different methods.
     """)
 
 # Main content
-st.title("✨ Hyperparameter Tuning Explorer")
+st.title("Hyperparameter Tuning Explorer")
+
 st.markdown("""
 <div class="card">
-This interactive e-learning application helps you understand and compare different hyperparameter tuning techniques 
-for machine learning models. Experiment with various methods and visualize their performance and efficiency.
+<p>Hyperparameter tuning is a critical step in the machine learning pipeline. It involves finding the optimal set of 
+hyperparameters for a learning algorithm to maximize its performance. This application helps you understand and 
+compare different hyperparameter tuning techniques through interactive demos and visualizations.</p>
 </div>
 """, unsafe_allow_html=True)
-
-# Navigation Tabs
-selected = option_menu(
-    menu_title=None,
-    options=["📚 Overview", "🔍 Grid Search", "🎲 Random Search", "🧠 Bayesian Optimization", "⚡ Hyperband"],
-    # icons=["book", "grid", "shuffle", "graph-up", "lightning"],
-    menu_icon="cast",
-    default_index=0,
-    orientation="horizontal",
-    styles={
-        "container": {"padding": "0!important", "background-color": f"{AWS_COLORS['light']}"},
-        "icon": {"color": f"{AWS_COLORS['primary']}", "font-size": "18px"},
-        "nav-link": {
-            "font-size": "16px", 
-            "text-align": "center", 
-            "margin": "0px", 
-            "--hover-color": f"{AWS_COLORS['background']}"
-        },
-        "nav-link-selected": {"background-color": f"{AWS_COLORS['secondary']}", "color": f"{AWS_COLORS['light']}"},
-    }
-)
 
 # Helper functions
 def load_dataset():
@@ -308,51 +248,38 @@ def create_comparison_chart():
     # Collect available results
     scores = []
     times = []
-    for method, time_key in zip(
+    methods_with_results = []
+    
+    for method, time_key, model_key in zip(
         methods, 
-        ["grid_time", "random_time", "bayesian_time", "hyperband_time"]
+        ["grid_time", "random_time", "bayesian_time", "hyperband_time"],
+        ["best_grid_model", "best_random_model", "best_bayesian_model", "best_hyperband_model"]
     ):
-        if method == "Grid Search" and st.session_state.best_grid_model is not None:
-            score, _ = evaluate_model(st.session_state.best_grid_model, st.session_state.X_test, st.session_state.y_test)
+        if st.session_state[model_key] is not None:
+            score, _ = evaluate_model(st.session_state[model_key], st.session_state.X_test, st.session_state.y_test)
             scores.append(score)
             times.append(st.session_state[time_key])
-        elif method == "Random Search" and st.session_state.best_random_model is not None:
-            score, _ = evaluate_model(st.session_state.best_random_model, st.session_state.X_test, st.session_state.y_test)
-            scores.append(score)
-            times.append(st.session_state[time_key])
-        elif method == "Bayesian Optimization" and st.session_state.best_bayesian_model is not None:
-            score, _ = evaluate_model(st.session_state.best_bayesian_model, st.session_state.X_test, st.session_state.y_test)
-            scores.append(score)
-            times.append(st.session_state[time_key])
-        elif method == "Hyperband" and st.session_state.best_hyperband_model is not None:
-            score, _ = evaluate_model(st.session_state.best_hyperband_model, st.session_state.X_test, st.session_state.y_test)
-            scores.append(score)
-            times.append(st.session_state[time_key])
-        else:
-            # Skip methods that haven't been run
-            pass
+            methods_with_results.append(method)
     
     # Create comparison chart if we have data
     if scores:
-        methods = methods[:len(scores)]  # Only include methods with results
-        
         fig = go.Figure()
         
         fig.add_trace(go.Bar(
-            x=methods,
+            x=methods_with_results,
             y=scores,
             name='Performance Score',
-            marker_color=AWS_COLORS["accent1"],
+            marker_color=AWS_COLORS["teal"],
             text=[f"{s:.4f}" for s in scores],
             textposition='auto',
         ))
         
         # Add a secondary y-axis for time
         fig.add_trace(go.Scatter(
-            x=methods,
+            x=methods_with_results,
             y=times,
             name='Time (s)',
-            marker_color=AWS_COLORS["secondary"],
+            marker_color=AWS_COLORS["orange"],
             mode='lines+markers',
             yaxis='y2'
         ))
@@ -375,7 +302,6 @@ def create_comparison_chart():
                 xanchor="right",
                 x=1
             ),
-            template="plotly_white",
             height=500,
         )
         
@@ -383,33 +309,54 @@ def create_comparison_chart():
     
     return None
 
-# Overview Tab
-if selected == "📚 Overview":
+# Create tabs
+tabs = st.tabs([
+    "📊 Overview", 
+    "🔍 Grid Search", 
+    "🎲 Random Search", 
+    "🧠 Bayesian Optimization", 
+    "⚡ Hyperband"
+])
+
+# Tab 1: Overview
+with tabs[0]:
     st.header("Understanding Hyperparameter Tuning")
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
         st.markdown("""
-        <div class="card">
-        <h3>What is Hyperparameter Tuning?</h3>
-        <p>Hyperparameter tuning is the process of finding the optimal set of hyperparameters for a machine learning algorithm. 
-        Hyperparameters are configuration variables that govern the training process and the topology of an ML model.</p>
+        ### What is Hyperparameter Tuning? 🤔
         
-        <p>Unlike model parameters which are learned during training, hyperparameters must be set before training begins.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        Hyperparameter tuning is the process of finding the optimal set of hyperparameters for a machine learning algorithm.
+        Unlike model parameters which are learned during training, hyperparameters must be set before training begins.
         
+        Effective hyperparameter tuning can significantly improve the performance of a machine learning model and is
+        essential for getting the most out of your algorithms.
+        """)
+        
+        tuning_aspects = {
+            "Model Performance": "Better hyperparameters lead to better predictions",
+            "Training Efficiency": "Proper settings can speed up convergence",
+            "Overfitting Prevention": "Right hyperparameters help generalize better",
+            "Resource Optimization": "Efficient models require fewer computational resources"
+        }
+        
+        for aspect, description in tuning_aspects.items():
+            st.markdown(f"""
+            <div style="margin-bottom: 10px; padding: 10px; border-radius: 5px; background-color: {AWS_COLORS['light_grey']}; border-left: 5px solid {AWS_COLORS['orange']}">
+                <strong style="color: {AWS_COLORS['dark_blue']};">{aspect}:</strong> {description}
+            </div>
+            """, unsafe_allow_html=True)
+    
     with col2:
         st.image("https://miro.medium.com/max/1400/1*mzNlxRJXRs8W2HjU-FSoEA.png", 
                  caption="Hyperparameter Tuning Process", 
                  use_container_width=True)
     
-    st.markdown("""
-    <div class="card">
-    <h3>Tuning Techniques Comparison</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("---")
+    
+    st.subheader("Tuning Techniques Comparison")
     
     comparison_data = {
         "Technique": ["Grid Search", "Random Search", "Bayesian Optimization", "Hyperband"],
@@ -442,12 +389,8 @@ if selected == "📚 Overview":
             st.session_state.best_bayesian_model is not None or 
             st.session_state.best_hyperband_model is not None):
         
-        st.markdown("""
-        <div class="card">
-        <h3>Performance Comparison</h3>
-        <p>Compare the different hyperparameter tuning methods you've tried so far:</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("### Performance Comparison")
+        st.markdown("Compare the different hyperparameter tuning methods you've tried so far:")
         
         comparison_chart = create_comparison_chart()
         if comparison_chart:
@@ -455,63 +398,96 @@ if selected == "📚 Overview":
         else:
             st.info("Run at least one tuning method to see comparison charts")
     
+    st.markdown("---")
+    
+    st.subheader("Getting Started")
     st.markdown("""
-    <div class="card">
-    <h3>Getting Started</h3>
-    <p>Select a tab above to explore each hyperparameter tuning technique. Each section includes:</p>
-    <ul>
-        <li>An explanation of the technique</li>
-        <li>Interactive demo with visualizations</li>
-        <li>Performance metrics and insights</li>
-    </ul>
-    <p>You can switch between classification and regression tasks using the sidebar.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    To explore each hyperparameter tuning technique:
+    
+    1. Use the sidebar to select a task type (Classification or Regression)
+    2. Navigate through the tabs above to explore different techniques
+    3. Each section includes an explanation, interactive demo, and visualizations
+    4. Run the demos to see how each technique performs and compare results
+    
+    Try different configurations to better understand how each method works and when to use it!
+    """)
 
-# Grid Search Tab
-elif selected == "🔍 Grid Search":
+# Tab 2: Grid Search
+with tabs[1]:
     st.header("Grid Search")
     
-    col1, col2 = st.columns([2, 1])
+    st.markdown("""
+    <div class="card">
+    <h3>What is Grid Search? 🔍</h3>
+    <p>Grid Search is an exhaustive search method that tries all possible combinations of the hyperparameter values specified.
+    It's a systematic approach to hyperparameter tuning that guarantees finding the best combination within the defined grid.</p>
+    
+    <h4>When to use Grid Search:</h4>
+    <ul>
+    <li>When you have a small number of hyperparameters to tune</li>
+    <li>When you have computational resources to spare</li>
+    <li>When you need to be exhaustive in your search</li>
+    <li>When the evaluation of each model is relatively quick</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-        <h3>How Grid Search Works</h3>
-        <p>Grid Search is an exhaustive search method that tries all possible combinations of the hyperparameter values specified.</p>
-        <p>It works by:</p>
-        <ol>
-            <li>Defining a grid of hyperparameter values</li>
-            <li>For each combination, training a model and evaluating its performance</li>
-            <li>Selecting the combination that yields the best performance</li>
-        </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Grid Search Works
+
+        Grid Search works by following these steps:
+
+        1. Define a grid of hyperparameter values to explore
+        2. For each combination, train a model and evaluate its performance
+        3. Select the combination that yields the best performance
+
+        Grid Search is guaranteed to find the optimal combination within your defined grid,
+        but it becomes inefficient as the number of hyperparameters and possible values increases.
+        """)
     
     with col2:
         st.image("https://scikit-learn.org/stable/_images/grid_search_workflow.png", 
                  caption="Grid Search Workflow", 
                  use_container_width=True)
     
-    st.markdown("""
-    <div class="card">
-    <h3>Advantages & Disadvantages</h3>
-    <p><strong>Advantages:</strong></p>
-    <ul>
+    st.markdown("---")
+    
+    st.subheader("Advantages and Disadvantages")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: #E5F6E3; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #7AA116;">✅ Advantages</h4>
+        <ul>
         <li>Simple to implement</li>
         <li>Guaranteed to find the best combination within the defined grid</li>
         <li>Easily parallelizable</li>
-    </ul>
-    <p><strong>Disadvantages:</strong></p>
-    <ul>
-        <li>Computationally expensive</li>
-        <li>Suffers from the curse of dimensionality (becomes inefficient with many hyperparameters)</li>
-        <li>Requires discretization of continuous parameters</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+        <li>Systematic and thorough</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown("### Grid Search Demo")
+    with col2:
+        st.markdown("""
+        <div style="background-color: #FEE7E4; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #D13212;">⚠️ Disadvantages</h4>
+        <ul>
+        <li>Computationally expensive</li>
+        <li>Suffers from the curse of dimensionality</li>
+        <li>Requires discretization of continuous parameters</li>
+        <li>Inefficient for high-dimensional hyperparameter spaces</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    st.subheader("Grid Search Demo")
     
     col1, col2 = st.columns([1, 1])
     
@@ -658,8 +634,7 @@ elif selected == "🔍 Grid Search":
                 
                 fig.update_layout(
                     xaxis_title="Hyperparameter",
-                    yaxis_title="Importance (Score Variance)",
-                    template="plotly_white"
+                    yaxis_title="Importance (Score Variance)"
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
@@ -676,20 +651,19 @@ elif selected == "🔍 Grid Search":
                 x='mean_test_score',
                 nbins=20,
                 title='Distribution of Cross-Validation Scores',
-                color_discrete_sequence=[AWS_COLORS["accent1"]]
+                color_discrete_sequence=[AWS_COLORS["teal"]]
             )
             
             fig.add_vline(
                 x=results_df['mean_test_score'].max(),
                 line_dash="dash", 
-                line_color=AWS_COLORS["secondary"],
+                line_color=AWS_COLORS["orange"],
                 annotation_text="Best score"
             )
             
             fig.update_layout(
                 xaxis_title="Mean Test Score",
-                yaxis_title="Count",
-                template="plotly_white"
+                yaxis_title="Count"
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -719,64 +693,86 @@ elif selected == "🔍 Grid Search":
         # Evaluate on test set
         test_score, metric_name = evaluate_model(st.session_state.best_grid_model, st.session_state.X_test, st.session_state.y_test)
         st.markdown(f"### Test Set {metric_name}: {test_score:.4f}")
+    else:
+        st.info("Configure the parameter grid and click 'Run Grid Search' to start the optimization process.")
+
+# Tab 3: Random Search
+with tabs[2]:
+    st.header("Random Search")
     
     st.markdown("""
     <div class="card">
-    <h3>When to Use Grid Search</h3>
+    <h3>What is Random Search? 🎲</h3>
+    <p>Random Search samples random combinations of hyperparameters from a defined search space, rather than testing all possible combinations.
+    It's often more efficient than Grid Search for high-dimensional spaces.</p>
+    
+    <h4>When to use Random Search:</h4>
     <ul>
-        <li>When you have a small number of hyperparameters to tune</li>
-        <li>When you have computational resources to spare</li>
-        <li>When you need to be exhaustive in your search</li>
-        <li>When the evaluation of each model is relatively quick</li>
+    <li>When you have many hyperparameters to tune</li>
+    <li>When you have limited computational resources</li>
+    <li>When you don't know which ranges of hyperparameter values are optimal</li>
+    <li>When you're doing preliminary exploration of the hyperparameter space</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
-
-# Random Search Tab
-elif selected == "🎲 Random Search":
-    st.header("Random Search")
     
-    col1, col2 = st.columns([2, 1])
+    col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-        <h3>How Random Search Works</h3>
-        <p>Random Search samples random combinations of hyperparameters from a defined search space, rather than testing all possible combinations.</p>
-        <p>It works by:</p>
-        <ol>
-            <li>Defining distributions for each hyperparameter</li>
-            <li>Randomly sampling a specified number of combinations from these distributions</li>
-            <li>Training and evaluating models with each sampled combination</li>
-            <li>Selecting the combination that yields the best performance</li>
-        </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Random Search Works
+
+        Random Search works by following these steps:
+
+        1. Define distributions for each hyperparameter
+        2. Randomly sample a specified number of combinations from these distributions
+        3. Train and evaluate models with each sampled combination
+        4. Select the combination that yields the best performance
+
+        Research by Bergstra and Bengio showed that random search often finds better hyperparameters in less time than grid search
+        because not all hyperparameters are equally important. Random search tests more values for each hyperparameter.
+        """)
     
     with col2:
         st.image("https://scikit-learn.org/stable/_images/randomized_search.png",
                  caption="Random Search vs. Grid Search",
                  use_container_width=True)
     
-    st.markdown("""
-    <div class="card">
-    <h3>Advantages & Disadvantages</h3>
-    <p><strong>Advantages:</strong></p>
-    <ul>
+    st.markdown("---")
+    
+    st.subheader("Advantages and Disadvantages")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: #E5F6E3; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #7AA116;">✅ Advantages</h4>
+        <ul>
         <li>More efficient than grid search for high-dimensional spaces</li>
         <li>Can find good hyperparameters with fewer evaluations</li>
         <li>Allows continuous parameters without discretization</li>
-    </ul>
-    <p><strong>Disadvantages:</strong></p>
-    <ul>
+        <li>Better coverage of the parameter space with the same compute budget</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: #FEE7E4; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #D13212;">⚠️ Disadvantages</h4>
+        <ul>
         <li>May miss optimal combinations by chance</li>
         <li>Less systematic than grid search</li>
         <li>Results may vary between runs due to randomness</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+        <li>No guarantee of finding the global optimum</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown("### Random Search Demo")
+    st.markdown("---")
+    
+    st.subheader("Random Search Demo")
     
     col1, col2 = st.columns(2)
     
@@ -889,20 +885,19 @@ elif selected == "🎲 Random Search":
                 x='mean_test_score',
                 nbins=20,
                 title='Distribution of Scores from Random Search',
-                color_discrete_sequence=[AWS_COLORS["accent1"]]
+                color_discrete_sequence=[AWS_COLORS["teal"]]
             )
             
             fig.add_vline(
                 x=results_df['mean_test_score'].max(),
                 line_dash="dash", 
-                line_color=AWS_COLORS["secondary"],
+                line_color=AWS_COLORS["orange"],
                 annotation_text="Best score"
             )
             
             fig.update_layout(
                 xaxis_title="Mean Test Score",
-                yaxis_title="Count",
-                template="plotly_white"
+                yaxis_title="Count"
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -950,8 +945,7 @@ elif selected == "🎲 Random Search":
             
             fig.update_layout(
                 xaxis_title="Hyperparameter",
-                yaxis_title="Correlation with Score",
-                template="plotly_white"
+                yaxis_title="Correlation with Score"
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -1002,7 +996,6 @@ elif selected == "🎲 Random Search":
             
             fig.update_layout(
                 title='Top 10 Parameter Combinations',
-                template="plotly_white",
                 height=600
             )
             
@@ -1033,80 +1026,104 @@ elif selected == "🎲 Random Search":
         # Evaluate on test set
         test_score, metric_name = evaluate_model(st.session_state.best_random_model, st.session_state.X_test, st.session_state.y_test)
         st.markdown(f"### Test Set {metric_name}: {test_score:.4f}")
+    else:
+        st.info("Configure the parameter space and click 'Run Random Search' to start the optimization process.")
     
     st.markdown("""
     <div class="card">
     <h3>Why Random Search Often Outperforms Grid Search</h3>
-    <p>Research by Bergstra and Bengio showed that random search often finds better hyperparameters in less time than grid search.</p>
-    <p>This is because:</p>
+    <p>Grid search divides the attention equally among all hyperparameters, but not all hyperparameters are equally important.</p>
+    <p>With the same number of trials:</p>
     <ul>
-        <li>Not all hyperparameters are equally important</li>
-        <li>Random search tests more values for each hyperparameter</li>
-        <li>Grid search wastes evaluations on unimportant parameters</li>
+    <li>Grid search tests fewer values per hyperparameter</li>
+    <li>Random search tests more values for each hyperparameter</li>
+    <li>Random search has a higher probability of finding optimal regions</li>
     </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-    <h3>When to Use Random Search</h3>
-    <ul>
-        <li>When you have limited computational resources</li>
-        <li>When you have many hyperparameters to tune</li>
-        <li>When you don't know which ranges of hyperparameter values are optimal</li>
-        <li>When you're doing preliminary exploration of the hyperparameter space</li>
-    </ul>
+    <p>This is especially true when only a few hyperparameters actually matter for performance.</p>
     </div>
     """, unsafe_allow_html=True)
 
-# Bayesian Optimization Tab
-elif selected == "🧠 Bayesian Optimization":
+# Tab 4: Bayesian Optimization
+with tabs[3]:
     st.header("Bayesian Optimization")
     
-    col1, col2 = st.columns([2, 1])
+    st.markdown("""
+    <div class="card">
+    <h3>What is Bayesian Optimization? 🧠</h3>
+    <p>Bayesian Optimization is a sequential strategy for optimizing black-box functions that uses previous evaluations
+    to determine the next points to evaluate. It builds a probabilistic model of the objective function to make informed decisions
+    about which hyperparameters to try next.</p>
+    
+    <h4>When to use Bayesian Optimization:</h4>
+    <ul>
+    <li>When evaluating each hyperparameter combination is expensive</li>
+    <li>When you need to find good hyperparameters with minimal evaluations</li>
+    <li>When the objective function is noisy</li>
+    <li>When you want more informed exploration than random search</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-        <h3>How Bayesian Optimization Works</h3>
-        <p>Bayesian Optimization is a sequential strategy for optimizing black-box functions that uses previous evaluations to determine the next points to evaluate.</p>
-        <p>It works by:</p>
-        <ol>
-            <li>Building a probabilistic model of the objective function (surrogate model)</li>
-            <li>Using an acquisition function to balance exploration and exploitation</li>
-            <li>Selecting new hyperparameter values that maximize the acquisition function</li>
-            <li>Updating the surrogate model with new evaluation results</li>
-            <li>Repeating until convergence or a budget is exhausted</li>
-        </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Bayesian Optimization Works
+
+        Bayesian Optimization works by following these steps:
+
+        1. Build a probabilistic model of the objective function (surrogate model)
+        2. Use an acquisition function to balance exploration and exploitation
+        3. Select new hyperparameter values that maximize the acquisition function
+        4. Evaluate the objective function at these new values
+        5. Update the surrogate model with the new results
+        6. Repeat until convergence or budget is exhausted
+        
+        The surrogate model is typically a Gaussian Process that provides both a prediction and 
+        an uncertainty estimate for any point in the parameter space. The acquisition function
+        uses this information to select promising regions for exploration.
+        """)
     
     with col2:
         st.image("https://miro.medium.com/max/1400/1*qWQ9SRRlSjIgr9bsCI-M5g.png", 
                  caption="Bayesian Optimization Process",
                  use_container_width=True)
     
-    st.markdown("""
-    <div class="card">
-    <h3>Advantages & Disadvantages</h3>
-    <p><strong>Advantages:</strong></p>
-    <ul>
+    st.markdown("---")
+    
+    st.subheader("Advantages and Disadvantages")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: #E5F6E3; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #7AA116;">✅ Advantages</h4>
+        <ul>
         <li>More efficient than random or grid search</li>
         <li>Works well for expensive-to-evaluate functions</li>
         <li>Makes informed choices about which hyperparameters to evaluate next</li>
         <li>Can handle continuous and discrete parameters</li>
-    </ul>
-    <p><strong>Disadvantages:</strong></p>
-    <ul>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: #FEE7E4; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #D13212;">⚠️ Disadvantages</h4>
+        <ul>
         <li>More complex to implement</li>
         <li>May get stuck in local optima</li>
         <li>Effectiveness depends on the quality of the surrogate model</li>
         <li>Less parallelizable than grid or random search</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown("### Bayesian Optimization Demo")
+    st.markdown("---")
+    
+    st.subheader("Bayesian Optimization Demo")
     
     col1, col2 = st.columns(2)
     
@@ -1245,7 +1262,7 @@ elif selected == "🧠 Bayesian Optimization":
                 y=scores,
                 mode='markers',
                 name='Iterations',
-                marker=dict(color=AWS_COLORS["accent1"])
+                marker=dict(color=AWS_COLORS["teal"])
             ))
             
             fig.add_trace(go.Scatter(
@@ -1253,14 +1270,13 @@ elif selected == "🧠 Bayesian Optimization":
                 y=best_so_far,
                 mode='lines+markers',
                 name='Best So Far',
-                marker=dict(color=AWS_COLORS["secondary"])
+                marker=dict(color=AWS_COLORS["orange"])
             ))
             
             fig.update_layout(
                 title="Convergence of Bayesian Optimization",
                 xaxis_title="Iteration",
-                yaxis_title="Score",
-                template="plotly_white"
+                yaxis_title="Score"
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -1315,8 +1331,7 @@ elif selected == "🧠 Bayesian Optimization":
             
             fig.update_layout(
                 xaxis_title="Hyperparameter",
-                yaxis_title="Importance",
-                template="plotly_white"
+                yaxis_title="Importance"
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -1368,7 +1383,6 @@ elif selected == "🧠 Bayesian Optimization":
                                     height=400
                                 )
                                 
-                                fig.update_layout(template="plotly_white")
                                 st.plotly_chart(fig, use_container_width=True)
     
     elif st.session_state.best_bayesian_model is not None:
@@ -1391,83 +1405,105 @@ elif selected == "🧠 Bayesian Optimization":
         # Evaluate on test set
         test_score, metric_name = evaluate_model(st.session_state.best_bayesian_model, st.session_state.X_test, st.session_state.y_test)
         st.markdown(f"### Test Set {metric_name}: {test_score:.4f}")
+    else:
+        st.info("Configure the Bayesian optimization parameters and click 'Run Bayesian Optimization' to start the process.")
     
     st.markdown("""
     <div class="card">
-    <h3>How It Works: The Surrogate Model</h3>
-    <p>The surrogate model is typically a Gaussian Process that provides:</p>
+    <h3>Exploring vs. Exploiting: The Acquisition Function</h3>
+    <p>The acquisition function is a key component of Bayesian optimization that balances:</p>
     <ul>
-        <li>A prediction of the objective function value for any point in the parameter space</li>
-        <li>An uncertainty estimate for that prediction</li>
+    <li><strong>Exploration:</strong> Sampling where the surrogate model is uncertain</li>
+    <li><strong>Exploitation:</strong> Sampling where the surrogate model predicts good values</li>
     </ul>
-    <p>The acquisition function uses both the predicted value and uncertainty to select new points, balancing:</p>
+    <p>Common acquisition functions:</p>
     <ul>
-        <li><strong>Exploitation</strong>: Sampling where the surrogate model predicts good values</li>
-        <li><strong>Exploration</strong>: Sampling where the surrogate model is uncertain</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-    <h3>When to Use Bayesian Optimization</h3>
-    <ul>
-        <li>When evaluating each hyperparameter combination is expensive (e.g., training deep neural networks)</li>
-        <li>When you need to find good hyperparameters with minimal evaluations</li>
-        <li>When the objective function is noisy</li>
-        <li>When you want more informed exploration than random search</li>
+    <li><strong>Expected Improvement (EI):</strong> Balanced approach</li>
+    <li><strong>Probability of Improvement (PI):</strong> More exploitative</li>
+    <li><strong>Lower Confidence Bound (LCB):</strong> More explorative</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
 
-# Hyperband Tab
-elif selected == "⚡ Hyperband":
+# Tab 5: Hyperband
+with tabs[4]:
     st.header("Hyperband")
     
-    col1, col2 = st.columns([2, 1])
+    st.markdown("""
+    <div class="card">
+    <h3>What is Hyperband? ⚡</h3>
+    <p>Hyperband is a resource allocation strategy for hyperparameter optimization. It focuses on allocating 
+    more resources to promising configurations and quickly eliminating poor performers.</p>
+    
+    <h4>When to use Hyperband:</h4>
+    <ul>
+    <li>When training models with very long training times (e.g., deep neural networks)</li>
+    <li>When computational resources are limited</li>
+    <li>When you can evaluate a model's potential with partial resources</li>
+    <li>When you want to efficiently explore many configurations</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 2])
     
     with col1:
         st.markdown("""
-        <div class="card">
-        <h3>How Hyperband Works</h3>
-        <p>Hyperband is a resource allocation strategy for hyperparameter optimization. It focuses on allocating more resources to promising configurations.</p>
-        <p>It works by:</p>
-        <ol>
-            <li>Sampling many configurations randomly</li>
-            <li>Evaluating all configurations with a small budget (e.g., few training iterations)</li>
-            <li>Eliminating the worst performing configurations</li>
-            <li>Allocating more resources to survivors</li>
-            <li>Repeating until finding the best configuration</li>
-        </ol>
-        </div>
-        """, unsafe_allow_html=True)
+        ### How Hyperband Works
+
+        Hyperband works by following these steps:
+
+        1. Sample many configurations randomly
+        2. Evaluate all configurations with a small budget (e.g., few training iterations)
+        3. Eliminate the worst performing configurations
+        4. Allocate more resources to survivors
+        5. Repeat until finding the best configuration
+
+        Hyperband is built on the Successive Halving algorithm, which starts with many configurations with small resources
+        and progressively allocates more resources to the most promising ones. This approach is especially efficient
+        for deep learning models where training is expensive.
+        """)
     
     with col2:
         st.image("https://miro.medium.com/max/1400/0*Z9GuqmrpIvIo-MvY", 
                  caption="Hyperband Elimination Process",
                  use_container_width=True)
     
-    st.markdown("""
-    <div class="card">
-    <h3>Advantages & Disadvantages</h3>
-    <p><strong>Advantages:</strong></p>
-    <ul>
+    st.markdown("---")
+    
+    st.subheader("Advantages and Disadvantages")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: #E5F6E3; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #7AA116;">✅ Advantages</h4>
+        <ul>
         <li>Extremely efficient for deep learning models</li>
         <li>Spends more time evaluating promising configurations</li>
         <li>Quickly eliminates poor performing configurations</li>
         <li>Can be combined with other search strategies</li>
-    </ul>
-    <p><strong>Disadvantages:</strong></p>
-    <ul>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: #FEE7E4; padding: 15px; border-radius: 5px;">
+        <h4 style="color: #D13212;">⚠️ Disadvantages</h4>
+        <ul>
         <li>May eliminate promising configurations that start slow</li>
         <li>Requires configurations that can be trained with varying resources</li>
         <li>More complex implementation</li>
         <li>Initial random sampling can be inefficient</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown("### Hyperband Demo")
+    st.markdown("---")
+    
+    st.subheader("Hyperband Demo")
     
     st.markdown("""
     <div class="card">
@@ -1755,7 +1791,7 @@ elif selected == "⚡ Hyperband":
                 x=round_summary['Round'],
                 y=round_summary['Configurations'],
                 name='Configurations',
-                marker_color=AWS_COLORS["accent1"]
+                marker_color=AWS_COLORS["teal"]
             ))
             
             # Add resource line
@@ -1764,7 +1800,7 @@ elif selected == "⚡ Hyperband":
                 y=round_summary['Resource (%)'],
                 mode='lines+markers',
                 name='Resource (%)',
-                marker=dict(color=AWS_COLORS["secondary"]),
+                marker=dict(color=AWS_COLORS["orange"]),
                 yaxis='y2'
             ))
             
@@ -1774,7 +1810,7 @@ elif selected == "⚡ Hyperband":
                 y=round_summary['Best Score'],
                 mode='lines+markers',
                 name='Best Score',
-                marker=dict(color=AWS_COLORS["success"]),
+                marker=dict(color=AWS_COLORS["green"]),
                 yaxis='y3'
             ))
             
@@ -1811,7 +1847,6 @@ elif selected == "⚡ Hyperband":
                     xanchor="right",
                     x=1
                 ),
-                template="plotly_white",
                 height=500,
             )
             
@@ -1842,7 +1877,6 @@ elif selected == "⚡ Hyperband":
             fig.update_layout(
                 xaxis_title="Resources Used (%)",
                 yaxis_title=f"{metric_name}",
-                template="plotly_white",
                 height=500
             )
             
@@ -1894,78 +1928,28 @@ elif selected == "⚡ Hyperband":
         # Evaluate on test set
         test_score, metric_name = evaluate_model(st.session_state.best_hyperband_model, st.session_state.X_test, st.session_state.y_test)
         st.markdown(f"### Test Set {metric_name}: {test_score:.4f}")
+    else:
+        st.info("Configure the Hyperband parameters and click 'Run Hyperband Simulation' to start the process.")
     
     st.markdown("""
     <div class="card">
     <h3>Successive Halving: The Core of Hyperband</h3>
     <p>Hyperband is built on Successive Halving, which works as follows:</p>
     <ol>
-        <li>Start with n configurations, each using r resources</li>
-        <li>Evaluate all configurations and keep the top 1/η performing ones</li>
-        <li>Increase the resource allocation by a factor of η for the remaining configurations</li>
-        <li>Repeat until only one configuration remains or maximum resource is reached</li>
+    <li>Start with n configurations, each using r resources</li>
+    <li>Evaluate all configurations and keep the top 1/η performing ones</li>
+    <li>Increase the resource allocation by a factor of η for the remaining configurations</li>
+    <li>Repeat until only one configuration remains or maximum resource is reached</li>
     </ol>
-    <p>Hyperband runs multiple brackets of successive halving with different allocations of configurations and resources.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-    <h3>When to Use Hyperband</h3>
-    <ul>
-        <li>When training models with very long training times (e.g., deep neural networks)</li>
-        <li>When computational resources are limited</li>
-        <li>When you can evaluate a model's potential with partial resources</li>
-        <li>When you want to efficiently explore many configurations</li>
-    </ul>
+    <p>This approach is particularly efficient because it spends more time evaluating promising configurations and quickly eliminates poor performers.</p>
     </div>
     """, unsafe_allow_html=True)
 
 # Footer
+st.markdown("---")
 st.markdown("""
-<div style="text-align: center; margin-top: 40px; padding: 20px; background-color: #f5f5f5; border-radius: 10px;">
-<p>Created with 💙 using Streamlit and Python | AWS ML University</p>
+<div style="text-align: center">
+    <p>© 2023 Hyperparameter Tuning Explorer | Created with Streamlit</p>
+    <p><small>For educational purposes only</small></p>
 </div>
 """, unsafe_allow_html=True)
-# ```
-
-# ## Application Description
-
-# This Streamlit application provides an interactive e-learning environment for understanding various hyperparameter tuning techniques in machine learning. Here's what the application offers:
-
-# ### Key Features
-
-# 1. **Interactive demonstrations** of four hyperparameter tuning techniques:
-#    - Grid Search
-#    - Random Search
-#    - Bayesian Optimization
-#    - Hyperband
-
-# 2. **Task flexibility** - supports both classification and regression tasks
-
-# 3. **Visual explanations** with charts, tables, and interactive elements for each tuning technique
-
-# 4. **Session management** with ability to reset at any time via the sidebar
-
-# 5. **Modern UI/UX** using AWS-inspired color scheme and responsive layout
-
-# 6. **Comparison tools** to see which techniques perform best for your specific task
-
-# ### Technical Implementation
-
-# - Uses the latest Streamlit features for responsive UI
-# - Implements popular ML libraries (scikit-learn, hyperopt, scikit-optimize)
-# - Visualizations with Plotly for interactive charts
-# - Tabbed navigation with emoji icons for intuitive user experience
-# - Session state management to preserve results between tab switches
-
-# ### Learning Experience
-
-# The application walks users through each hyperparameter tuning technique with:
-# 1. Conceptual explanations
-# 2. Visual diagrams
-# 3. Interactive demos where users can adjust parameters
-# 4. Result visualizations and performance metrics
-# 5. Comparative analysis between methods
-
-# This creates a comprehensive learning environment where users can not only read about hyperparameter tuning but actively explore and experiment with different approaches.
