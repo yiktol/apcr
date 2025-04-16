@@ -297,24 +297,25 @@ def load_image_from_url(url):
 # Define AWS stock images URLs
 aws_images = {
     "home": "https://d1.awsstatic.com/training-and-certification/certification-badges/AWS-Certified-Solutions-Architect-Associate_badge.3419559c682629072f1eb968d59dea0741772c0f.png",
-    "sqs": "https://d1.awsstatic.com/Products/product-name/diagrams/product-page-diagram_Amazon-SQS@2x.d79ebf1742ab78d2546045034c2deb402ddd31c4.png",
-    "sns": "https://d1.awsstatic.com/product-marketing/SNS/product-page-diagram_Amazon-SNS_event-driven-SNS-compute%402x.07f1509816f60c8a98b1a7741e7fb5e0e7f970ea.png",
-    "eventbridge": "https://d1.awsstatic.com/products/eventbridge/Product-Page-Diagram_Amazon-EventBridge%402x.24c0d8bd637766ba43d3364058d7a367919fc69e.png",
-    "lambda": "https://d1.awsstatic.com/product-marketing/Lambda/Diagrams/product-page-diagram_Lambda-RealTimeFileProcessing.a59577de4b6471674a540b878b0b684e0249a18c.png",
-    "api_gateway": "https://d1.awsstatic.com/serverless/New-API-GW-Diagram.c9fc9835d2a9aa00ef90d0dbb4df1e73fbb282e4.png",
-    "containers": "https://d1.awsstatic.com/legal/AmazonElasticContainerServiceAgreement/Product-Page-Diagram_Amazon-ECS%402x.0d872eb6fb782ddc733a27d2ab5694e9b8ca095c.png",
-    "ecs": "https://d1.awsstatic.com/product-marketing/ECS/ECS_Diagrams/ecs-fargate%402x.b8486599d2e50e5fcdc3326e42a4ba90e7c3f881.png",
-    "eks": "https://d1.awsstatic.com/products/eks/Product-Page-Diagram_Amazon-EKS%402x.ccad94521511d0aa2a9c5cc7d147513ff8fb061e.png",
-    "fargate": "https://d1.awsstatic.com/products/fargate/Product-Page-Diagram_Fargate.b7f73bbac9cc630a1c8c5a5668b282ab2a6b213a.png",
-    "secrets_manager": "https://d1.awsstatic.com/diagrams/Secrets-Manager-HIW%402x.5d58b84637657bd3b720f265f5d1449f2ee56b31.png",
-    "acm": "https://d1.awsstatic.com/products/ACM/product-page-diagram_certificate-manager_how-it-works%402x.457eaeac8fd3cf1b3db9c05904c937eb3b0dbc45.png",
-    "patch_manager": "https://d1.awsstatic.com/products/systems-manager/Product-Page-Diagram_AWS-Systems-Manager_Patch-Manager_How-it-Works%402x.283c13eb185a92186361a9b21d8b46fa06ec77ab.png",
-    "iam_identity_center": "https://d1.awsstatic.com/products/IAM/product-page-diagram-IAM-Identity-Center_How-it-Works.510adec96b47cb6112661c0d2160ea6e2695b8ea.png",
-    "directory_service": "https://d1.awsstatic.com/Products/product-name/diagrams/product-page-diagram_AWS-Directory-Service_how-it-works.11f6b76d3110b1c3a25422a0ea944ee1deed8b41.png",
-    "ram": "https://d1.awsstatic.com/products/RAM/product-page-diagram-AWS-Resource-Access-Manager.1fcece1397fa7e53a5a5e59e9192dd4731473c55.png",
-    "cognito": "https://d1.awsstatic.com/products/cognito/product-page-diagram-Amazon-Cognito-Authenticating-Users%402x.2f82c7afc4fd5e777d4426e7629909ef4b31dad9.png",
-    "analytics": "https://d1.awsstatic.com/aws-monitoring-intelligentdiagnostics.3a18f07e68c4ea3786585ea712a279e929ca242c.png",
-    "ml": "https://d1.awsstatic.com/AI-Brain-for-AI-ML%402x.9d5d606ffba0170c124d9cef9866d13934985299.png"
+    "sqs": "images/sqs.png",
+    "sns": "images/sns1.png",
+    "eventbridge": "images/eb.png",
+    "lambda": "images/lambda.png",
+    "api_gateway": "images/apigw.png",
+    "containers": "images/container_on_aws.png",
+    "ecs": "images/ecs.png",
+    "eks": "images/eks.png",
+    "fargate": "images/fargate.png",
+    "secrets_manager": "images/secret_manager.png",
+    "acm": "images/acm.png",
+    "patch_manager": "images/patch_manager.tif",
+    "iam_identity_center": "images/iam_identity_center.png",
+    "security_catalog": "images/security_catalog.png",
+    "directory_service": "images/directory_service.png",
+    "ram": "images/ram.png",
+    "cognito": "images/cognito.png",
+    "analytics": "images/analytics-services.png",
+    "ml": "images/ml_stack.jpg"
 }
 
 # Initialize session state
@@ -3114,7 +3115,7 @@ def containers_page():
     
     st.markdown("""
     <div style="display: flex; justify-content: center; margin: 30px 0;">
-        <img src="https://d1.awsstatic.com/Developer%20Marketing/containers/compared-vms-containers.78075890a4e693aebb9dbcafbe874e0d17334fe5.jpg" style="max-width: 80%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <img src="images/containers_vs_vms.png" style="max-width: 80%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
     </div>
     """, unsafe_allow_html=True)
     
@@ -3629,7 +3630,7 @@ def security_services_page():
     st.markdown("""
     <div style="display: flex; justify-content: center; margin: 30px 0;">
         <div style="text-align: center;">
-            <img src="https://d1.awsstatic.com/aws-answers/answers-images/aws-security-layers-capabilities.a1eefc9271f83ae7d0cd168f25bb2835d9663d8b.png" style="max-width: 80%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <img src="Content_Review_5/images/security_catalog.png" style="max-width: 80%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
         </div>
     </div>
     """, unsafe_allow_html=True)
