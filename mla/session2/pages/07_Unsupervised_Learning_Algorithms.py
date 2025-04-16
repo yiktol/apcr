@@ -571,21 +571,20 @@ with tabs[0]:
         <div class="card">
         <h3>Amazon SageMaker Implementation</h3>
         <p>Here's how you can implement K-means clustering in Amazon SageMaker:</p>
-        <pre>
-import boto3
+        <pre><code>import boto3
 import sagemaker
-from sagemaker.amazon.amazon_estimator import get_image_uri
+from sagemaker.amazon.amazon_estimator import get_image_uri</code>
 
 # Set up the SageMaker session
-session = sagemaker.Session()
+<code>session = sagemaker.Session()
 bucket = session.default_bucket()
-role = sagemaker.get_execution_role()
+role = sagemaker.get_execution_role()</code>
 
 # Get the K-means container
-container = get_image_uri(boto3.Session().region_name, 'kmeans')
+<code>container = get_image_uri(boto3.Session().region_name, 'kmeans')</code>
 
 # Set the algorithm parameters
-hyperparameters = {
+<code>hyperparameters = {
     "k": 5,
     "feature_dim": 2,
     "mini_batch_size": 500,
@@ -593,26 +592,26 @@ hyperparameters = {
     "max_iterations": 300,
     "tol": 1e-3,
     "eval_metrics": ["ssd", "msd"]
-}
+}</code>
 
 # Set up the estimator
-kmeans = sagemaker.estimator.Estimator(
+<code>kmeans = sagemaker.estimator.Estimator(
     container,
     role, 
     instance_count=1, 
     instance_type='ml.m5.xlarge',
     hyperparameters=hyperparameters,
     output_path=f"s3://{bucket}/kmeans-output"
-)
+)</code>
 
 # Train the model
-kmeans.fit({'train': train_data_s3_path})
+<code>kmeans.fit({'train': train_data_s3_path})</code>
 
 # Deploy the model for inference
-kmeans_predictor = kmeans.deploy(
+<code>kmeans_predictor = kmeans.deploy(
     initial_instance_count=1,
     instance_type='ml.t2.medium'
-)
+)</code>
         </pre>
         </div>
         """, unsafe_allow_html=True)
