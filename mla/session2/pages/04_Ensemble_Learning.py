@@ -21,7 +21,7 @@ import io
 
 # Set page configuration
 st.set_page_config(
-    page_title="Ensemble Learning Explorer",
+    page_title="Ensemble Learning",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -181,7 +181,7 @@ with st.sidebar:
     """)
 
 # Main content
-st.title("Ensemble Learning Explorer")
+st.title("Ensemble Learning")
 
 st.markdown("""
 <div class="card">
