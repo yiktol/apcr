@@ -890,7 +890,7 @@ def home_page():
     
     st.markdown("""
     <div class="aws-info-card">
-        <h3>Topics covered</h3>
+        <h3>Topics covered:</h3>
         <p>
             • AWS Global Infrastructure<br>
             • Amazon CloudFront<br>

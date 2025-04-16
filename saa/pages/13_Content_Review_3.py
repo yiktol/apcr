@@ -884,7 +884,7 @@ def home_page():
     
     st.markdown("""
     <div class="aws-info-card">
-        <h3>Topics covered in Session 3:</h3>
+        <h3>Topics covered:</h3>
         <ul>
             <li>AWS Caching & File Servers</li>
             <li>AWS Database Offerings</li>

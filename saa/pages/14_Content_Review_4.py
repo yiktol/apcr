@@ -844,7 +844,7 @@ def home_page():
     
     st.markdown("""
     <div class="aws-info-card">
-        <h3>Topics covered in Week 4:</h3>
+        <h3>Topics covered:</h3>
         <ul>
             <li>AWS Elastic Block Store (EBS)</li>
             <li>IPv4 vs. IPv6 Addressing</li>
