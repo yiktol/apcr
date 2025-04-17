@@ -388,23 +388,7 @@ with tabs[1]:
         """)
         
         # ML Lifecycle diagram
-        lifecycle_fig, ax = plt.subplots(figsize=(10, 2))
-        lifecycle_stages = ['Setup', 'Data Processing', 'Model Development', 'Deployment and Inference', 'Monitoring']
-        ax.axis('off')
-        for i, stage in enumerate(lifecycle_stages):
-            if stage == 'Model Development':
-                color = '#FF9900'  # AWS Orange for the current stage
-                weight = 'bold'
-            else:
-                color = '#232F3E'  # AWS Blue
-                weight = 'normal'
-            ax.text(i/len(lifecycle_stages) + 0.1, 0.5, stage, ha='center', va='center', 
-                   fontsize=12, color=color, fontweight=weight)
-            if i < len(lifecycle_stages) - 1:
-                ax.arrow(i/len(lifecycle_stages) + 0.2, 0.5, 0.15, 0, head_width=0.05, 
-                        head_length=0.01, fc=color, ec=color)
-        
-        st.pyplot(lifecycle_fig)
+        st.image('images/ml_lifecycle.png')
     
     with col2:
         info_box("""<b>You are here: Model Development</b>
@@ -569,7 +553,7 @@ with tabs[2]:
     """)
     
     # Create a comparison of model development methods
-    st.image("https://miro.medium.com/max/1400/1*xmxe288KJ7WB5xiR_W6jcg.png", caption="Spectrum of AWS Machine Learning Options", use_container_width=True)
+    st.image("images/model_development_methods.png", caption="Spectrum of AWS Machine Learning Options", width=1200)
     
     custom_header("SageMaker Model Development Methods", "sub")
     
@@ -627,45 +611,7 @@ with tabs[2]:
     """)
     
     # Create visualization of supervised learning algorithms
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # Create a simple tree representation
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 10)
-    ax.axis('off')
-    
-    # Main node
-    ax.text(5, 9, "Supervised Learning", ha='center', fontsize=16, bbox=dict(facecolor='#FF9900', alpha=0.5, boxstyle='round'))
-    
-    # First level nodes
-    ax.text(2.5, 7, "Classification", ha='center', fontsize=14, bbox=dict(facecolor='#1E88E5', alpha=0.3, boxstyle='round'))
-    ax.text(7.5, 7, "Regression", ha='center', fontsize=14, bbox=dict(facecolor='#1E88E5', alpha=0.3, boxstyle='round'))
-    
-    # Connect lines
-    ax.plot([5, 2.5], [8.8, 7.3], 'k-')
-    ax.plot([5, 7.5], [8.8, 7.3], 'k-')
-    
-    # Second level - Classification
-    ax.text(1.5, 5, "Binary", ha='center', fontsize=12, bbox=dict(facecolor='lightgray', alpha=0.3, boxstyle='round'))
-    ax.text(3.5, 5, "Multi-class", ha='center', fontsize=12, bbox=dict(facecolor='lightgray', alpha=0.3, boxstyle='round'))
-    
-    # Connect lines for classification
-    ax.plot([2.5, 1.5], [6.8, 5.3], 'k-')
-    ax.plot([2.5, 3.5], [6.8, 5.3], 'k-')
-    
-    # Algorithms - Binary
-    ax.text(1.5, 3.5, "Linear Learner\nXGBoost\nSVM", ha='center', fontsize=10, bbox=dict(facecolor='white', boxstyle='round,pad=0.5', edgecolor='gray'))
-    ax.plot([1.5, 1.5], [4.8, 3.8], 'k-')
-    
-    # Algorithms - Multi-class
-    ax.text(3.5, 3.5, "XGBoost\nK-NN\nRandomForest", ha='center', fontsize=10, bbox=dict(facecolor='white', boxstyle='round,pad=0.5', edgecolor='gray'))
-    ax.plot([3.5, 3.5], [4.8, 3.8], 'k-')
-    
-    # Algorithms - Regression
-    ax.text(7.5, 5, "Linear Regression\nXGBoost\nRandomForest", ha='center', fontsize=10, bbox=dict(facecolor='white', boxstyle='round,pad=0.5', edgecolor='gray'))
-    ax.plot([7.5, 7.5], [6.8, 5.3], 'k-')
-    
-    st.pyplot(fig)
+    st.image('images/supervised_learning.png',width=800)
     
     # Unsupervised learning
     custom_header("Unsupervised Learning Algorithms", "section")
@@ -682,6 +628,8 @@ with tabs[2]:
         - **Topic Modeling**: Discover abstract topics in documents (LDA, NTM)
         """)
         
+        st.image('images/unsupervised_learning.png',width=800)
+
     with col2:
         # Simple representation of unsupervised learning
         cluster_data = np.random.randn(100, 2) * 0.8
@@ -825,7 +773,7 @@ with tabs[3]:
         """)
     
     with col2:
-        st.image("https://dmhnzl5mp9mj6.cloudfront.net/security_awsblog/images/BEDROCK-Architecture.png", caption="Amazon Bedrock Architecture")
+        st.image("images/kb.png", caption="Amazon Bedrock Architecture")
         
         info_box("""<b>Foundation models (FMs)</b> are large AI models pre-trained on vast amounts of data that can be adapted to a wide range of tasks.
         
@@ -834,47 +782,7 @@ Unlike traditional ML models built for specific tasks, FMs provide a versatile f
     
     custom_header("Customizing Foundation Models", "section")
     
-    # Create a visualization comparing foundation model customization methods
-    fig, ax = plt.subplots(figsize=(10, 5))
-    
-    # Set up the axis
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 10)
-    ax.axis('off')
-    
-    # Define the methods and their properties
-    methods = [
-        {"name": "Prompt Engineering", "x": 1.5, "y": 7, "complexity": "Low", "training": "No"},
-        {"name": "Retrieval Augmented Generation (RAG)", "x": 3.5, "y": 7, "complexity": "Medium", "training": "No"},
-        {"name": "Fine-tuning", "x": 6.5, "y": 7, "complexity": "High", "training": "Yes"},
-        {"name": "Continued pretraining", "x": 9, "y": 7, "complexity": "Very High", "training": "Yes"}
-    ]
-    
-    # Draw a horizontal line representing increasing complexity
-    ax.plot([1, 9], [5, 5], 'k-', alpha=0.5)
-    ax.text(5, 4.5, "Complexity, cost, time →", ha='center', fontsize=12)
-    
-    # Add methods to the visualization
-    for method in methods:
-        if method["training"] == "No":
-            color = '#ADD8E6'  # Light blue for no training
-            training_text = "No model training involved"
-        else:
-            color = '#FFA07A'  # Light salmon for training
-            training_text = "Model training involved"
-            
-        # Draw method box
-        ax.text(method["x"], method["y"], method["name"], ha='center', fontsize=12, 
-                bbox=dict(facecolor=color, alpha=0.7, boxstyle='round,pad=0.5'))
-        
-        # Draw description below
-        ax.text(method["x"], method["y"]-1, f"Complexity: {method['complexity']}\n{training_text}", 
-                ha='center', fontsize=10)
-        
-        # Draw a vertical line to the horizontal complexity line
-        ax.plot([method["x"], method["x"]], [method["y"]-1.5, 5], 'k--', alpha=0.3)
-    
-    st.pyplot(fig)
+    st.image('images/customizing_fm.png')
     
     st.markdown("""
     ### Common Approaches for Customizing Foundation Models
@@ -934,62 +842,7 @@ Unlike traditional ML models built for specific tasks, FMs provide a versatile f
     
     with col2:
         # Creating a simple RAG workflow diagram
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.set_xlim(0, 10)
-        ax.set_ylim(0, 10)
-        ax.axis('off')
-        
-        # Create components
-        components = [
-            {"name": "User Query", "x": 1, "y": 8, "type": "input", "color": "#E1F5FE"},
-            {"name": "Knowledge Base", "x": 5, "y": 6, "type": "db", "color": "#FFECB3"},
-            {"name": "Augmented Prompt", "x": 5, "y": 8, "type": "process", "color": "#E8F5E9"},
-            {"name": "Foundation Model", "x": 5, "y": 2, "type": "model", "color": "#FF9900", "models": [
-                "Anthropic—Claude", "Meta—Llama", "Amazon Titan", "AI21 Labs—Jurassic"
-            ]},
-            {"name": "Response", "x": 9, "y": 8, "type": "output", "color": "#E8F5E9"}
-        ]
-        
-        # Draw connections
-        ax.arrow(2, 8, 2, 0, head_width=0.2, head_length=0.2, fc='black', ec='black', width=0.05)
-        ax.arrow(5, 7, 0, -4, head_width=0.2, head_length=0.2, fc='black', ec='black', width=0.05)
-        ax.arrow(6.5, 8, 1.5, 0, head_width=0.2, head_length=0.2, fc='black', ec='black', width=0.05)
-        ax.arrow(5, 3, 0, 2, head_width=0.2, head_length=0.2, fc='black', ec='black', width=0.05)
-        
-        # Draw retrieval arrow
-        ax.arrow(2, 7, 2, -0.5, head_width=0.2, head_length=0.2, fc='#FFA07A', ec='#FFA07A', width=0.05)
-        ax.text(3, 6.5, "Semantic Search", fontsize=8, color="#D32F2F")
-        
-        # Draw components
-        for c in components:
-            if c["type"] == "model":
-                # Draw foundation model box
-                ax.add_patch(plt.Rectangle((c["x"]-3, c["y"]-1), 6, 2, fill=True, facecolor=c["color"], 
-                                          edgecolor='gray', alpha=0.7, linewidth=2))
-                ax.text(c["x"], c["y"], c["name"], ha='center', va='center', fontsize=12, fontweight='bold')
-                
-                # Draw model names
-                y_offset = 0.5
-                for model in c["models"]:
-                    ax.text(c["x"], c["y"] - y_offset, model, ha='center', va='center', fontsize=8, fontstyle='italic')
-                    y_offset += 0.3
-            else:
-                if c["type"] == "db":
-                    # Database symbol (cylinder-like)
-                    ax.add_patch(Rectangle((c["x"]-2, c["y"]-0.75), 4, 1.5, fill=True, facecolor=c["color"], 
-                                               edgecolor='gray', alpha=0.7, linewidth=1))
-                    ax.add_patch(Ellipse((c["x"], c["y"]+0.75), 4, 0.5, fill=True, facecolor=c["color"], 
-                                             edgecolor='gray', alpha=0.7, linewidth=1))
-                    ax.add_patch(Ellipse((c["x"], c["y"]-0.75), 4, 0.5, fill=True, facecolor=c["color"], 
-                                             edgecolor='gray', alpha=0.7, linewidth=1))
-                else:
-                    # Regular boxes
-                    ax.add_patch(plt.Rectangle((c["x"]-1, c["y"]-0.5), 2, 1, fill=True, facecolor=c["color"], 
-                                               edgecolor='gray', alpha=0.7, linewidth=1))
-                
-                ax.text(c["x"], c["y"], c["name"], ha='center', va='center', fontsize=10)
-        
-        st.pyplot(fig)
+        st.image('images/rag.png')
         
         st.caption("RAG workflow in Amazon Bedrock Knowledge Bases")
     
@@ -1131,7 +984,7 @@ with tabs[4]:
     
     with col3:
         st.markdown("### Recurrent Neural Networks (RNN)")
-        st.image("https://miro.medium.com/v2/resize:fit:1400/1*6xj7xyBfK_IZ0re3XA0sTg.png", caption="RNN")
+        st.image("images/rnn.png", caption="RNN")
         st.markdown("""
         - Processes sequential data
         - Maintains memory of previous inputs
@@ -1289,7 +1142,7 @@ with tabs[5]:
         """)
     
     with col2:
-        st.image("https://d1.awsstatic.com/reInvent/reinvent-2022/sagemaker/SageMaker%20Training%20HIW%20Diagram.9c1e2f98a344d9e7a799cfe871dd68ee877e8ce1.png", caption="SageMaker Training Overview")
+        st.image("images/sagemaker_training_job.png", caption="SageMaker Training Overview")
         
         info_box("""<b>SageMaker Training Features:</b><br><br>
         
@@ -1313,7 +1166,7 @@ with tabs[5]:
     
     with col1:
         st.markdown("### File Mode")
-        st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2019/12/30/SageMaker-FM.gif", width=300)
+        st.image("images/s3_file_mode.png", width=400)
         st.markdown("""
         - Downloads entire dataset before training starts
         - Requires sufficient storage space
@@ -1324,7 +1177,7 @@ with tabs[5]:
     
     with col2:
         st.markdown("### Fast File Mode")
-        st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2019/12/30/SageMaker-FFM.gif", width=300)
+        st.image("images/s3_fast_file_mode.png", width=400)
         st.markdown("""
         - Looks like normal files but streams in background
         - No waiting for downloads, reduced storage needs
@@ -1335,7 +1188,7 @@ with tabs[5]:
     
     with col3:
         st.markdown("### Pipe Mode")
-        st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2019/12/30/SageMaker-PM.gif", width=300)
+        st.image("images/s3_pipe_mode.png", width=400)
         st.markdown("""
         - Streaming mode that reads data sequentially
         - Direct streaming from S3 to training algorithm
@@ -1456,7 +1309,7 @@ with tabs[5]:
     
     with col1:
         st.markdown("### Grid Search")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr1_lrg", width=250)
+        st.image("images/grid_search.jpg", width=250)
         st.markdown("""
         - Systematically searches all combinations
         - Divides each hyperparameter range into equally spaced values
@@ -1467,7 +1320,7 @@ with tabs[5]:
     
     with col2:
         st.markdown("### Random Search")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr2_lrg", width=250)
+        st.image("images/random_search.jpg", width=250)
         st.markdown("""
         - Randomly samples points from hyperparameter space
         - More efficient than grid search
@@ -1478,7 +1331,7 @@ with tabs[5]:
     
     with col3:
         st.markdown("### Bayesian Optimization")
-        st.image("https://www.sciencedirect.com/science/article/pii/S0169743922000314/gr3_lrg", width=250)
+        st.image("images/bayesian.jpg", width=250)
         st.markdown("""
         - Uses results of previous evaluations
         - Builds probabilistic model of the objective

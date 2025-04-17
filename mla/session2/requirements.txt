@@ -1,9 +1,10 @@
 streamlit
 streamlit_option_menu
 streamlit_lottie
+boto3
 pandas
 matplotlib
-numpy==1.26.1
+numpy>1.26.2
 scikit-learn
 bertopic
 gensim
@@ -17,3 +18,8 @@ umap
 scipy<1.13
 hyperopt
 scikit-optimize
+langchain
+langchain-community
+langchain-aws
+faiss-cpu
+faiss-gpu
