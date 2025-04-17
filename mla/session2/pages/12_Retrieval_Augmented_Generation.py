@@ -429,7 +429,6 @@ def parameter_sidebar():
     with st.sidebar:
         st.markdown("<div class='sub-header'>Session Management</div>", unsafe_allow_html=True)
         
-        st.markdown(f"**Session ID:** `{st.session_state.session_id}`")
         
         if st.button("Reset Session", key="reset_session", help="Clear conversation history and uploaded documents"):
             reset_session()
@@ -483,6 +482,9 @@ def parameter_sidebar():
             
             For more information, visit the [Amazon Bedrock documentation](https://docs.aws.amazon.com/bedrock/).
             """)
+        
+        
+        st.markdown(f"**Session ID:** `{st.session_state.session_id}`")
         
     return model_id, params
 
