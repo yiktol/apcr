@@ -1068,13 +1068,13 @@ with tabs[3]:
                         # Create list of base models
                         estimators = []
                         if use_rf:
-                            estimators.append(('rf', RandomForestClassifier(n_estimators=100, random_state=42)))
+                            estimators.append(('rf', RandomForestClassifier(n_estimators=10, random_state=42)))
                         if use_svm:
                             estimators.append(('svm', SVC(probability=True, random_state=42)))
                         if use_lr:
                             estimators.append(('lr', LogisticRegression(max_iter=1000, random_state=42)))
                         if use_gb:
-                            estimators.append(('gb', GradientBoostingClassifier(n_estimators=100, random_state=42)))
+                            estimators.append(('gb', GradientBoostingClassifier(n_estimators=10, random_state=42)))
                         
                         if len(estimators) == 0:
                             st.error("Please select at least one base model!")
@@ -1100,7 +1100,8 @@ with tabs[3]:
                             final_estimator=final_estimator,
                             cv=cv_folds,
                             stack_method='predict_proba',
-                            n_jobs=-1
+                            n_jobs=-1,
+                            passthrough=True
                         )
                         
                         stacking_model.fit(st.session_state.X_train, st.session_state.y_train)
