@@ -429,30 +429,30 @@ def main():
     # Sidebar for session management
     with st.sidebar:
 
-        st.title("Session Management")
+        st.markdown("### Session Management")
         st.info(f"User ID: {st.session_state.user_id}")
         
-        if st.button("Reset Session"):
+        if st.button("🔄 Reset Session"):
             reset_session()
             st.rerun()
         
         st.divider()
         
         # Information about the application
-        st.subheader("About this application")
-        st.markdown("""
-            This interactive learning application demonstrates the capabilities 
-            of Amazon SageMaker Model Registry. Explore how to organize, track, and 
-            manage your machine learning models throughout their lifecycle.
-        """)
-        
-        # AWS learning resources
-        st.sidebar.subheader("Additional Resources")
-        st.sidebar.markdown("""
-            - [SageMaker Model Registry Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html)
-            - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
-            - [AWS Training and Certification](https://aws.amazon.com/training/)
-        """)
+        with st.expander("📚 About This App", expanded=False):
+            st.markdown("""
+                This interactive learning application demonstrates the capabilities 
+                of Amazon SageMaker Model Registry. Explore how to organize, track, and 
+                manage your machine learning models throughout their lifecycle.
+                """)
+            
+            # AWS learning resources
+            st.subheader("Additional Resources")
+            st.markdown("""
+                - [SageMaker Model Registry Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html)
+                - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
+                - [AWS Training and Certification](https://aws.amazon.com/training/)
+            """)
     
     # Main app header
     st.title("Amazon SageMaker Model Registry")

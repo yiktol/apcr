@@ -140,6 +140,39 @@ def load_css():
             visibility: visible;
             opacity: 1;
         }
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+            background-color: #F8F9FA;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stTabs [data-baseweb="tab"] {
+            height: 60px;
+            white-space: pre-wrap;
+            border-radius: 6px;
+            font-weight: 600;
+            background-color: #FFFFFF;
+            color: #232F3E;
+            border: 1px solid #E9ECEF;
+            padding: 5px 15px;
+        }
+        .stTabs [aria-selected="true"] {
+            background-color: #FF9900 !important;
+            color: #FFFFFF !important;
+            border: 1px solid #FF9900 !important;
+        }
+        .stButton button {
+            background-color: #FF9900;
+            color: white;
+            border-radius: 4px;
+            border: none;
+            padding: 8px 16px;
+        }
+        .stButton button:hover {
+            background-color: #EC7211;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -155,58 +188,31 @@ def load_lottie_url(url):
 # Sidebar for navigation and session management
 def render_sidebar():
     with st.sidebar:
-        st.image("https://d1.awsstatic.com/logos/aws-logo-lockups/poweredbyaws/PB_AWS_logo_RGB_stacked_REV_SQ.91cd4af40773cbfbd15577a3c2b8a346fe3e8fa2.png", width=200)
-        st.markdown("## SageMaker MLOps Explorer")
         
-        selected = option_menu(
-            menu_title=None,
-            options=["🏠 Home", "📊 Data Preparation", "🛠️ Model Build", "📈 Model Evaluation", 
-                    "🔍 Model Selection", "🚀 Deployment", "📡 Monitoring", "ℹ️ About"],
-            icons=["house", "database-fill", "tools", "graph-up", 
-                  "search", "rocket", "broadcast", "info-circle"],
-            menu_icon="cast",
-            default_index=0,
-        )
+        st.markdown("### Session Management")
+
+        st.info(f"User ID: {st.session_state.user_id}")
         
-        st.markdown("---")
-        st.markdown("### Session Information")
-        st.write(f"Session ID: {st.session_state.user_id[:8]}")
-        st.write(f"Started: {st.session_state.start_time.strftime('%H:%M:%S')}")
-        st.write(f"Interactions: {st.session_state.interactions}")
-        
-        if st.button("Reset Session", key="reset_session"):
+        if st.button("🔄 Reset Session", key="reset_session"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.experimental_rerun()
+            st.rerun()
     
-    # Map the selected option to the current page
-    page_mapping = {
-        "🏠 Home": "Home",
-        "📊 Data Preparation": "Data Preparation",
-        "🛠️ Model Build": "Model Build",
-        "📈 Model Evaluation": "Model Evaluation",
-        "🔍 Model Selection": "Model Selection",
-        "🚀 Deployment": "Deployment",
-        "📡 Monitoring": "Monitoring",
-        "ℹ️ About": "About"
-    }
-    
-    st.session_state.current_page = page_mapping.get(selected, "Home")
-    st.session_state.interactions += 1
 
+        st.divider()
+
+        with st.expander("📚 About This App", expanded=False):
+           st.markdown("""
+                This interactive learning application demonstrates MLOps-ready features of Amazon SageMaker, allowing you to explore the complete machine learning lifecycle from data preparation to monitoring.
+            """)
 # Function to render the home page
 def home_page():
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown('<div class="main-header">SageMaker MLOps Interactive Learning Platform</div>', unsafe_allow_html=True)
-        st.markdown("""
-        Welcome to the interactive learning platform for Amazon SageMaker MLOps! This application will guide you through the entire MLOps workflow using Amazon SageMaker.
+
         
-        Explore each stage of the MLOps lifecycle with interactive examples, visualizations, and code samples.
-        """)
-        
-        st.markdown('<div class="sub-header">What is MLOps?</div>', unsafe_allow_html=True)
+        st.header("What is MLOps?")
         st.markdown("""
         MLOps (Machine Learning Operations) combines Machine Learning, DevOps, and Data Engineering to streamline 
         the end-to-end machine learning lifecycle. It focuses on the deployment, monitoring, and management of 
@@ -315,15 +321,10 @@ def data_preparation_page():
         st.image("https://d1.awsstatic.com/SageMaker/sagemaker-components.39fa1212c238f72187485e3961a9cb20af6415b6.png", 
                 caption="SageMaker Data Processing Components")
     
-    # Tabs for different data preparation tools
-    data_prep_tab = option_menu(
-        menu_title=None,
-        options=["Data Wrangler", "Processing Jobs", "Feature Store"],
-        icons=["database-gear", "cpu", "box2"],
-        orientation="horizontal",
-    )
-    
-    if data_prep_tab == "Data Wrangler":
+   
+    tab1, tab2, tab3 = st.tabs(["Data Wrangler", "Processing Jobs", "Feature Store"])
+
+    with tab1:
         st.markdown('<div class="sub-header">Amazon SageMaker Data Wrangler</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -475,7 +476,7 @@ transformed_data = transform_data(input_data)
             st.code(code, language='python')
             st.markdown('</div>', unsafe_allow_html=True)
         
-    elif data_prep_tab == "Processing Jobs":
+    with tab2:
         st.markdown('<div class="sub-header">SageMaker Processing Jobs</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -636,7 +637,7 @@ if __name__ == '__main__':
         st.code(preproc_code, language='python')
         st.markdown('</div>', unsafe_allow_html=True)
         
-    elif data_prep_tab == "Feature Store":
+    with tab3:
         st.markdown('<div class="sub-header">Amazon SageMaker Feature Store</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -812,15 +813,11 @@ def model_build_page():
     - Tracking and managing experiments
     """)
     
-    # Tabs for different model building features
-    model_build_tab = option_menu(
-        menu_title=None,
-        options=["Training Jobs", "Built-in Algorithms", "Experiments"],
-        icons=["gear", "grid", "clipboard-data"],
-        orientation="horizontal",
-    )
-    
-    if model_build_tab == "Training Jobs":
+
+    tab1, tab2, tab3 = st.tabs(["Training Jobs", "Built-in Algorithms", "Experiments"])
+
+
+    with tab1:
         st.markdown('<div class="sub-header">SageMaker Training Jobs</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -1062,7 +1059,7 @@ if __name__ == '__main__':
         st.code(train_script, language='python')
         st.markdown('</div>', unsafe_allow_html=True)
         
-    elif model_build_tab == "Built-in Algorithms":
+    with tab2:
         st.markdown('<div class="sub-header">SageMaker Built-in Algorithms</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -1403,7 +1400,7 @@ deepar_estimator.fit({"train": "s3://my-bucket/data/train",
         except:
             st.error("Graphviz is required to display the algorithm decision tree.")
         
-    elif model_build_tab == "Experiments":
+    with tab3:
         st.markdown('<div class="sub-header">SageMaker Experiments</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -1667,15 +1664,10 @@ def model_evaluation_page():
     - Assess model fairness and bias
     """)
     
-    # Tabs for different evaluation aspects
-    eval_tab = option_menu(
-        menu_title=None,
-        options=["Performance Metrics", "Model Explainability", "Bias Detection"],
-        icons=["speedometer2", "lightbulb", "shield-check"],
-        orientation="horizontal",
-    )
     
-    if eval_tab == "Performance Metrics":
+    tab1, tab2, tab3 = st.tabs(["Performance Metrics", "Model Explainability", "Bias Detection"])
+
+    with tab1:
         st.markdown('<div class="sub-header">Evaluating Model Performance</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -1887,7 +1879,7 @@ clarify_processor.run_model_explainability(
         st.code(clarify_code, language='python')
         st.markdown('</div>', unsafe_allow_html=True)
         
-    elif eval_tab == "Model Explainability":
+    with tab2:
         st.markdown('<div class="sub-header">Model Explainability with SageMaker Clarify</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -1904,9 +1896,6 @@ clarify_processor.run_model_explainability(
             SageMaker Clarify provides these explanations using techniques like SHAP (SHapley Additive exPlanations).
             """)
         
-        with col2:
-            lottie_explain = load_lottie_url("https://assets1.lottiefiles.com/packages/lf20_zxjjmmmy.json")
-            st_lottie(lottie_explain, height=200, key="explain_animation")
         
         # SHAP example
         st.markdown('<div class="info-box">Interactive Example: Feature Importance with SHAP</div>', unsafe_allow_html=True)
@@ -2101,7 +2090,7 @@ clarify_processor.run_explainability(
         st.code(clarify_explain_code, language='python')
         st.markdown('</div>', unsafe_allow_html=True)
         
-    elif eval_tab == "Bias Detection":
+    with tab3:
         st.markdown('<div class="sub-header">Bias Detection with SageMaker Clarify</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -2427,15 +2416,9 @@ def model_selection_page():
     - Approve models for different deployment stages
     """)
     
-    # Tabs for different model selection aspects
-    selection_tab = option_menu(
-        menu_title=None,
-        options=["Model Comparison", "Model Registry", "Model Approval Workflow"],
-        icons=["bar-chart", "archive", "check-circle"],
-        orientation="horizontal",
-    )
+    tab1, tab2, tab3 = st.tabs(["Model Comparison", "Model Registry", "Model Approval Workflow"])
     
-    if selection_tab == "Model Comparison":
+    with tab1:
         st.markdown('<div class="sub-header">Comparing Model Candidates</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -2665,7 +2648,7 @@ def model_selection_page():
         </div>
         """, unsafe_allow_html=True)
         
-    elif selection_tab == "Model Registry":
+    with tab2:
         st.markdown('<div class="sub-header">SageMaker Model Registry</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -3046,7 +3029,7 @@ predictor = model.deploy(
                 
                 st.code(hyperparams, language='json')
         
-    elif selection_tab == "Model Approval Workflow":
+    with tab3:
         st.markdown('<div class="sub-header">Model Approval Workflow</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -3612,15 +3595,9 @@ def deployment_page():
     - Serverless inference for cost-effective deployment
     """)
     
-    # Tabs for different deployment options
-    deploy_tab = option_menu(
-        menu_title=None,
-        options=["Real-time Endpoints", "Batch Transform", "Advanced Deployment"],
-        icons=["lightning", "boxes", "gear-wide-connected"],
-        orientation="horizontal",
-    )
-    
-    if deploy_tab == "Real-time Endpoints":
+    tab1, tab2, tab3 = st.tabs(["Real-time Endpoints","Batch Transform","Advanced Deployment"])
+
+    with tab1:
         st.markdown('<div class="sub-header">SageMaker Real-time Endpoints</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -4075,7 +4052,7 @@ def update_traffic_distribution(original_weight, improved_weight):
         st.code(ab_testing_code, language='python')
         st.markdown('</div>', unsafe_allow_html=True)
         
-    elif deploy_tab == "Batch Transform":
+    with tab2:
         st.markdown('<div class="sub-header">SageMaker Batch Transform</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -4410,7 +4387,7 @@ transformer.wait()
                 if percent_complete < 100:
                     break
         
-    elif deploy_tab == "Advanced Deployment":
+    with tab3:
         st.markdown('<div class="sub-header">Advanced Deployment Options</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -5578,15 +5555,9 @@ def monitoring_page():
     - Automate retraining when necessary
     """)
     
-    # Tabs for different monitoring aspects
-    monitor_tab = option_menu(
-        menu_title=None,
-        options=["Data Quality", "Model Quality", "Bias Drift", "Model Explainability"],
-        icons=["database-check", "graph-up", "shield-check", "lightbulb"],
-        orientation="horizontal",
-    )
+    tab1, tab2, tab3, tab4 = st.tabs(["Data Quality", "Model Quality", "Bias Drift", "Model Explainability"])
     
-    if monitor_tab == "Data Quality":
+    with tab1:
         st.markdown('<div class="sub-header">Data Quality Monitoring</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
@@ -5940,7 +5911,7 @@ for schedule in schedules["MonitoringScheduleSummaries"]:
                 </div>
                 """, unsafe_allow_html=True)
         
-    elif monitor_tab == "Model Quality":
+    with tab2:
         st.markdown('<div class="sub-header">Model Quality Monitoring</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -6425,7 +6396,7 @@ print(f"Uploaded ground truth to: {uploaded_path}")
                     </div>
                     """, unsafe_allow_html=True)
         
-    elif monitor_tab == "Bias Drift":
+    with tab3:
         st.markdown('<div class="sub-header">Bias Drift Monitoring</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -6764,7 +6735,7 @@ for schedule in schedules["MonitoringScheduleSummaries"]:
                 Example: If the model correctly identifies 80% of qualified applicants from one group but only 65% from another group, the difference is -0.15.
                 """)
             
-    elif monitor_tab == "Model Explainability":
+    with tab4:
         st.markdown('<div class="sub-header">Model Explainability Monitoring</div>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -7222,26 +7193,53 @@ def about_page():
 # Main application logic
 def main():
     # Render the sidebar
+
     render_sidebar()
+
+    st.markdown('<div class="main-header">SageMaker MLOps Interactive Learning Platform</div>', unsafe_allow_html=True)
+    st.markdown("""
+    Welcome to the interactive learning platform for Amazon SageMaker MLOps! This application will guide you through the entire MLOps workflow using Amazon SageMaker.
+    
+    Explore each stage of the MLOps lifecycle with interactive examples, visualizations, and code samples.
+    """)
+
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+        "🏠 Home",
+        "📊 Data Preparation",
+        "🛠️ Model Build",
+        "📈 Model Evaluation",
+        "🔍 Model Selection",
+        "🚀 Deployment",
+        "📡 Monitoring",
+        "ℹ️ About"
+    ])
+
+    
     
     # Render the appropriate page based on current_page
-    if st.session_state.current_page == "Home":
+    with tab1:
         home_page()
-    elif st.session_state.current_page == "Data Preparation":
+    with tab2:
         data_preparation_page()
-    elif st.session_state.current_page == "Model Build":
+        # data_wrangler_page()
+    with tab3:
         model_build_page()
-    elif st.session_state.current_page == "Model Evaluation":
+        # model_build_page()
+    with tab4:
         model_evaluation_page()
-    elif st.session_state.current_page == "Model Selection":
+        # model_evaluation_page()
+    with tab5:
         model_selection_page()
-    elif st.session_state.current_page == "Deployment":
+        # model_selection_page()
+    with tab6:
         deployment_page()
-    elif st.session_state.current_page == "Monitoring":
+        # deployment_page()
+    with tab7:
         monitoring_page()
-    elif st.session_state.current_page == "About":
+        # monitoring_page()
+    with tab8:
         about_page()
-    
+
     # Add footer
     st.markdown('<div class="footer">© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</div>', unsafe_allow_html=True)
 

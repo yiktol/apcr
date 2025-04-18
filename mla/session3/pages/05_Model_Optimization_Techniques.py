@@ -122,6 +122,19 @@ if st.sidebar.button("🔄 Reset Session"):
     time.sleep(1)
     st.rerun()
 
+st.sidebar.divider()
+
+with st.sidebar.expander(label='About this application' ,expanded=False):
+    st.markdown("""
+This application explores essential machine learning optimization techniques with hands-on visualizations. The app focuses on three key areas:
+
+- **Loss Functions**: Understand different ways to measure prediction errors and when to use MSE, MAE, Log Loss, and Huber Loss
+- **Convergence**: Learn how optimization algorithms approach optimal solutions and the factors affecting their stability
+- **Gradient Descent**: Visualize the fundamental optimization algorithm through interactive 2D and 3D demonstrations
+    """)
+
+
+
 # Custom functions for data generation and visualization
 def generate_regression_data(n_samples=100, noise=0.5, random_state=42):
     """Generate synthetic regression data"""

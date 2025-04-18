@@ -145,6 +145,7 @@ dataset_option = st.sidebar.selectbox(
     key="dataset_selection"
 )
 
+
 if dataset_option == "California Housing":
     st.session_state.dataset = 'california'
 else:
@@ -157,6 +158,19 @@ model_option = st.sidebar.selectbox(
     options=["Linear Regression", "Ridge Regression", "Random Forest", "Gradient Boosting"],
     key="model_selection"
 )
+
+st.sidebar.divider()
+
+with st.sidebar.expander(label='About this application' ,expanded=False):
+    st.markdown("""
+This application teaches regression model evaluation techniques through hands-on visualizations and dynamic examples. The app focuses on four key metrics:
+
+- **Mean Squared Error (MSE)**: Explore how this fundamental metric penalizes prediction errors
+- **Root Mean Squared Error (RMSE)**: Understand this interpretable metric that uses the same units as your target variable
+- **Coefficient of Determination (R²)**: Visualize how well your model explains variance in the data
+- **Adjusted R²**: Learn how this metric penalizes unnecessary model complexity
+
+ """)
 
 # Function to prepare dataset
 @st.cache_data

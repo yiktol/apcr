@@ -135,6 +135,22 @@ dataset_option = st.sidebar.selectbox(
     key="dataset_selection"
 )
 
+
+st.sidebar.divider()
+
+with st.sidebar.expander(label='About this application' ,expanded=False):
+    st.markdown("""
+This application focuses on model evaluation techniques for classification problems in machine learning, covering five essential areas:
+
+- **Confusion Matrix**: Visualize and understand true/false positives and negatives with adjustable thresholds
+- **Accuracy & Precision**: Learn when these metrics are appropriate and their limitations
+- **Recall & F1 Score**: Explore the balance between different types of errors with an interactive calculator
+- **AUC-ROC Curves**: Visualize model performance across all possible thresholds
+- **Heat Maps**: Master different visualization techniques for interpreting model results
+    """)
+
+
+
 if dataset_option == "Breast Cancer":
     st.session_state.dataset = 'breast_cancer'
 elif dataset_option == "Wine Classification":

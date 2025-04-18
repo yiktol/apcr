@@ -1225,31 +1225,30 @@ def main():
     
     # Sidebar for session management
     with st.sidebar:
-        st.image("https://d1.awsstatic.com/logos/aws-logo-lockups/poweredbyaws/PB_AWS_logo_RGB_stacked_REV_SQ.91cd4af40773cbfbd15577a3c2b8a346fe3e8fa2.png", width=200)
-        st.title("Session Management")
+        st.markdown("### Session Management")
         st.info(f"User ID: {st.session_state.user_id}")
         
-        if st.button("Reset Session"):
+        if st.button("🔄 Reset Session"):
             reset_session()
             st.experimental_rerun()
         
         st.divider()
         
         # Information about the application
-        st.subheader("About this application")
-        st.markdown("""
-            This interactive learning application demonstrates Amazon SageMaker's 
-            advanced inference hosting options. Explore each tab to understand the 
-            different model hosting strategies and their use cases.
-        """)
-        
-        # AWS learning resources
-        st.sidebar.subheader("Additional Resources")
-        st.sidebar.markdown("""
-            - [SageMaker Inference Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/deploy-model.html)
-            - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
-            - [AWS Training and Certification](https://aws.amazon.com/training/)
-        """)
+        with st.expander("📚 About This App", expanded=False):
+            st.markdown("""
+                This interactive learning application demonstrates Amazon SageMaker's 
+                advanced inference hosting options. Explore each tab to understand the 
+                different model hosting strategies and their use cases.
+            """)
+            
+            # AWS learning resources
+            st.subheader("Additional Resources")
+            st.markdown("""
+                - [SageMaker Inference Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/deploy-model.html)
+                - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
+                - [AWS Training and Certification](https://aws.amazon.com/training/)
+            """)
     
     # Main app header
     st.title("Amazon SageMaker Inference Hosting Options")

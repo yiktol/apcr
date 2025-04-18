@@ -239,7 +239,7 @@ with st.sidebar:
             st.rerun()
     
     # Reset button
-    if st.button("Reset Session 🔄"):
+    if st.button("🔄 Reset Session"):
         reset_session()
     
     # Progress tracking
@@ -2088,7 +2088,6 @@ col1, col2 = st.columns([1, 5])
 with col1:
     st.image("images/aws_logo.png", width=70)
 with col2:
-    st.markdown("**AWS Machine Learning Engineer - Associate | Domain 2: ML Model Development**")
     st.markdown("© 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.")
 # ```
 

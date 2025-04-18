@@ -288,7 +288,7 @@ with st.sidebar:
             st.rerun()
     
     # Reset button
-    if st.button("Reset Session 🔄"):
+    if st.button("🔄 Reset Session"):
         reset_session()
     
     # Progress tracking

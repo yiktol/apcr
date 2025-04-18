@@ -134,6 +134,23 @@ if st.sidebar.button("🔄 Reset Session"):
     time.sleep(1)
     st.rerun()
 
+
+st.sidebar.divider()
+
+with st.sidebar.expander(label='About this application' ,expanded=False):
+    st.markdown("""
+
+    This application explores model generalization in machine learning, focusing on four key areas:
+
+    - **Underfitting & Overfitting**: Visualize the balance between model simplicity and complexity
+    - **Regularization Techniques**: Learn how constraints improve model performance on unseen data
+    - **Dropout**: Explore how randomly disabling neurons enhances neural network generalization
+    - **L1/L2 Regularization**: Compare different penalty approaches for controlling model complexity
+
+    """)
+
+
+
 # Data generation functions
 @st.cache_data
 def generate_polynomial_data(noise=0.5):

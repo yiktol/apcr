@@ -136,27 +136,27 @@ with st.sidebar:
     st.title("Session Management")
     st.info(f"User ID: {st.session_state.user_id}")
     
-    if st.button("Reset Session"):
+    if st.button("🔄 Reset Session"):
         st.session_state.clear()
         st.rerun()
     
     st.divider()
     
     # Information about the application
-    st.subheader("About this application")
-    st.markdown("""
-        This interactive learning application demonstrates the powerful evaluation 
-        tools available in Amazon SageMaker. Explore each tab to learn about different 
-        capabilities and see them in action with interactive examples.
-    """)
+    with st.expander(label='About this application' ,expanded=False):
+        st.markdown("""
+            This interactive learning application demonstrates the powerful evaluation 
+            tools available in Amazon SageMaker. Explore each tab to learn about different 
+            capabilities and see them in action with interactive examples.
+        """)
     
-    # AWS learning resources
-    st.sidebar.subheader("Additional Resources")
-    st.sidebar.markdown("""
-        - [SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
-        - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
-        - [AWS Training and Certification](https://aws.amazon.com/training/)
-    """)
+        # AWS learning resources
+        st.subheader("Additional Resources")
+        st.markdown("""
+            - [SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
+            - [AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/)
+            - [AWS Training and Certification](https://aws.amazon.com/training/)
+        """)
 
 # Main app header
 st.title("Amazon SageMaker Tools for Evaluation")
