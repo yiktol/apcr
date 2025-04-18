@@ -1,7 +1,6 @@
 streamlit
 streamlit_lottie
 pandas
-numpy
 matplotlib
 numpy==1.26.1
 scikit-learn
@@ -9,3 +8,8 @@ seaborn
 tensorflow
 requests
 tabulate
+networkx
+altair 
+plotly 
+pillow
+graphviz

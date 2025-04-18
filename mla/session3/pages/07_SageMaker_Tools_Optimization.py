@@ -45,8 +45,8 @@ def load_lottieurl(url: str):
     return r.json()
 
 # Initialize session state
-if 'init' not in st.session_state:
-    st.session_state.init = True
+if 'init_opt' not in st.session_state:
+    st.session_state.init_opt = True
     st.session_state.user_id = str(uuid.uuid4())
     st.session_state.debugger_stage = 0
     st.session_state.current_model = "ResNet"

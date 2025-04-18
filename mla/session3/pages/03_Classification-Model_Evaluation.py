@@ -116,8 +116,6 @@ def init_session_state():
 init_session_state()
 
 # Sidebar for session management
-st.sidebar.image("https://d1.awsstatic.com/training-and-certification/certification-badges/AWS-Certified-Machine-Learning-Specialty_badge.5af6667a7152501ac769f252adb7ac96539d1421.png", width=100)
-st.sidebar.title("ML Model Evaluation")
 st.sidebar.markdown("### Session Management")
 
 # Reset session button

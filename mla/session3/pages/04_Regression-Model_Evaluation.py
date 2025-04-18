@@ -126,8 +126,6 @@ def init_session_state():
 init_session_state()
 
 # Sidebar for session management
-st.sidebar.image("https://d1.awsstatic.com/training-and-certification/certification-badges/AWS-Certified-Machine-Learning-Specialty_badge.5af6667a7152501ac769f252adb7ac96539d1421.png", width=100)
-st.sidebar.title("Regression Model Evaluation")
 st.sidebar.markdown("### Session Management")
 
 # Reset session button
@@ -137,7 +135,7 @@ if st.sidebar.button("🔄 Reset Session"):
     init_session_state()
     st.sidebar.success("Session has been reset!")
     time.sleep(1)
-    st.experimental_rerun()
+    st.rerun()
 
 # Dataset selection
 st.sidebar.markdown("### Dataset Selection")
@@ -1371,7 +1369,7 @@ with tab6:
             
             st.session_state.quiz_score = score
             st.session_state.quiz_submitted = True
-            st.experimental_rerun()
+            st.rerun()
     
     else:
         # Show results
@@ -1432,7 +1430,7 @@ with tab6:
             st.session_state.quiz_submitted = False
             st.session_state.quiz_answers = {}
             st.session_state.quiz_score = 0
-            st.experimental_rerun()
+            st.rerun()
 
 # Summary section
 st.markdown("""

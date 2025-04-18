@@ -43,8 +43,8 @@ def load_lottieurl(url: str):
     return r.json()
 
 # Initialize session state
-if 'init' not in st.session_state:
-    st.session_state.init = True
+if 'init_eval' not in st.session_state:
+    st.session_state.init_eval = True
     st.session_state.user_id = str(uuid.uuid4())
     st.session_state.clarify_model_choice = "XGBoost"
     st.session_state.debugger_stage = 0
@@ -133,7 +133,6 @@ st.markdown("""
 
 # Sidebar for session management
 with st.sidebar:
-    # st.image("https://d1.awsstatic.com/logos/aws-logo-lockups/poweredbyaws/PB_AWS_logo_RGB_stacked_REV_SQ.91cd4af40773cbfbd15577a3c2b8a346fe3e8fa2.png", width=200)
     st.title("Session Management")
     st.info(f"User ID: {st.session_state.user_id}")
     
