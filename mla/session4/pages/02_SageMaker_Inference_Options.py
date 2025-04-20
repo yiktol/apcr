@@ -1471,12 +1471,12 @@ def main():
             xaxis_title="Hour of Day",
             yaxis=dict(
                 title="Traffic (requests/sec)",
-                titlefont=dict(color=AWS_COLORS["blue"]),
+                # titlefont=dict(color=AWS_COLORS["blue"]),
                 tickfont=dict(color=AWS_COLORS["blue"])
             ),
             yaxis2=dict(
                 title="Instance Count",
-                titlefont=dict(color=AWS_COLORS["orange"]),
+                # titlefont=dict(color=AWS_COLORS["orange"]),
                 tickfont=dict(color=AWS_COLORS["orange"]),
                 anchor="x",
                 overlaying="y",
@@ -1985,12 +1985,12 @@ def main():
             xaxis_title="Number of Instances",
             yaxis=dict(
                 title="Processing Time (min)",
-                titlefont=dict(color=AWS_COLORS["orange"]),
+                # titlefont=dict(color=AWS_COLORS["orange"]),
                 tickfont=dict(color=AWS_COLORS["orange"])
             ),
             yaxis2=dict(
                 title="Throughput (records/min)",
-                titlefont=dict(color=AWS_COLORS["teal"]),
+                # titlefont=dict(color=AWS_COLORS["teal"]),
                 tickfont=dict(color=AWS_COLORS["teal"]),
                 overlaying="y",
                 side="right"
