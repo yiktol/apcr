@@ -256,6 +256,7 @@ def generate_model_cards():
                 "source": "s3://example-bucket/recommendations/training/",
                 "timeframe": "Last 12 months",
                 "interactions": 78000000,
+                "rows": 78000000,
                 "users": 2300000,
                 "items": 145000,
                 "preprocessing": [
@@ -267,7 +268,8 @@ def generate_model_cards():
             "evaluation_data": {
                 "source": "s3://example-bucket/recommendations/evaluation/",
                 "timeframe": "Last 2 weeks",
-                "interactions": 5200000
+                "interactions": 5200000,
+                "rows": 5200000
             },
             "deployment": {
                 "endpoint": "product-recommendations-prod",
@@ -737,7 +739,7 @@ def create_model_card_visualization(model_card):
             st.subheader("Training Data")
             st.markdown(f"**Source:** `{model_card['training_data']['source']}`")
             st.markdown(f"**Timeframe:** {model_card['training_data']['timeframe']}")
-            # st.markdown(f"**Rows:** {model_card['training_data']['rows']:,}")
+            st.markdown(f"**Rows:** {model_card['training_data']['rows']:,}")
             st.markdown(f"**Rows:** {model_card.get('training_data', {}).get('rows', 'N/A'):,}")
             if 'features' in model_card['training_data']:
                 st.markdown(f"**Features:** {model_card['training_data']['features']}")
@@ -750,7 +752,7 @@ def create_model_card_visualization(model_card):
             st.subheader("Evaluation Data")
             st.markdown(f"**Source:** `{model_card['evaluation_data']['source']}`")
             st.markdown(f"**Timeframe:** {model_card['evaluation_data']['timeframe']}")
-            # st.markdown(f"**Rows:** {model_card['evaluation_data']['rows']:,}")
+            st.markdown(f"**Rows:** {model_card['evaluation_data']['rows']:,}")
             st.markdown(f"**Rows:** {model_card.get('training_data', {}).get('rows', 'N/A'):,}")
             
             st.subheader("Deployment Configuration")
@@ -1962,26 +1964,26 @@ def main():
         st.divider()
         
         # Information about the application
-        st.subheader("About this application")
-        st.markdown("""
-            This e-learning application demonstrates ML Governance with Amazon SageMaker.
-            Learn about SageMaker Role Manager, Model Cards, and the Model Dashboard.
-        """)
-        
-        # Load lottie animation
-        lottie_url = "https://assets5.lottiefiles.com/packages/lf20_qp1q7mct.json"
-        lottie_json = load_lottie_url(lottie_url)
-        if lottie_json:
-            st_lottie(lottie_json, height=200, key="sidebar_animation")
-        
-        # Additional resources section
-        st.sidebar.subheader("Additional Resources")
-        st.sidebar.markdown("""
-            - [SageMaker Role Manager Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/role-manager.html)
-            - [SageMaker Model Cards Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-cards.html)
-            - [SageMaker Model Dashboard Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-dashboard.html)
-            - [ML Governance Best Practices](https://aws.amazon.com/blogs/machine-learning/category/artificial-intelligence/ml-governance/)
-        """)
+        with st.expander("About this application", expanded=False):
+            st.markdown("""
+                This e-learning application demonstrates ML Governance with Amazon SageMaker.
+                Learn about SageMaker Role Manager, Model Cards, and the Model Dashboard.
+            """)
+            
+            # Load lottie animation
+            lottie_url = "https://assets5.lottiefiles.com/packages/lf20_qp1q7mct.json"
+            lottie_json = load_lottie_url(lottie_url)
+            if lottie_json:
+                st_lottie(lottie_json, height=200, key="sidebar_animation")
+            
+            # Additional resources section
+            st.subheader("Additional Resources")
+            st.markdown("""
+                - [SageMaker Role Manager Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/role-manager.html)
+                - [SageMaker Model Cards Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-cards.html)
+                - [SageMaker Model Dashboard Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-dashboard.html)
+                - [ML Governance Best Practices](https://aws.amazon.com/blogs/machine-learning/category/artificial-intelligence/ml-governance/)
+            """)
     
     # Main app header
     st.title("ML Governance with Amazon SageMaker")
@@ -2598,9 +2600,7 @@ print(f"Created model card: {{response['ModelCardArn']}}")
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <div style="font-weight: bold; font-size: 16px;">{info['name']}</div>
                         <div>
-                            <span style="background-color: {status_color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">{info['status']}
-                            </span>
-                            {alert_badge}
+                            <span style="background-color: {status_color}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">{info['status']}</span>{alert_badge}
                         </div>
                     </div>
                     <div style="margin-bottom: 15px; font-size: 13px;">

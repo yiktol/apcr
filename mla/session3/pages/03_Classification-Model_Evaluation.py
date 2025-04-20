@@ -1190,7 +1190,7 @@ with tab7:
             st.markdown(f"**Question {i+1}**: {q['question']}")
             st.session_state.quiz_answers[i] = st.radio(
                 f"Select your answer for question {i+1}:",
-                q['options'],
+                q['options'],index=None,
                 key=f"q{i}"
             )
             st.markdown("---")

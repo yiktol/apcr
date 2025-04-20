@@ -681,12 +681,12 @@ def create_instance_family_comparison_chart(instance_family_id):
         xaxis_title="Instance Type",
         yaxis=dict(
             title="vCPUs",
-            titlefont=dict(color="#00A1C9"),
+            # titlefont=dict(color="#00A1C9"),
             tickfont=dict(color="#00A1C9")
         ),
         yaxis2=dict(
             title="Memory (GiB)",
-            titlefont=dict(color="#FF9900"),
+            # titlefont=dict(color="#FF9900"),
             tickfont=dict(color="#FF9900"),
             anchor="x",
             overlaying="y",
@@ -761,12 +761,12 @@ def create_instance_comparison_chart(model_id, highlight_instances=None):
         ),
         yaxis=dict(
             title="Latency (ms)",
-            titlefont=dict(color="#00A1C9"),
+            # titlefont=dict(color="#00A1C9"),
             tickfont=dict(color="#00A1C9")
         ),
         yaxis2=dict(
             title="Throughput (req/sec)",
-            titlefont=dict(color="#59BA47"),
+            # titlefont=dict(color="#59BA47"),
             tickfont=dict(color="#59BA47"),
             anchor="x",
             overlaying="y",
@@ -1302,28 +1302,28 @@ def main():
         st.divider()
         
         # Information about the application
-        st.subheader("About this application")
-        st.markdown("""
-            This e-learning application demonstrates Amazon SageMaker Inference Recommender, a capability 
-            that helps you choose the best instance type for your ML model deployment.
+        with st.expander("About this application", expanded=False):
+            st.markdown("""
+                This e-learning application demonstrates Amazon SageMaker Inference Recommender, a capability 
+                that helps you choose the best instance type for your ML model deployment.
+                
+                Navigate through the tabs to learn about different ML instance options and how 
+                Inference Recommender works to optimize your model deployment.
+            """)
             
-            Navigate through the tabs to learn about different ML instance options and how 
-            Inference Recommender works to optimize your model deployment.
-        """)
-        
-        # Load lottie animation
-        lottie_url = "https://assets1.lottiefiles.com/packages/lf20_AbQGpP.json"
-        lottie_json = load_lottie_url(lottie_url)
-        if lottie_json:
-            st_lottie(lottie_json, height=200, key="sidebar_animation")
-        
-        # Additional resources section
-        st.sidebar.subheader("Additional Resources")
-        st.sidebar.markdown("""
-            - [SageMaker Inference Recommender Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/inference-recommender.html)
-            - [SageMaker Instance Types](https://docs.aws.amazon.com/sagemaker/latest/dg/instance-types-az.html)
-            - [Inference Recommender Best Practices](https://aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-inference-recommender/)
-        """)
+            # Load lottie animation
+            lottie_url = "https://assets1.lottiefiles.com/packages/lf20_AbQGpP.json"
+            lottie_json = load_lottie_url(lottie_url)
+            if lottie_json:
+                st_lottie(lottie_json, height=200, key="sidebar_animation")
+            
+            # Additional resources section
+            st.subheader("Additional Resources")
+            st.markdown("""
+                - [SageMaker Inference Recommender Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/inference-recommender.html)
+                - [SageMaker Instance Types](https://docs.aws.amazon.com/sagemaker/latest/dg/instance-types-az.html)
+                - [Inference Recommender Best Practices](https://aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-inference-recommender/)
+            """)
     
     # Main app header
     st.title("Amazon SageMaker Inference Recommender")
@@ -1509,7 +1509,7 @@ def main():
                 yaxis_title="Monthly Cost ($)",
                 yaxis2=dict(
                     title="Cumulative Savings ($)",
-                    titlefont=dict(color='#FF9900'),
+                    # titlefont=dict(color='#FF9900'),
                     tickfont=dict(color='#FF9900'),
                     overlaying="y",
                     side="right"

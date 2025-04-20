@@ -124,8 +124,8 @@ st.markdown("""
 
 # Initialize session state
 def init_session_state():
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = True
+    if 'initialized_hyper' not in st.session_state:
+        st.session_state.initialized_hyper = True
         # Data
         st.session_state.X_train = None
         st.session_state.X_test = None

@@ -21,7 +21,7 @@ from streamlit_option_menu import option_menu
 
 # Set page configuration
 st.set_page_config(
-    page_title="SageMaker MLOps Learning Platform",
+    page_title="SageMaker MLOps",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -7196,7 +7196,7 @@ def main():
 
     render_sidebar()
 
-    st.markdown('<div class="main-header">SageMaker MLOps Interactive Learning Platform</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">SageMaker MLOps</div>', unsafe_allow_html=True)
     st.markdown("""
     Welcome to the interactive learning platform for Amazon SageMaker MLOps! This application will guide you through the entire MLOps workflow using Amazon SageMaker.
     

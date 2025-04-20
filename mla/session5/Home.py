@@ -231,32 +231,24 @@ def info_box(text, box_type="info"):
             <div class="info-box">
                 <div markdown="1">
                     {text}
-                </div>
-            </div>
             """, unsafe_allow_html=True)
     elif box_type == "success":
         st.markdown(f"""
             <div class="success-box">
                 <div markdown="1">
                     {text}
-                </div>
-            </div>
             """, unsafe_allow_html=True)
     elif box_type == "warning":
         st.markdown(f"""
             <div class="warning-box">
                 <div markdown="1">
                     {text}
-                </div>
-            </div>
             """, unsafe_allow_html=True)
     elif box_type == "tip":
         st.markdown(f"""
             <div class="tip-box">
                 <div markdown="1">
                     {text}
-                </div>
-            </div>
             """, unsafe_allow_html=True)
 
 # Function for definition box - same as Domain 1
@@ -507,7 +499,7 @@ with tabs[1]:
         all of them to maintain the quality and reliability of your ML solutions.
         """)
         
-        st.image("images/model_drift.png", caption="Model Drift Over Time", width=600)
+        # st.image("images/model_drift.png", caption="Model Drift Over Time", width=600)
     
     with col2:
         info_box("""

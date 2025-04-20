@@ -1,5 +1,6 @@
 streamlit
 streamlit_lottie
+streamlit_option_menu
 pandas
 matplotlib
 numpy==1.26.1
@@ -13,3 +14,5 @@ altair
 plotly 
 pillow
 graphviz
+networkx
+boto3

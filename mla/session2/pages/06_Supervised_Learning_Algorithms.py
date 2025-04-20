@@ -115,8 +115,8 @@ def sigmoid(x):
 
 # Initialize session state
 def init_session_state():
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = True
+    if 'initialized_sup' not in st.session_state:
+        st.session_state.initialized_sup = True
         st.session_state.linear_learner_trained = False
         st.session_state.xgboost_trained = False
         st.session_state.knn_trained = False

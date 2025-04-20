@@ -6,3 +6,6 @@ toolbarMode = "minimal"
 
 #[ui]
 #hideTopBar = true
+
+[browser]
+gatherUsageStats = false

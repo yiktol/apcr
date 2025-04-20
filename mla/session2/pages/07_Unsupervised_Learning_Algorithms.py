@@ -174,8 +174,8 @@ st.markdown("""
 
 # Initialize session state
 def init_session_state():
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = True
+    if 'initialized_usup' not in st.session_state:
+        st.session_state.initialized_usup = True
         
         # K-means state variables
         st.session_state.kmeans_data = None

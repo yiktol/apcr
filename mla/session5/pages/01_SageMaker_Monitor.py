@@ -952,28 +952,28 @@ def main():
         st.divider()
         
         # Information about the application
-        st.subheader("About this application")
-        st.markdown("""
-            This e-learning application demonstrates how Amazon SageMaker Model Monitor works 
-            to detect and visualize model drift in machine learning deployments.
+        with st.expander("About this application", expanded=False):
+            st.markdown("""
+                This e-learning application demonstrates how Amazon SageMaker Model Monitor works 
+                to detect and visualize model drift in machine learning deployments.
+                
+                Navigate through the tabs to learn about different types of drift, 
+                monitoring strategies, and how to test models with different traffic distributions.
+            """)
             
-            Navigate through the tabs to learn about different types of drift, 
-            monitoring strategies, and how to test models with different traffic distributions.
-        """)
-        
-        # Load lottie animation
-        lottie_url = "https://assets4.lottiefiles.com/packages/lf20_qp1q7mct.json"
-        lottie_json = load_lottie_url(lottie_url)
-        if lottie_json:
-            st_lottie(lottie_json, height=200, key="sidebar_animation")
-        
-        # Additional resources section
-        st.sidebar.subheader("Additional Resources")
-        st.sidebar.markdown("""
-            - [SageMaker Model Monitor Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor.html)
-            - [Model Drift Detection Best Practices](https://aws.amazon.com/blogs/machine-learning/best-practices-for-detecting-and-handling-model-drift-on-amazon-sagemaker/)
-            - [SageMaker Model Monitoring Examples](https://github.com/aws/amazon-sagemaker-examples/tree/master/sagemaker_model_monitor)
-        """)
+            # Load lottie animation
+            lottie_url = "https://assets4.lottiefiles.com/packages/lf20_qp1q7mct.json"
+            lottie_json = load_lottie_url(lottie_url)
+            if lottie_json:
+                st_lottie(lottie_json, height=200, key="sidebar_animation")
+            
+            # Additional resources section
+            st.subheader("Additional Resources")
+            st.markdown("""
+                - [SageMaker Model Monitor Documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor.html)
+                - [Model Drift Detection Best Practices](https://aws.amazon.com/blogs/machine-learning/best-practices-for-detecting-and-handling-model-drift-on-amazon-sagemaker/)
+                - [SageMaker Model Monitoring Examples](https://github.com/aws/amazon-sagemaker-examples/tree/master/sagemaker_model_monitor)
+            """)
     
     # Main app header
     st.title("Amazon SageMaker Model Monitor Learning Hub")

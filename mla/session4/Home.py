@@ -2321,7 +2321,7 @@ with tabs[6]:
             # Display each question
             for i, q in enumerate(selected_questions):
                 st.markdown(f"**Question {i+1}:** {q['question']}")
-                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
                 user_answers.append((answer, q['correct'], q['explanation']))
             
             # Submit button
