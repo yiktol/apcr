@@ -261,7 +261,7 @@ with tab1:
     col1, col2, col3 = st.columns([1,2,1])
     
     with col2:
-        st.image("https://miro.medium.com/max/1400/1*Y9qJHm_4woVqNv-aZIXgJg.png", caption="The Bias-Variance Tradeoff")
+        st.image("images/bias-and-variance.png", caption="The Bias-Variance Tradeoff")
     
     st.markdown("""
     The bias-variance tradeoff is a central problem in supervised learning:
@@ -338,11 +338,11 @@ with tab2:
     
     with col1:
         st.markdown('<div class="info-box"><strong>Underfitting</strong>: Model is too simple to capture the underlying pattern in the data. It performs poorly on both training and test data.</div>', unsafe_allow_html=True)
-        st.image("https://miro.medium.com/max/1400/0*0AmzRmHhu6PhA8KX.png", width=300, caption="Underfitting Example")
+        st.image("images/underfit.png", width=300, caption="Underfitting Example")
     
     with col2:
         st.markdown('<div class="info-box"><strong>Overfitting</strong>: Model is too complex and captures noise in the training data. It performs well on training data but poorly on test data.</div>', unsafe_allow_html=True)
-        st.image("https://miro.medium.com/max/1400/0*BvG3KraXri5nVbkh.png", width=300, caption="Overfitting Example")
+        st.image("images/overfit.png", width=300, caption="Overfitting Example")
     
     # Interactive demo of polynomial regression
     st.subheader("Interactive Polynomial Regression Demo")

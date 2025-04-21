@@ -377,7 +377,7 @@ with tabs[1]:
     
     with col1:
         st.markdown("#### Underfitting")
-        # st.image("images/underfitting.png", caption="Underfitting Example")
+        st.image("images/underfitting.png", caption="Underfitting Example")
         st.markdown("""
         - Model is too simple to capture the underlying pattern
         - Poor performance on both training and test data
@@ -395,7 +395,7 @@ with tabs[1]:
     
     with col2:
         st.markdown("#### Overfitting")
-        # st.image("images/overfitting.png", caption="Overfitting Example")
+        st.image("images/overfitting.png", caption="Overfitting Example")
         st.markdown("""
         - Model learns noise instead of the underlying pattern
         - Good performance on training data, poor on test data
@@ -413,7 +413,7 @@ with tabs[1]:
     
     with col3:
         st.markdown("#### Appropriate Fitting")
-        # st.image("images/good_fit.png", caption="Good Fit Example")
+        st.image("images/good_fit.png", caption="Good Fit Example")
         st.markdown("""
         - Model captures the underlying pattern without noise
         - Good performance on both training and test data
@@ -440,7 +440,7 @@ with tabs[1]:
     
     with col1:
         st.markdown("### Dropout Regularization")
-        # st.image("images/dropout.png", caption="Dropout Regularization in Neural Networks")
+        st.image("images/dropout.png", caption="Dropout Regularization in Neural Networks")
         st.markdown("""
         Dropout is a regularization technique for neural networks:
         
@@ -453,7 +453,7 @@ with tabs[1]:
     
     with col2:
         st.markdown("### L1/L2 Regularization")
-        # st.image("images/l1_l2.png", caption="L1 vs L2 Regularization")
+        st.image("images/l1_l2.png", caption="L1 vs L2 Regularization")
         
         st.markdown("#### L1 Regularization (Lasso)")
         st.markdown("""
@@ -639,7 +639,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("### Cross-Validation")
-        # st.image("images/cross_validation.png", caption="K-Fold Cross-Validation")
+        st.image("images/cross_validation.png", caption="K-Fold Cross-Validation")
         st.markdown("""
         Cross-validation is a technique that provides a more reliable estimate of model performance by using multiple train-test splits:
         
@@ -653,7 +653,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("### Learning Curves")
-        # st.image("images/learning_curves.png", caption="Learning Curves Example")
+        st.image("images/learning_curves.png", caption="Learning Curves Example")
         st.markdown("""
         Learning curves plot model performance against training set size:
         
@@ -674,7 +674,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("#### SageMaker Clarify")
-        st.image("https://d1.awsstatic.com/SageMaker-Clarify-How-it-works.3e1739db812b5d9ad35ec0f2164769565df7c749.png", width=300)
+        # st.image("https://d1.awsstatic.com/SageMaker-Clarify-How-it-works.3e1739db812b5d9ad35ec0f2164769565df7c749.png", width=300)
         st.markdown("""
         SageMaker Clarify provides:
         
@@ -688,7 +688,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("#### SageMaker Debugger")
-        st.image("https://d1.awsstatic.com/rt21-mujiba/demo3-debug.2376975bbf5eb4b9e05d6e9f494c0671550ee374.png", width=300)
+        # st.image("https://d1.awsstatic.com/rt21-mujiba/demo3-debug.2376975bbf5eb4b9e05d6e9f494c0671550ee374.png", width=300)
         st.markdown("""
         SageMaker Debugger provides:
         
@@ -702,7 +702,7 @@ with tabs[2]:
     
     with col3:
         st.markdown("#### SageMaker Experiments")
-        st.image("https://docs.aws.amazon.com/images/sagemaker/latest/dg/images/experiments/experiment1.png", width=300)
+        # st.image("https://docs.aws.amazon.com/images/sagemaker/latest/dg/images/experiments/experiment1.png", width=300)
         st.markdown("""
         SageMaker Experiments helps:
         
@@ -795,7 +795,7 @@ with tabs[3]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/confusion_matrix.png", caption="Confusion Matrix")
+        st.image("images/confusion_matrix.png", caption="Confusion Matrix", width=500)
         
         st.markdown("""
         A confusion matrix is a table that summarizes the prediction results of a classification model:
@@ -1725,7 +1725,7 @@ with tabs[5]:
     
     with col1:
         st.markdown("### SageMaker Debugger")
-        st.image("https://d1.awsstatic.com/re19/Diagram_Amazon-SageMaker-Debugger_How-it-Works@2x.155304b8582a1a5f9d8d654461e01d9b08712c53.png", width=400)
+        # st.image("https://d1.awsstatic.com/re19/Diagram_Amazon-SageMaker-Debugger_How-it-Works@2x.155304b8582a1a5f9d8d654461e01d9b08712c53.png", width=400)
         st.markdown("""
         **Key capabilities:**
         
@@ -1739,7 +1739,7 @@ with tabs[5]:
     
     with col2:
         st.markdown("### SageMaker Automatic Model Tuning")
-        st.image("https://d1.awsstatic.com/product-marketing/Automatic%20Model%20Tuning/product-page-diagram_SageMaker_Auto-Model-Tuning_HIW%402x.4ec0c8c9733cd8cfbfacb9777389f16b7c960d97.png", width=400)
+        # st.image("https://d1.awsstatic.com/product-marketing/Automatic%20Model%20Tuning/product-page-diagram_SageMaker_Auto-Model-Tuning_HIW%402x.4ec0c8c9733cd8cfbfacb9777389f16b7c960d97.png", width=400)
         st.markdown("""
         **Key capabilities:**
         
@@ -1926,7 +1926,7 @@ with tabs[6]:
             # Display each question
             for i, q in enumerate(selected_questions):
                 st.markdown(f"**Question {i+1}:** {q['question']}")
-                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
                 user_answers.append((answer, q['correct'], q['explanation']))
             
             # Submit button
