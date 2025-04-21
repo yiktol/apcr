@@ -1126,7 +1126,7 @@ with tab3:
         - **Saddle points**: Areas where gradient is zero but not a minimum
         - **Solution**: Momentum, random restarts, or advanced optimizers
         
-        ![Saddle Points](https://miro.medium.com/v2/resize:fit:720/format:webp/1*SU3UwEwGmfgan3-h-BJVVA.png)
+        ![Saddle Points](https://miro.medium.com/v2/resize:fit:4800/format:webp/1*ZC9qItK9wI0F6BwSVYMQGg.png)
         """)
     
     with challenges_col3:
@@ -1137,7 +1137,7 @@ with tab3:
         - **Result**: Erratic convergence path
         - **Solution**: Larger batch sizes, gradient clipping, or noise reduction techniques
         
-        ![Noisy Gradients](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*7_vX7jkJ4Xj9BgjX1pV07g.png)
+        ![Noisy Gradients](https://miro.medium.com/v2/resize:fit:4800/format:webp/1*e_Iw6AxcCyTwAx2sUKRjig.png)
         """)
     
     st.markdown("### Interactive Convergence Explorer")

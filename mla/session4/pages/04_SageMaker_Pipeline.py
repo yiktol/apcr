@@ -1368,7 +1368,7 @@ def main():
         
         if st.button("🔄 Reset Session"):
             reset_session()
-            st.experimental_rerun()
+            st.rerun()
         
         st.divider()
         
