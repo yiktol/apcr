@@ -14,11 +14,12 @@ from PIL import Image
 import io
 import requests
 import boto3
+import uuid
 from typing import Dict, List, Any, Union
 
 # Initialize session state
 def init_session_state():
-    if 'initialized' not in st.session_state:
+    if 'initialized_infra' not in st.session_state:
         st.session_state.quiz_scores = {
             "autoscaling": 0,
             "container": 0,
@@ -29,7 +30,8 @@ def init_session_state():
             "container": False,
             "iac": False
         }
-        st.session_state.initialized = True
+        st.session_state.initialized_infra = True
+        st.session_state.user_id = str(uuid.uuid4())
 
 def load_css():
     st.markdown("""
@@ -2270,16 +2272,19 @@ def main():
     # Sidebar
     with st.sidebar:        
         st.markdown("### Session Management")
-        if st.button("Reset Session"):
+        st.info(f"User ID: {st.session_state.user_id}")
+        if st.button("🔄 Reset Session"):
             reset_session()
         
-        st.markdown("---")
-        st.markdown("### Resources")
-        st.markdown("""
-        - [Amazon SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
-        - [AWS Container Services](https://aws.amazon.com/containers/)
-        - [Infrastructure as Code](https://aws.amazon.com/devops/infrastructure-as-code/)
-        """)
+        st.sidebar.divider()
+        
+        with st.expander("📚 About This App", expanded=False):
+          st.markdown("### Resources")
+          st.markdown("""
+          - [Amazon SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
+          - [AWS Container Services](https://aws.amazon.com/containers/)
+          - [Infrastructure as Code](https://aws.amazon.com/devops/infrastructure-as-code/)
+          """)
     
     # Main content area - tabs
     tabs = st.tabs([

@@ -1398,7 +1398,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/reInvent2022/Build-ML-Apps/Inference-App-Diagram.da0754cfa0d5f7e630f1a0171d798d83f7fa01bf.png", 
+            st.image("images/realtime_inference.png", 
                      caption="SageMaker Real-Time Inference", use_container_width=True)
         
         # Real-time inference diagram
@@ -1570,7 +1570,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/product-marketing/SageMaker/AsyncInference.963ecfc651ab4bc39adaefd224926b6ab04cacb6.png", 
+            st.image("images/async_inference.png", 
                      caption="SageMaker Asynchronous Inference", use_container_width=True)
         
         # Async inference diagram
@@ -1800,7 +1800,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/reInvent2022/Build-ML-Apps/Inference-App-Diagram2.4761862a8a1bc7ea05b3a223b40e1261c8e0aa5e.png", 
+            st.image("images/batch_transform.png", 
                      caption="SageMaker Batch Transform", use_container_width=True)
         
         # Batch transform diagram
@@ -2088,7 +2088,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/product-marketing/Serverless/Diagram_Amazon-API-Gateway-Serverless_HIW%402x.095eb618163052bd052d68b75dc3d4a066e95420.png", 
+            st.image("images/serverless_inference.png", 
                      caption="Serverless Architecture Pattern", use_container_width=True)
         
         # Serverless inference diagram

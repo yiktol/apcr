@@ -490,7 +490,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/re19/Diagrams/product-page-diagram_Amazon-SageMaker-Studio_Model-Registry%402x.3e88c6ac8c7ecc50fe0abe4a023f9490e4df3cf5.png", 
+            st.image("images/register_model.png", width=30,
                      caption="SageMaker Model Registry Process Flow", use_container_width=True)
         
         st.subheader("Model Registry Workflow")
@@ -894,7 +894,7 @@ print(f"Deployed model to endpoint: {predictor.endpoint_name}")
             """)
         
         with col2:
-            st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/09/21/ML-5383-image010.png", 
+            st.image("images/model_registry_components.png", 
                      caption="SageMaker Model Registry Components")
         
         # Interactive diagram

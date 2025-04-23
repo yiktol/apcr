@@ -469,7 +469,7 @@ with tabs[1]:
     col1, col2 = st.columns(2)
     
     with col1:
-        # st.image("images/model_registry.png", caption="SageMaker Model Registry")
+        st.image("images/model_registry.png", caption="SageMaker Model Registry")
         st.markdown("""
         Amazon SageMaker Model Registry is a feature that helps you:
         
@@ -533,7 +533,7 @@ with tabs[1]:
         with each new registration.
         """)
     
-    # st.image("images/model_registry_structure.png", caption="Model Registry Structure with Model Groups and Model Packages")
+    st.image("images/model_registry_structure.png", caption="Model Registry Structure with Model Groups and Model Packages",width=800)
     
     custom_header("Using Model Registry", "section")
     
@@ -717,7 +717,7 @@ with tabs[2]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/realtime_inference.png", caption="Real-Time Inference Architecture")
+        st.image("images/realtime_inference.png", caption="Real-Time Inference Architecture", width=600)
         st.markdown("""
         Real-time inference provides a persistent HTTPS endpoint for making predictions with low latency.
         It's ideal for applications that need immediate responses, such as user-facing applications or
@@ -777,7 +777,7 @@ with tabs[2]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/async_inference.png", caption="Asynchronous Inference Architecture")
+        st.image("images/async_inference.png", caption="Asynchronous Inference Architecture", width=600)
         st.markdown("""
         Asynchronous inference is ideal when you have large payload sizes or long processing times but don't need
         immediate responses. It queues incoming requests and processes them asynchronously, returning results
@@ -848,7 +848,7 @@ with tabs[2]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/batch_transform.png", caption="Batch Transform Architecture")
+        st.image("images/batch_transform.png", caption="Batch Transform Architecture", width=600)
         st.markdown("""
         Batch transform is used for offline processing of large datasets when you don't need a
         persistent endpoint. It processes complete datasets and stores results in Amazon S3.
@@ -911,7 +911,7 @@ with tabs[2]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/serverless_inference.png", caption="Serverless Inference Architecture")
+        st.image("images/serverless_inference.png", caption="Serverless Inference Architecture", width=600)
         st.markdown("""
         Serverless inference automatically provisions and scales compute resources as needed. It's ideal for
         workloads with intermittent or unpredictable traffic patterns, as you only pay for the compute resources
@@ -970,7 +970,7 @@ with tabs[2]:
     
     custom_header("Decision Flow for Choosing Inference Options", "sub")
     
-    # st.image("images/inference_decision_flow.png", caption="Decision Flow for Selecting the Right Inference Option", width=800)
+    st.image("images/inference_decision_flow.png", caption="Decision Flow for Selecting the Right Inference Option", width=600)
     
     st.markdown("""
     When deciding which inference option to use, consider these key questions:
@@ -994,7 +994,7 @@ with tabs[2]:
     
     with col1:
         st.markdown("### Multi-Model Endpoints")
-        # st.image("images/multi_model.png", width=250)
+        st.image("images/multi_model.png", width=400)
         st.markdown("""
         Host multiple models behind a single endpoint:
         
@@ -1007,7 +1007,7 @@ with tabs[2]:
     
     with col2:
         st.markdown("### Multi-Container Endpoints")
-        # st.image("images/multi_container.png", width=250)
+        st.image("images/multi_container.png", width=400)
         st.markdown("""
         Deploy multiple containers on a single endpoint:
         
@@ -1020,7 +1020,7 @@ with tabs[2]:
     
     with col3:
         st.markdown("### Inference Pipelines")
-        # st.image("images/inference_pipeline.png", width=250)
+        st.image("images/inference_pipeline.png", width=400)
         st.markdown("""
         Chain multiple containers for sequential processing:
         
@@ -1273,7 +1273,7 @@ with tabs[3]:
     
     with col1:
         st.markdown("### Image Registry")
-        # st.image("images/ecr.png", width=200)
+        st.image("images/ecr.png", width=100)
         st.markdown("""
         **Amazon Elastic Container Registry (ECR)**
         
@@ -1287,7 +1287,7 @@ with tabs[3]:
     
     with col2:
         st.markdown("### Orchestration")
-        # st.image("images/ecs_eks.png", width=200)
+        st.image("images/ecs.png", width=100)
         st.markdown("""
         **Amazon Elastic Container Service (ECS)**
         
@@ -1295,7 +1295,10 @@ with tabs[3]:
         - Simple way to run containerized applications
         - Integrates with AWS services
         - Supports both EC2 and Fargate launch types
+        """)
         
+        st.image("images/eks.png", width=100)
+        st.markdown("""
         **Amazon Elastic Kubernetes Service (EKS)**
         
         - Managed Kubernetes service
@@ -1306,7 +1309,7 @@ with tabs[3]:
     
     with col3:
         st.markdown("### Compute")
-        # st.image("images/ec2_fargate.png", width=200)
+        st.image("images/ec2.png", width=100)
         st.markdown("""
         **Amazon EC2**
         
@@ -1314,7 +1317,9 @@ with tabs[3]:
         - Full control over instances
         - Broad selection of instance types
         - Support for custom AMIs
-        
+        """)
+        st.image("images/fargate.png", width=100)
+        st.markdown("""
         **AWS Fargate**
         
         - Serverless compute for containers
@@ -1334,7 +1339,7 @@ with tabs[3]:
     
     with col1:
         st.markdown("### AWS CloudFormation")
-        # st.image("images/cloudformation.png", width=200)
+        st.image("images/cloudformation.png", width=100)
         st.markdown("""
         **Key Features:**
         
@@ -1402,7 +1407,7 @@ with tabs[3]:
     
     with col2:
         st.markdown("### AWS Cloud Development Kit (CDK)")
-        # st.image("images/cdk.png", width=200)
+        st.image("images/cdk.png", width=100)
         st.markdown("""
         **Key Features:**
         
@@ -1515,7 +1520,7 @@ with tabs[4]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/sagemaker_pipelines.png", caption="SageMaker Pipelines Overview")
+        st.image("images/sagemaker_pipelines.png", caption="SageMaker Pipelines Overview", width=400)
         st.markdown("""
         SageMaker Pipelines enables you to:
         
@@ -1548,7 +1553,7 @@ with tabs[4]:
     step to another.
     """)
     
-    # st.image("images/pipeline_example.png", caption="Example ML Pipeline Workflow", width=800)
+    st.image("images/pipeline_example.png", caption="Example ML Pipeline Workflow", width=800)
     
     st.markdown("### Pipeline Steps")
     
@@ -1787,7 +1792,7 @@ with tabs[4]:
     
     with col2:
         st.markdown("### Integrating with EventBridge")
-        # st.image("images/eventbridge.png", width=250)
+        st.image("images/eventbridge.png", width=400)
         st.markdown("""
         Amazon EventBridge can be used to trigger automated actions based on pipeline events:
         
@@ -1863,7 +1868,7 @@ with tabs[5]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        # st.image("images/mlops_workflow.png", caption="End-to-end MLOps Workflow")
+        st.image("images/mlops_workflow.png", caption="End-to-end MLOps Workflow")
         st.markdown("""
         MLOps addresses challenges unique to ML systems:
         
@@ -1896,7 +1901,7 @@ with tabs[5]:
     to model monitoring.
     """)
     
-    # st.image("images/mlops_practices.png", caption="MLOps Practices and ML Workflow", width=800)
+    st.image("images/mlops_practices.png", caption="MLOps Practices and ML Workflow", width=800)
     
     col1, col2, col3 = st.columns(3)
     
@@ -1939,7 +1944,7 @@ with tabs[5]:
     Amazon SageMaker provides several built-in features to support MLOps practices across the ML workflow:
     """)
     
-    # st.image("images/sagemaker_mlops_features.png", caption="MLOps-Ready Features in SageMaker", width=800)
+    st.image("images/sagemaker_mlops_features.png", caption="MLOps-Ready Features in SageMaker", width=800)
     
     with st.expander("Data Preparation Features"):
         col1, col2 = st.columns(2)
@@ -2049,7 +2054,7 @@ with tabs[5]:
     """)
     
     with st.expander("Small MLOps Architecture"):
-        # st.image("images/small_mlops_architecture.png", caption="Small MLOps Architecture", width=800)
+        st.image("images/small_mlops_architecture.png", caption="Small MLOps Architecture", width=800)
         
         st.markdown("""
         This architecture is suitable for small teams or early ML projects:
@@ -2072,7 +2077,7 @@ with tabs[5]:
         """)
     
     with st.expander("Medium MLOps Architecture"):
-        # st.image("images/medium_mlops_architecture.png", caption="Medium MLOps Architecture", width=800)
+        st.image("images/medium_mlops_architecture.png", caption="Medium MLOps Architecture", width=800)
         
         st.markdown("""
         This architecture is designed for teams with more complex requirements:
@@ -2106,7 +2111,7 @@ with tabs[5]:
     
     with col1:
         st.markdown("### Blue/Green Deployments")
-        # st.image("images/blue_green.png", width=350)
+        st.image("images/blue_green.png", width=350)
         st.markdown("""
         - Creates new fleet (green) alongside existing fleet (blue)
         - Allows testing of new deployment before shifting traffic
@@ -2117,7 +2122,7 @@ with tabs[5]:
     
     with col2:
         st.markdown("### Traffic Shifting Modes")
-        # st.image("images/traffic_shifting.png", width=350)
+        st.image("images/traffic_shifting.png", width=350)
         st.markdown("""
         **All-at-once:**
         - 100% of traffic shifts at once to new fleet

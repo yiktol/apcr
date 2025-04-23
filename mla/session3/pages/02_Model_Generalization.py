@@ -662,7 +662,7 @@ with tab3:
         st.markdown("""
         **L1 Regularization (Lasso)** adds a penalty term to the loss function proportional to the absolute sum of coefficient values:
         
-        <div class="formula-box">
+        <div class='formula-box'>
         $$Loss = MSE + \\alpha \\sum_{i=1}^{n} |w_i|$$
         </div>
         
@@ -971,7 +971,7 @@ with tab5:
         - Useful when you suspect many features are irrelevant
         """, unsafe_allow_html=True)
         
-        st.image("https://miro.medium.com/max/1400/1*fjnswkPYGZPgVbHBUbJxJQ.png", caption="L1 Regularization Contours")
+        st.image("https://miro.medium.com/v2/resize:fit:4800/format:webp/1*P3bTxrYuLGhF5-m0WEgomQ.png", caption="L1 Regularization Contours")
     
     with col2:
         st.subheader("L2 Regularization (Ridge)")
@@ -989,7 +989,7 @@ with tab5:
         - Effective for handling multicollinearity
         """, unsafe_allow_html=True)
         
-        st.image("https://miro.medium.com/max/1400/1*6t5E9G-JOWYKjvVUhTmr_Q.png", caption="L2 Regularization Contours")
+        st.image("https://miro.medium.com/v2/resize:fit:4800/format:webp/1*lFmQebk5GoibKN2ZQYzYpw.png", caption="L2 Regularization Contours")
     
     # Interactive demo comparing L1 and L2 regularization
     st.subheader("Interactive L1 vs L2 Regularization Comparison")
@@ -1129,7 +1129,7 @@ with tab5:
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.image("https://miro.medium.com/max/1400/1*G2QwxPF2LyfIrCOmOQnIpg.png", caption="L1 vs L2 Regularization Geometry")
+        st.image("https://miro.medium.com/v2/resize:fit:4800/format:webp/1*wB7K1ubmrJsB2_vgQvKDTA.png", caption="L1 vs L2 Regularization Geometry")
     
     with col2:
         st.markdown("""

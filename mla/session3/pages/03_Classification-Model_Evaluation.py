@@ -448,7 +448,7 @@ with tab1:
         st.info("👈 Select a different dataset from the sidebar to see how evaluation metrics change across different problems!")
         
     with col2:
-        st.image("https://miro.medium.com/max/1400/1*Ypb_NrRJZ_M5CuY_hW_0pQ.png", caption="Model Evaluation Flow")
+        st.image("https://miro.medium.com/v2/resize:fit:4800/format:webp/0*8yher9Uy3W5gcWX_", caption="Model Evaluation Flow")
         
         st.markdown("""
         ### Dataset Info

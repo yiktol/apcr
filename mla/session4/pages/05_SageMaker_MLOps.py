@@ -29,8 +29,8 @@ st.set_page_config(
 
 # Initialize session state
 def init_session_state():
-    if "initialized" not in st.session_state:
-        st.session_state.initialized = True
+    if "initialized_mlops" not in st.session_state:
+        st.session_state.initialized_mlops = True
         st.session_state.current_page = "Home"
         st.session_state.user_id = str(uuid.uuid4())
         st.session_state.start_time = datetime.now()

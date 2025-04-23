@@ -1,0 +1,1482 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>AWS Machine Learning Engineer - Associate Certification</title>
+  <link rel="icon" type="image/x-icon" href="aws.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #232f3e;
+      --secondary-color: #ff9900;
+      --accent-color: #0073bb;
+      --light-bg: #f8f9fa;
+      --dark-bg: #232f3e;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: var(--light-bg);
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header styles */
+    .header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #344b61 100%);
+      color: white;
+      padding: 20px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-logo img {
+      height: 60px;
+      width: auto;
+    }
+
+    .header-title h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-title p {
+      font-size: 16px;
+      opacity: 0.8;
+      margin: 0;
+    }
+
+    /* Navigation */
+    .nav-tabs {
+      background-color: white;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      display: flex;
+      overflow-x: auto;
+      margin-top: 20px;
+      border-bottom: 1px solid #e1e4e8;
+    }
+
+    .nav-tab {
+      padding: 15px 25px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+      color: #555;
+      border-bottom: 3px solid transparent;
+      transition: var(--transition);
+    }
+
+    .nav-tab:hover {
+      color: var(--accent-color);
+    }
+
+    .nav-tab.active {
+      color: var(--accent-color);
+      border-bottom: 3px solid var(--accent-color);
+    }
+
+    /* Main content */
+    .content-section {
+      display: none;
+      padding: 30px 0;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 10px;
+    }
+
+    /* Card styles */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #344b61 100%);
+      color: white;
+      padding: 15px;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 15px;
+      flex-grow: 1;
+    }
+
+    .resource-list {
+      list-style-type: none;
+    }
+
+    .resource-item {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .resource-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .resource-link {
+      display: flex;
+      align-items: center;
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .resource-link:hover {
+      color: var(--secondary-color);
+    }
+
+    .resource-index {
+      background-color: var(--accent-color);
+      color: white;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Playground section */
+    .playground-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 25px;
+    }
+
+    .playground-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      height: 100%;
+    }
+
+    .playground-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .playground-image {
+      height: 200px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .playground-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .playground-card:hover .playground-image img {
+      transform: scale(1.05);
+    }
+
+    .playground-content {
+      padding: 20px;
+    }
+
+    .playground-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .playground-title i {
+      color: var(--secondary-color);
+    }
+
+    .playground-description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .playground-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: var(--accent-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .playground-button:hover {
+      background-color: #005d96;
+    }
+
+    .playground-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255, 153, 0, 0.9);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--dark-bg);
+      color: white;
+      padding: 20px 0;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Kickoff Section Styles */
+    .kickoff-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 25px;
+    }
+
+    .certification-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .certification-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 15px;
+    }
+
+    .certification-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .certification-level {
+      background-color: var(--primary-color);
+      color: white;
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .session-roadmap {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .session-block {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      min-width: 150px;
+      padding: 15px;
+      margin-right: 20px;
+      text-align: center;
+    }
+
+    .session-block h4 {
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    .exam-info {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .exam-info ul {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    .domain-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: white;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--box-shadow);
+    }
+
+    .domain-table th {
+      background-color: var(--primary-color);
+      color: white;
+      text-align: left;
+      padding: 12px 15px;
+    }
+
+    .domain-table td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .domain-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1000px) {
+      .playground-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      }
+
+      .session-roadmap {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .session-block {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-title h1 {
+        font-size: 22px;
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .playground-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-tab {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+
+      .certification-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .header-title h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <div class="header-logo">
+        <img src="img/AWS-Certified-Machine-Learning-Engineer-Associate_badge.png" alt="AWS Certified Machine Learning Engineer">
+        <div class="header-title">
+          <h1>AWS Partner: Certification Readiness</h1>
+          <p>Machine Learning Engineer - Associate</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="container">
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="openSection('playgrounds')">
+        <i class="fas fa-flask"></i> Playgrounds
+      </div>
+      <!-- <div class="nav-tab" onclick="openSection('kickoff')">
+        <i class="fas fa-rocket"></i> Kickoff
+      </div>
+      <div class="nav-tab" onclick="openSection('overview')">
+        <i class="fas fa-home"></i> Overview
+      </div>
+      <div class="nav-tab" onclick="openSection('schedule')">
+        <i class="fas fa-calendar-alt"></i> Program Schedule
+      </div>
+      <div class="nav-tab" onclick="openSection('resources')">
+        <i class="fas fa-book"></i> Learning Resources
+      </div>
+      <div class="nav-tab" onclick="openSection('faq')">
+        <i class="fas fa-question-circle"></i> FAQ
+      </div> -->
+    </div>
+
+    <!-- Content Sections -->
+
+    <!-- Kickoff Section -->
+    <div id="kickoff" class="content-section">
+      <h2 class="section-title">Program Kickoff</h2>
+      
+      <div class="schedule-section">
+        <h3 class="week-header">About AWS Certifications</h3>
+        
+        <p>AWS Certifications help identify talent and drive business results:</p>
+        
+        <div class="certification-grid">
+          <div class="certification-card">
+            <div class="certification-level">FOUNDATIONAL</div>
+            <p>Six months of fundamental AWS Cloud and industry knowledge</p>
+          </div>
+          
+          <div class="certification-card">
+            <div class="certification-level">ASSOCIATE</div>
+            <p>One year of experience solving problems and implementing solutions using the AWS Cloud</p>
+          </div>
+          
+          <div class="certification-card">
+            <div class="certification-level">PROFESSIONAL</div>
+            <p>Two years of experience designing, operating, and troubleshooting solutions using the AWS Cloud</p>
+          </div>
+          
+          <div class="certification-card">
+            <div class="certification-level">SPECIALTY</div>
+            <p>Technical AWS Cloud experience in the Specialty domain as specified in the exam guide</p>
+          </div>
+        </div>
+        
+        <h3 class="week-header">AWS Certified Machine Learning Engineer - Associate</h3>
+        
+        <p>The AWS Certified Machine Learning Engineer - Associate (MLA-C01) exam validates a candidate's ability to build, operationalize, deploy, and maintain machine learning (ML) solutions and pipelines by using the AWS Cloud.</p>
+        <br>
+        <p><strong>Applicable for professionals looking to:</strong></p>
+        <ul style="margin-left: 20px;">
+          <li><strong>Build Skills in Machine Learning:</strong> The ideal candidate for this exam has at least 1 year of experience using Amazon SageMaker and other AWS Services for ML engineering.</li>
+          <li><strong>Career Advancement:</strong> Advance your career by validating knowledge of ML on AWS</li>
+        </ul>
+      </div>
+      <br>
+      <h2 class="section-title">Program Overview</h2>
+      
+      <h3 class="week-header">Session Roadmap</h3>
+      
+      <div class="session-roadmap">
+        <div class="session-block">
+          <h4>Sessions 1 & 2</h4>
+          <p>Domain 1: Data Preparation for ML</p>
+        </div>
+        
+        <div class="session-block">
+          <h4>Sessions 3 & 4</h4>
+          <p>Domain 2: ML Model Development</p>
+        </div>
+        
+        <div class="session-block">
+          <h4>Sessions 5 & 6</h4>
+          <p>Domain 2: ML Model Development</p>
+        </div>
+        
+        <div class="session-block">
+          <h4>Sessions 7 & 8</h4>
+          <p>Domain 3: Deployment and Orchestration</p>
+        </div>
+        
+        <div class="session-block">
+          <h4>Sessions 9 & 10</h4>
+          <p>Domain 4: Monitoring, Maintenance, and Security</p>
+        </div>
+      </div>
+      
+      <div class="schedule-section">
+        <h3 class="week-header">AWS Skill Builder Options</h3>
+        <br>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Free Digital Training</h3>
+            </div>
+            <div class="card-body">
+              <ul style="margin-left: 20px;">
+                <li>600+ digital courses</li>
+                <li>Learning plans</li>
+                <li>10 Practice Question Sets</li>
+                <li>AWS Cloud Quest (Foundational)</li>
+                <li>AWS SimuLearn (Cloud Practitioner)</li>
+              </ul>
+              <div style="margin-top: 15px;">
+                <a href="https://explore.skillbuilder.aws/learn/catalog?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" class="playground-button" target="_blank">Access Free Training</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3>Individual Subscription (Optional)</h3>
+            </div>
+            <div class="card-body">
+              <p>Everything in free digital training, plus:</p>
+              <ul style="margin-left: 20px;">
+                <li>AWS SimuLearn (200+ trainings)</li>
+                <li>AWS Cloud Quest (Intermediate-Advanced)</li>
+                <li>Official Practice Exams; Enhanced Exam Prep</li>
+                <li>Unlimited access to 1000+ hands-on labs</li>
+                <li>AWS Jam Journeys (lab-based challenges)</li>
+                <li>AWS Digital Classroom (Annual only)</li>
+              </ul>
+              <p style="margin-top: 10px; font-size: 14px;">Individual subscriptions are priced at $29 USD per month (Flexibility to cancel anytime) or $449 USD per year.</p>
+              <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <a href="https://explore.skillbuilder.aws/pages/59/subscriptions?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" class="playground-button" target="_blank">Get Subscription</a>
+                <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" class="playground-button" target="_blank">Enhanced Exam Prep</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- <div class="schedule-section">
+        <h3 class="week-header">Week 1 Digital Training Curriculum</h3>
+        <p>What to get started on this week! Do your best to complete this week's training content.</p>
+        
+        <div style="margin-top: 15px;">
+          <h4 style="color: var(--primary-color);">AWS Skill Builder Learning Plan Courses</h4>
+          <ul style="margin-left: 20px;">
+            <li>AWS Technical Essentials</li>
+            <li>Getting Started with AWS Storage</li>
+          </ul>
+          
+          <h4 style="color: var(--primary-color); margin-top: 15px;">Enhanced Exam Prep Plan (Optional)</h4>
+          <ul style="margin-left: 20px;">
+            <li>Start AWS Cloud Quest: Machine Learning</li>
+            <li>Complete Domain 1 Courses</li>
+          </ul>
+        </div>
+      </div> -->
+      <br>
+      <h2 class="section-title">Exam Experience & Contents</h2>
+      
+      <div class="exam-info">
+        <h3 class="week-header">Taking the exam</h3>
+        <ul>
+          <li>130 minutes in duration</li>
+          <li>65 Questions (50 Scored questions)</li>
+          <li>Scored from 100 to 1,000 (720+ to Pass)</li>
+          <li>Multiple Choice, Multiple Response, Ordering, Matching, and Case Study questions</li>
+          <li>No Negative points or Partial credit</li>
+          <li>In-Person and Remote options available</li>
+          <li>Live proctor during exam</li>
+        </ul>
+      </div>
+      
+      <h3 class="week-header">Machine Learning Engineer - Associate Domains</h3>
+      <p>Review the <a href="https://d1.awsstatic.com/training-and-certification/docs-machine-learning-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf" target="_blank">exam guide</a> for deeper understanding of each domain</p>
+      
+      <table class="domain-table">
+        <thead>
+          <tr>
+            <th>Domain Name</th>
+            <th>Weighting</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Data Preparation for Machine Learning</td>
+            <td>28%</td>
+          </tr>
+          <tr>
+            <td>ML Model Development</td>
+            <td>26%</td>
+          </tr>
+          <tr>
+            <td>Deployment and Orchestration of ML Workflows</td>
+            <td>22%</td>
+          </tr>
+          <tr>
+            <td>ML Solution Monitoring, Maintenance, and Security</td>
+            <td>24%</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="schedule-section">
+        <h3 class="week-header">Account Set-up Resources</h3>
+        <br>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>AWS Partner Network (APN) Account</h3>
+            </div>
+            <div class="card-body">
+              <p>This program is designed for AWS Partners.</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Register to APN with your company email</li>
+                <li>Link your AWS Certification to this profile</li>
+                <li>Use your APN credentials to access exclusive AWS Partner Training resources</li>
+              </ul>
+              <div style="margin-top: 15px;">
+                <a href="https://partnercentral.awspartner.com/partnercentral2/s/SelfRegister" class="playground-button" target="_blank">Register with APN</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3>AWS Skill Builder Access</h3>
+            </div>
+            <div class="card-body">
+              <p>Access digital training and official practice question sets</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Login as AWS Partner using APN credentials</li>
+                <li>Utilize for supplemental materials</li>
+                <li>Utilize for official practice question sets</li>
+                <li>Explore and learn!</li>
+              </ul>
+              <div style="margin-top: 15px;">
+                <a href="https://skillbuilder.aws/" class="playground-button" target="_blank">Access Skill Builder</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3>Exam Registration</h3>
+            </div>
+            <div class="card-body">
+              <p>Set-up your AWS Certification account and register early!</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Bookmark the exam page - lots of resources!</li>
+                <li>Access CertMetrics through the exam page</li>
+                <li>Recommended to register with your APN account</li>
+                <li>Schedule early and give yourself a deadline</li>
+              </ul>
+              <div style="margin-top: 15px;">
+                <a href="https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/" class="playground-button" target="_blank">Register for Exam</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview Section -->
+    <div id="overview" class="content-section">
+      <h2 class="section-title">Program Overview</h2>
+      <div class="schedule-section">
+        <p>Welcome to the AWS Partner Certification Readiness: Machine Learning Engineer - Associate program!</p>
+        <br>
+        <p>Validate your cloud expertise as an AWS Certified Machine Learning Engineer - Associate. Earning this certification shows you have the skills to design automated data-based solutions natively in AWS.</p>
+        <br>
+        <p>This program includes self-paced digital training in AWS Skill Builder and weekly live sessions with our training architects. These sessions provide exam strategy insights, real-world use cases, and hands-on demos of AWS services.</p>
+        
+        <h3 style="margin-top: 20px;">Throughout the program, our AWS Subject Matter Experts will help you:</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>Connect what you learn to real-world customer solutions</li>
+          <li>Develop an exam success strategy and apply this knowledge to your own experiences</li>
+          <li>Apply knowledge and test concepts through a series of practice exam questions</li>
+        </ul>
+
+        <h3>Who should participate?</h3>
+        <p>This offering is designed for AWS Partners with:</p>
+        <ul style="margin-left: 20px;">
+          <li>1 year of hands-on experience with AWS services (recommended)</li>
+          <li>1+ year of experience in machine learning engineering or a related field (recommended)</li>
+          <li>Time each week to complete 8+ hours of training and attend the scheduled sessions (recordings available for asynchronous learning)</li>
+        </ul>
+      </div>
+      <br>
+      <h2 class="section-title">Getting Started</h2>
+      <div class="schedule-section">
+        <ol style="margin-left: 20px;">
+          <li>Visit the Schedule section within the Reception page of the event to add the weekly sessions to your calendar.</li>
+          <li>Set up your AWS Partner Network (APN) account using your business email. <a href="https://partnercentral.awspartner.com/partnercentral2/s/SelfRegister" target="_blank">Register here</a></li>
+          <li>Next, sign into AWS Skill Builder as an AWS Partner using the credentials from step 2. A Learning Plan for this program will be automatically assigned within 24 hours, but you may enroll directly as well: <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></li>
+          <li>(Optional) If you have an AWS Skill Builder Subscription, you may enroll in the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a> to access AWS Builder Labs, AWS CloudQuest, Practice Exam, and Enhanced Exam Prep resources.</li>
+        </ol>
+        
+        <p style="margin-top: 15px;">Having problems? See our <a href="https://training.resources.awscloud.com/partner-certification-readiness/set-up-your-apn-account" target="_blank">APN Set-up</a> and <a href="https://training.resources.awscloud.com/partner-certification-readiness/log-into-skill-builder-as-a-partner" target="_blank">Skill Builder Login</a> video guides.</p>
+      </div>
+    </div>
+
+    <!-- Schedule Section -->
+    <div id="schedule" class="content-section">
+      <h2 class="section-title">Program Schedule</h2>
+      
+      <div class="schedule-container">
+        <!-- Week 1 -->
+        <div class="schedule-week">
+          <h3 class="week-header">Week 1 - Data Preparation for Machine Learning (ML)</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Attend the Kickoff</td>
+                <td class="task-description">Welcome to the program! Our program lead and training architects will give you an overview, set expectations, walk through program materials, and answer your questions. We're excited you're here-let's get started!</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_KickoffSession.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Complete Weekly Digital Training Assignments</td>
+                <td class="task-description">
+                  It's critical you access your digital materials each week. Get started with the program and complete these trainings from your AWS Skill Builder learning plan:
+                  <ul>
+                    <li>AWS Technical Essentials</li>
+                    <li>Getting Started with AWS Storage</li>
+                  </ul>
+                  <p>If you'd like to go hands on with AWS - AWS Skill Builder Subscription holders may utilize the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a>:</p>
+                  <ul>
+                    <li>Get Started - AWS Cloud Quest: Machine Learning</li>
+                    <li>Complete - Domain 1 Courses</li>
+                  </ul>
+                </td>
+                <td class="task-action">From your <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Content Review Session</td>
+                <td class="task-description">Experts from AWS will guide you through a review of key AWS services and concepts related to your digital training assignments. This week's topics include: Ingest and Store data, Transform data, perform feature engineering, and ensuring data integrity.</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session1.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Exam Strategy Session</td>
+                <td class="task-description">Join experts from AWS as they check-in on your training progress. Session includes a review of sample exam style questions with a review of each answer choice. Learn strategies to select correct answers while you review!</td>
+                <td class="task-action">Join the session or review the recording!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Week 2 -->
+        <div class="schedule-week">
+          <h3 class="week-header">Week 2 - ML Model Development</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Schedule Your Exam</td>
+                <td class="task-description">Register for a virtual or in-person exam through Pearson VUE using your AWS Certification account. Doing this can help keep you accountable to your goal! Aim for a period of time 4-6 weeks from now.</td>
+                <td class="task-action"><a href="https://partnercentral.awspartner.com/LmsSsoRedirect?RelayState=%2fcertification%3ftrk%3D1b409ad1-89ec-4848-b9fb-6065cb3bbc39%26sc_channel%3Del" target="_blank">Schedule Exam</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Digital Training</td>
+                <td class="task-description">
+                  This week, complete these trainings from your AWS Skill Builder learning plan:
+                  <ul>
+                    <li>AWS Glue Getting Started</li>
+                    <li>Fundamentals of Machine Learning and Artificial Intelligence</li>
+                    <li>Planning a Machine Learning Project</li>
+                    <li>Introduction to Amazon SageMaker</li>
+                    <li>Amazon Bedrock Getting Started</li>
+                  </ul>
+                  <p>If you'd like to go hands on with AWS - AWS Skill Builder Subscription holders may utilize the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a>:</p>
+                  <ul>
+                    <li>Continue - AWS Cloud Quest: Machine Learning</li>
+                    <li>Complete - Domain 1 Courses</li>
+                  </ul>
+                </td>
+                <td class="task-action">From your <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Content Review Session</td>
+                <td class="task-description">Experts from AWS will guide you through a review of key AWS services and concepts related to your digital training assignments. This week's topics include: Choosing a modeling approach, train and remind models.</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session2.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Exam Strategy Session</td>
+                <td class="task-description">Join experts from AWS as they check-in on your training progress. Session includes a review of sample exam style questions with a review of each answer choice. Learn strategies to select correct answers while you review!</td>
+                <td class="task-action">Join the session or review the recording!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Week 3 -->
+        <div class="schedule-week">
+          <h3 class="week-header">Week 3 - ML Model Development (Continued)</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Digital Training</td>
+                <td class="task-description">
+                  This week, complete these trainings from your AWS Skill Builder learning plan:
+                  <ul>
+                    <li>AWS PartnerCast - GenAI Series: Distributed Training on AWS SageMaker</li>
+                    <li>AWS PartnerCast - Model Evaluation Using Amazon Bedrock & Amazon SageMaker</li>
+                    <li>Developing Machine Learning Solutions</li>
+                    <li>Developing Generative Artificial Intelligence Solutions</li>
+                  </ul>
+                  <p>If you'd like to go hands on with AWS - AWS Skill Builder Subscription holders may utilize the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a>:</p>
+                  <ul>
+                    <li>Continue - AWS Cloud Quest: Machine Learning</li>
+                    <li>Complete - Domain 2 Courses</li>
+                  </ul>
+                </td>
+                <td class="task-action">From your <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Content Review Session</td>
+                <td class="task-description">Experts from AWS will guide you through a review of key AWS services and concepts related to your digital training assignments. This week's topics include: Analyze Model Performance.</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session3.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Exam Strategy Session</td>
+                <td class="task-description">Join experts from AWS as they check-in on your training progress. Session includes a review of sample exam style questions with a review of each answer choice. Learn strategies to select correct answers while you review!</td>
+                <td class="task-action">Join the session or review the recording!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Week 4 -->
+        <div class="schedule-week">
+          <h3 class="week-header">Week 4 - Deployment and Orchestration of ML Workflows</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Digital Training</td>
+                <td class="task-description">
+                  This week, complete these trainings from your AWS Skill Builder learning plan:
+                  <ul>
+                    <li>Getting Started with AWS CloudFormation</li>
+                    <li>Getting Started with Amazon ECS</li>
+                    <li>Getting Started with DevOps on AS</li>
+                    <li>AWS PartnerCast - Tech Talks - Amazon SageMaker MLOps</li>
+                    <li>AWS Billing and Cost Management</li>
+                  </ul>
+                  <p>If you'd like to go hands on with AWS - AWS Skill Builder Subscription holders may utilize the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a>:</p>
+                  <ul>
+                    <li>Complete Lab - Analyze and Prepare Data with Amazon SageMaker Data Wrangler and Amazon EMR</li>
+                    <li>Complete - Domain 3 Courses</li>
+                  </ul>
+                </td>
+                <td class="task-action">From your <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Content Review Session</td>
+                <td class="task-description">Experts from AWS will guide you through a review of key AWS services and concepts related to your digital training assignments. This week's topics include: Deployment infrastructure selection and scripting. Automated orchestration tools.</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session4.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Exam Strategy Session</td>
+                <td class="task-description">Join experts from AWS as they check-in on your training progress. Session includes a review of sample exam style questions with a review of each answer choice. Learn strategies to select correct answers while you review!</td>
+                <td class="task-action">Join the session or review the recording!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Week 5 -->
+        <div class="schedule-week">
+          <h3 class="week-header">Week 5 - Solution Monitoring, Maintenance, and Security</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Digital Training</td>
+                <td class="task-description">
+                  This week, complete these trainings from your AWS Skill Builder learning plan:
+                  <ul>
+                    <li>Security, Compliance, and Governance for AI Solutions</li>
+                    <li>Responsible Artificial Intelligence Practices</li>
+                    <li>AWS Identity and Access Management - Architecture and Terminology</li>
+                    <li>Review - Standard Exam Prep Plan</li>
+                    <li>Exam Prep Official Practice Question Set</li>
+                  </ul>
+                  <p>If you'd like to go hands on with AWS - AWS Skill Builder Subscription holders may utilize the <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">Enhanced Exam Prep Plan</a>:</p>
+                  <ul>
+                    <li>Complete Lab - Train a model with Amazon SageMaker</li>
+                    <li>Complete - Domain 4 courses</li>
+                    <li>Complete - Official Pretest MLA-C01</li>
+                    <li>Review - Exam Prep Enhanced Course</li>
+                  </ul>
+                </td>
+                <td class="task-action">From your <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" target="_blank">AWS Skill Builder Learning Plan</a></td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Content Review Session</td>
+                <td class="task-description">Experts from AWS will guide you through a review of key AWS services and concepts related to your digital training assignments. This week's topics include: Monitor model inference, monitor and optimize infrastructure costs, and secure AWS resources.</td>
+                <td class="task-action">Join the session or review the recording! <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session5.pdf" target="_blank">Access slides here</a>.</td>
+              </tr>
+              <tr>
+                <td class="task-name">Scheduled Exam Strategy Session</td>
+                <td class="task-description">Join experts from AWS as they check-in on your training progress. Session includes a review of sample exam style questions with a review of each answer choice. Learn strategies to select correct answers while you review!</td>
+                <td class="task-action">Join the session or review the recording!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Final Certification -->
+        <div class="schedule-week final-certification">
+          <h3 class="week-header">AWS Certified Machine Learning Engineer - Associate</h3>
+          
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="task-name">Sit for your AWS Certification exam</td>
+                <td class="task-description">By now, the program has concluded and we expect you've already scheduled an exam. Finalize the review of any materials, then sit for your exam! Be sure to connect your completed AWS Certification page to your AWS Partner Network account to ensure that your employer is properly credited.</td>
+                <td class="task-action">Good luck! Be sure to share your news. <a href="https://training.resources.awscloud.com/partner-certification-readiness/link-your-certification" target="_blank">How-to guide</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <style>
+        .schedule-container {
+          margin-bottom: 40px;
+        }
+        
+        .schedule-week {
+          margin-bottom: 30px;
+          background-color: white;
+          border-radius: var(--border-radius);
+          box-shadow: var(--box-shadow);
+          overflow: hidden;
+        }
+        
+        .week-header {
+          background-color: var(--primary-color);
+          color: white;
+          padding: 15px 20px;
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+        }
+        
+        .schedule-table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+        }
+        
+        .schedule-table th {
+          background-color: #f5f5f5;
+          color: var(--primary-color);
+          text-align: left;
+          padding: 12px 15px;
+          font-weight: 600;
+          border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .schedule-table th:first-child {
+          width: 20%;
+        }
+        
+        .schedule-table th:last-child {
+          width: 20%;
+        }
+        
+        .schedule-table td {
+          padding: 15px;
+          vertical-align: top;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .schedule-table tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .task-name {
+          font-weight: 600;
+          color: var(--accent-color);
+        }
+        
+        .task-description {
+          color: #333;
+        }
+        
+        .task-description ul {
+          margin-top: 5px;
+          margin-bottom: 10px;
+          padding-left: 20px;
+        }
+        
+        .task-action {
+          font-weight: 500;
+        }
+        
+        .task-action a {
+          color: var(--accent-color);
+          text-decoration: none;
+          display: inline-block;
+          margin-top: 5px;
+          transition: color 0.3s;
+        }
+        
+        .task-action a:hover {
+          color: var(--secondary-color);
+          text-decoration: underline;
+        }
+        
+        .final-certification .week-header {
+          background-color: var(--secondary-color);
+        }
+        
+        @media (max-width: 768px) {
+          .schedule-table, .schedule-table tbody, .schedule-table th, .schedule-table td, .schedule-table tr {
+            display: block;
+          }
+          
+          .schedule-table thead {
+            display: none;
+          }
+          
+          .schedule-table td {
+            padding: 10px 15px;
+            position: relative;
+            border: none;
+          }
+          
+          .schedule-table td:before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 5px;
+          }
+          
+          .task-name:before { content: "Task:"; }
+          .task-description:before { content: "Description:"; }
+          .task-action:before { content: "Action:"; }
+          
+          .task-name, .task-action {
+            padding-top: 15px;
+          }
+          
+          .task-name {
+            border-top: 1px solid #eee;
+          }
+          
+          .schedule-table tr:first-child .task-name {
+            border-top: none;
+          }
+        }
+      </style>
+    </div>
+
+    <!-- Resources Section -->
+    <div id="resources" class="content-section">
+      <h2 class="section-title">Learning Resources</h2>
+      
+      <div class="card-grid">
+        <!-- Core Study Materials -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Core Study Materials</h3>
+          </div>
+          <div class="card-body">
+            <ul class="resource-list">
+              <li class="resource-item">
+                <a href="https://explore.skillbuilder.aws/learn/learning_plan/view/2319/aws-partner-certification-readiness-machine-learning-engineer-associate?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" class="resource-link" target="_blank">
+                  <span class="resource-index">1</span>
+                  <span>AWS Partner Certification Readiness Learning Plan</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://explore.skillbuilder.aws/learn/public/learning_plan/view/2192/enhanced-exam-prep-plan-aws-machine-learning-associate-mla-c01?trk=3542e3a0-ce46-44de-9723-40ee2a7f960c&sc_channel=el" class="resource-link" target="_blank">
+                  <span class="resource-index">2</span>
+                  <span>Enhanced Exam Prep Plan</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_KickoffSession.pdf" class="resource-link" target="_blank">
+                  <span class="resource-index">3</span>
+                  <span>Kickoff Session Slides</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://d3pnq78j1ybu70.cloudfront.net/apcr/APCR-MLA/APCR-MLA_ContentReview_Session1.pdf" class="resource-link" target="_blank">
+                  <span class="resource-index">4</span>
+                  <span>Content Review Session 1 Slides</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://d1.awsstatic.com/training-and-certification/docs-machine-learning-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf" class="resource-link" target="_blank">
+                  <span class="resource-index">5</span>
+                  <span>Official Exam Guide</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Setup & Support -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Setup & Support</h3>
+          </div>
+          <div class="card-body">
+            <ul class="resource-list">
+              <li class="resource-item">
+                <a href="https://partnercentral.awspartner.com/partnercentral2/s/SelfRegister" class="resource-link" target="_blank">
+                  <span class="resource-index">1</span>
+                  <span>Set up your AWS Partner Network Account</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://explore.skillbuilder.aws/learn/signin" class="resource-link" target="_blank">
+                  <span class="resource-index">2</span>
+                  <span>Sign in to AWS Skill Builder</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://training.resources.awscloud.com/partner-certification-readiness/set-up-your-apn-account" class="resource-link" target="_blank">
+                  <span class="resource-index">3</span>
+                  <span>APN Account Setup Guide</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://training.resources.awscloud.com/partner-certification-readiness/log-into-skill-builder-as-a-partner" class="resource-link" target="_blank">
+                  <span class="resource-index">4</span>
+                  <span>Skill Builder Login Guide</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Exam Preparation -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Exam Preparation</h3>
+          </div>
+          <div class="card-body">
+            <ul class="resource-list">
+              <li class="resource-item">
+                <a href="https://partnercentral.awspartner.com/LmsSsoRedirect?RelayState=%2fcertification%3ftrk%3D1b409ad1-89ec-4848-b9fb-6065cb3bbc39%26sc_channel%3Del" class="resource-link" target="_blank">
+                  <span class="resource-index">1</span>
+                  <span>Schedule Your Exam</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://training.resources.awscloud.com/partner-certification-readiness/link-your-certification" class="resource-link" target="_blank">
+                  <span class="resource-index">2</span>
+                  <span>Link Your Certification</span>
+                </a>
+              </li>
+              <li class="resource-item">
+                <a href="https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/" class="resource-link" target="_blank">
+                  <span class="resource-index">3</span>
+                  <span>Certification Information Page</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playgrounds Section -->
+    <div id="playgrounds" class="content-section active">
+      <h2 class="section-title">
+        <i class="fas fa-flask"></i>
+        ML Engineer Playgrounds
+      </h2>
+      <div class="playground-grid">
+        <!-- Data Preparation for ML -->
+        <div class="playground-card">
+          <div class="playground-image">
+            <img src="img/ml_image_1.png" alt="ML Fundamentals">
+            <span class="playground-badge">Data Preparation</span>
+          </div>
+          <div class="playground-content">
+            <h3 class="playground-title">
+              <i class="fas fa-microchip"></i> Data Preparation for ML
+            </h3>
+            <p class="playground-description">
+              The lesson prepares machine learning engineers in data preparation techniques including data ingestion, storage, transformation, feature engineering, and quality assurance to build effective ML models.
+            </p>
+            <a href="https://t.yikyakyuk.com/apcr-mla-session1/" target="_blank" class="playground-button">Explore Playground</a>
+          </div>
+        </div>
+
+        <!-- ML Model Development 1 -->
+        <div class="playground-card">
+          <div class="playground-image">
+            <img src="img/ml_image_2.png" alt="ML Model Development">
+            <span class="playground-badge">Model Development</span>
+          </div>
+          <div class="playground-content">
+            <h3 class="playground-title">
+              <i class="fas fa-robot"></i> ML Model Development 1
+            </h3>
+            <p class="playground-description">
+              The lesson aims to teach machine learning engineers how to select appropriate modeling approaches and train, tune, and refine models using AWS SageMaker, foundation models, and hyperparameter optimization techniques for maximizing model performance.
+            </p>
+            <!-- <a href="#" class="playground-button">Coming Soon</a> -->
+            <a href="https://t.yikyakyuk.com/apcr-mla-session2/" target="_blank" class="playground-button">Explore Playground</a>
+          </div>
+        </div>
+
+        <!-- ML Model Development 2 -->
+        <div class="playground-card">
+          <div class="playground-image">
+            <img src="img/ml_image_3.png" alt="Model Performance Analysis">
+            <span class="playground-badge">Model Analysis</span>
+          </div>
+          <div class="playground-content">
+            <h3 class="playground-title">
+              <i class="fas fa-brain"></i> ML Model Development 2
+            </h3>
+            <p class="playground-description">
+              The lesson objective is to teach participants how to analyze machine learning model performance through various evaluation metrics, optimization techniques, and AWS SageMaker tools to improve model generalization and accuracy.
+            </p>
+            <!-- <a href="#" class="playground-button">Coming Soon</a> -->
+            <a href="https://t.yikyakyuk.com/apcr-mla-session3/" target="_blank" class="playground-button">Explore Playground</a>
+          </div>
+        </div>
+
+        <!-- Deployment and Orchestration -->
+        <div class="playground-card">
+          <div class="playground-image">
+            <img src="img/ml_image_4.png" alt="Deployment and Orchestration">
+            <span class="playground-badge">Deployment</span>
+          </div>
+          <div class="playground-content">
+            <h3 class="playground-title">
+              <i class="fas fa-cogs"></i> Deployment and Orchestration
+            </h3>
+            <p class="playground-description">
+              The lesson objective is to understand how to select and implement appropriate deployment infrastructure, create scripted infrastructure, and use automated orchestration tools for setting up CI/CD pipelines within AWS SageMaker's machine learning workflows.
+            </p>
+            <a href="#" class="playground-button">Coming Soon</a>
+            <!-- <a href="https://t.yikyakyuk.com/apcr-mla-session4/" target="_blank" class="playground-button">Explore Playground</a> -->
+          </div>
+        </div>
+
+        <!-- Monitoring, Maintenance, and Security -->
+        <div class="playground-card">
+          <div class="playground-image">
+            <img src="img/ml_image_5.png" alt="Monitoring and Security">
+            <span class="playground-badge">Monitoring & Security</span>
+          </div>
+          <div class="playground-content">
+            <h3 class="playground-title">
+              <i class="fas fa-shield-alt"></i> Monitoring, Maintenance, and Security
+            </h3>
+            <p class="playground-description">
+              The lesson objective is to understand how to monitor ML model inference, optimize infrastructure and costs, and secure AWS resources in machine learning solutions, focusing on Domain 4 of the Machine Learning Engineer certification.
+            </p>
+            <a href="#" class="playground-button">Coming Soon</a>
+            <!-- <a href="https://t.yikyakyuk.com/apcr-mla-session5/" target="_blank" class="playground-button">Explore Playground</a> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div id="faq" class="content-section">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      
+      <div class="schedule-section">
+        <h3 class="week-header">Will the scheduled sessions be recorded?</h3>
+        <p>Yes, the scheduled sessions will be available on-demand, within the Replay area. Slides for the Kick-off and Content Review sessions are accessible from the Expo Booth as well. You will find these resources by accessing the event space within RingCentral.</p>
+        
+        <h3 class="week-header">What should I do if I receive a 403 error when accessing courses in AWS Skill Builder?</h3>
+        <p>Make sure that you choose to log into Skill Builder as an AWS Partner and enter your APN Partner Central account information. Learn how to sign into Skill Builder as a partner by watching <a href="https://training.resources.awscloud.com/partner-certification-readiness/log-into-skill-builder-as-a-partner" target="_blank">this short video</a>.</p>
+        
+        <h3 class="week-header">How do I register for the AWS Machine Learning Engineer - Associate exam?</h3>
+        <p>To register for an exam, create an account or sign in at <a href="https://partnercentral.awspartner.com/LmsSsoRedirect?RelayState=%2fcertification%3ftrk%3D1b409ad1-89ec-4848-b9fb-6065cb3bbc39%26sc_channel%3Del" target="_blank">aws.training/certification</a>, then navigate to Exam Registration and follow the prompts. Still need help? Get step-by-step guidance on how to <a href="https://training.resources.awscloud.com/partner-certification-readiness/set-up-your-aws-certification-account" target="_blank">register for an exam as an AWS Partner</a>.</p>
+        
+        <h3 class="week-header">How much does the AWS Machine Learning Engineer - Associate exam cost?</h3>
+        <p>The AWS Certified Machine Learning Engineer - Associate exam fee is 150 USD.</p>
+        
+        <h3 class="week-header">How do I share my AWS Certification achievement with my employer?</h3>
+        <p>Watch <a href="https://training.resources.awscloud.com/partner-certification-readiness/link-your-certification" target="_blank">this video tutorial</a> to learn how to provide consent for your employer to view your certifications. Remember - your AWS Certification belongs to you and you can always change this setting if your employer changes.</p>
+        
+        <h3 class="week-header">My AWS Certification account name doesn't match my legal ID. How can I update my profile?</h3>
+        <p>To change your name on your AWS Certification Account, submit a ticket to the <a href="https://support.aws.amazon.com/#/contacts/aws-training" target="_blank">AWS Training and Certification Support team</a>. Select Account Assistance as the inquiry type and Name Change as the additional details, and include the requested information in the description. If needed, our Support team will request documentation to process the edit. Once all necessary information is submitted, allow up to two days for the change to be processed.</p>
+        
+        <h3 class="week-header">Who should I contact if I experience technical issues?</h3>
+        <p>Having issues with Skill Builder? Review the <a href="https://explore.skillbuilder.aws/pages/47/support" target="_blank">AWS Skill Builder support website</a> or <a href="https://www.aws.training/Support" target="_blank">contact support</a> with specific details about the challenge you're encountering.</p>
+        <p>Experiencing issues with APN Partner Central? Contact the <a href="https://www.apn-portal.com/knowledgebase/?cu=1&fs=ContactUs&l=en_US" target="_blank">APN Support team</a> directly.</p>
+        
+        <h3 class="week-header">What if I have additional questions about AWS Certification?</h3>
+        <p>Browse the <a href="https://aws.amazon.com/certification/faqs/" target="_blank">AWS Certification FAQs</a> on our website.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    function openSection(sectionId) {
+      // Hide all content sections
+      const contentSections = document.getElementsByClassName('content-section');
+      for (let i = 0; i < contentSections.length; i++) {
+        contentSections[i].classList.remove('active');
+      }
+
+      // Show the selected content section
+      document.getElementById(sectionId).classList.add('active');
+
+      // Update active tab
+      const navTabs = document.getElementsByClassName('nav-tab');
+      for (let i = 0; i < navTabs.length; i++) {
+        navTabs[i].classList.remove('active');
+      }
+
+      // Find the clicked tab and make it active
+      const tabs = document.getElementsByClassName('nav-tab');
+      for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].getAttribute('onclick') === `openSection('${sectionId}')`) {
+          tabs[i].classList.add('active');
+        }
+      }
+    }
+    
+    function expandSchedule() {
+      // This function could be used to expand additional schedule details
+      alert("Please scroll to view all weekly schedule details");
+    }
+  </script>
+</body>
+
+</html>

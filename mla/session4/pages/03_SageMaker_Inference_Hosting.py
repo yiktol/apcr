@@ -1472,7 +1472,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/04/29/ML-2241-1.jpg",
+            st.image("images/multi_model.png",
                     caption="Multi-Model Endpoint Architecture", use_container_width=True)
         
         # How MME works
@@ -1810,7 +1810,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d1.awsstatic.com/reInvent2022/Build-ML-Apps/Inference-App-Diagram3.dad44cf1268e7f82cee48cc2a1f22d870abf3886.png",
+            st.image("images/multi_container.png",
                     caption="Multi-Container Endpoint Architecture", use_container_width=True)
         
         # How it works
@@ -2241,7 +2241,7 @@ def main():
             """)
         
         with col2:
-            st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2019/04/16/sagemaker-inference-pipeline-1.gif",
+            st.image("images/inference_pipeline.png",
                     caption="Inference Pipeline Flow", use_container_width=True)
         
         # How it works
