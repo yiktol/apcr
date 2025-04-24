@@ -771,7 +771,7 @@ def render_topic_when_to_use_ml():
         **Suggested approach:**
         ```python
         def calculate_monthly_interest(principal, annual_rate, days_in_month, days_in_year=365):
-            """
+            '''
             Calculate monthly interest on a loan
             
             Args:
@@ -782,7 +782,7 @@ def render_topic_when_to_use_ml():
                 
             Returns:
                 Monthly interest amount
-            """
+           '''
             monthly_interest = principal * annual_rate * (days_in_month / days_in_year)
             return round(monthly_interest, 2)
         
@@ -885,7 +885,7 @@ def render_topic_when_to_use_ml():
         **Suggested approach:**
         ```python
         def celsius_to_fahrenheit(celsius):
-            """
+            '''
             Convert Celsius temperature to Fahrenheit
             
             Args:
@@ -893,7 +893,7 @@ def render_topic_when_to_use_ml():
                 
             Returns:
                 Temperature in Fahrenheit
-            """
+            '''
             return (celsius * 9/5) + 32
         
         # Example usage
@@ -1188,17 +1188,16 @@ def render_topic_ml_vs_genai():
             openai.api_key = "your-api-key"
             
             # Company information for context
-            company_context = """
+            company_context = '''
             Our company is TechGadgets Inc. We sell electronics online.
             Return policy: 30-day returns with receipt.
             Shipping: 2-day standard, overnight premium option.
             Password reset: Self-service on website or call support.
-            """
-            
+            '''
+                        
             # Function to handle customer queries
             def handle_customer_query(query):
-                prompt = f"""
-                '''You are a customer service representative for TechGadgets Inc.
+                prompt = '''You are a customer service representative for TechGadgets Inc.
                 
                 Company information:
                 {company_context}
@@ -1209,7 +1208,7 @@ def render_topic_ml_vs_genai():
                 them with a human agent.
                 
                 Customer query: {query}'''
-                """
+                
                 
                 response = openai.Completion.create(
                     model="text-davinci-003",
@@ -1513,7 +1512,7 @@ def render_topic_ml_vs_genai():
                 for product in product_catalog:
                     catalog_text += f"Product ID: {product['product_id']}, Name: {product['name']}, Category: {product['category']}, Price: ${product['price']}, Description: {product['description']}\\n"
                 
-                prompt = f"""
+                prompt = '''
                 You are a personalized recommendation engine. Based on the user profile and product catalog below,
                 recommend {top_n} products that would most interest this user. Consider their purchase history,
                 browsing history, and preferences. Do not recommend products they've already purchased.
@@ -1530,7 +1529,7 @@ def render_topic_ml_vs_genai():
                 
                 Provide your recommendations as a JSON array with product_id, name, and a personalized reason
                 for each recommendation.
-                """
+                '''
                 
                 response = openai.ChatCompletion.create(
                     model="gpt-4",
@@ -1581,7 +1580,7 @@ def render_knowledge_check():
         st.warning("Ready to test your knowledge? This quiz will help you assess your understanding of AI concepts.")
         if st.button("Start Knowledge Check"):
             st.session_state.knowledge_check_started = True
-            st.experimental_rerun()
+            st.rerun()
     
     elif not st.session_state.knowledge_check_submitted:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -1703,7 +1702,7 @@ def render_knowledge_check():
             # Update session state
             st.session_state.knowledge_check_score = score
             st.session_state.knowledge_check_submitted = True
-            st.experimental_rerun()
+            st.rerun()
         
         st.markdown("</div>", unsafe_allow_html=True)
     
@@ -1767,7 +1766,7 @@ def render_knowledge_check():
                 "q4": None,
                 "q5": []
             }
-            st.experimental_rerun()
+            st.rerun()
         
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1789,7 +1788,7 @@ def main():
     
     # Sidebar content
     with st.sidebar:
-        st.markdown("## AI Concepts E-Learning")
+        st.markdown("## AI Concepts")
         st.markdown("### Session Management")
         st.markdown(f"**User ID:** {st.session_state.user_id}")
         
@@ -1801,7 +1800,7 @@ def main():
             st.write("An interactive e-learning platform to explore core AI concepts and differences between AI technologies.")
     
     # Main content
-    st.markdown("<h1 class='title'>AI Concepts E-Learning</h1>", unsafe_allow_html=True)
+    st.title("AI Concepts")
     
     # Create tabs with emojis
     tab1, tab2, tab3, tab4, tab5 = st.tabs([

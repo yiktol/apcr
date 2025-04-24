@@ -1,0 +1,1413 @@
+# # SageMaker Performance & Optimization Learning App
+
+# ## requirements.txt
+# ```
+# streamlit==1.30.0
+# matplotlib==3.7.2
+# pandas==2.0.3
+# plotly==5.18.0
+# uuid==1.30
+# pillow==10.1.0
+# ```
+
+# ## app.py
+# ```python
+import streamlit as st
+import uuid
+import pandas as pd
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
+from PIL import Image
+import base64
+import io
+import json
+import math
+
+# Set page configuration
+st.set_page_config(
+    page_title="SageMaker Performance & Optimization",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Initialize session state
+def init_session_state():
+    if "session_id" not in st.session_state:
+        st.session_state["session_id"] = str(uuid.uuid4())
+    
+    if "knowledge_check_progress" not in st.session_state:
+        st.session_state["knowledge_check_progress"] = {}
+    
+    if "knowledge_check_answers" not in st.session_state:
+        st.session_state["knowledge_check_answers"] = {}
+    
+    if "knowledge_check_submitted" not in st.session_state:
+        st.session_state["knowledge_check_submitted"] = False
+
+# Initialize session state
+init_session_state()
+
+# Sidebar
+with st.sidebar:
+    st.image("https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png", width=200)
+    st.title("Navigation")
+    
+    # About this App (collapsible)
+    with st.expander("About this App", expanded=False):
+        st.write("""
+        This interactive e-learning application focuses on AWS SageMaker Performance & Optimization.
+        
+        Learn about:
+        - SageMaker ML instance options
+        - Inference Recommender
+        - Cost analysis tools
+        - Cost optimization strategies
+        
+        Complete knowledge checks to test your understanding!
+        """)
+    
+    # Reset session
+    if st.button("Reset Session"):
+        # Clear all session state
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        init_session_state()
+        st.rerun()
+
+# Main content area
+st.title("🚀 SageMaker Performance & Optimization")
+st.markdown("---")
+
+# Create tabs for navigation
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "💻 ML Instance Options", 
+    "🔍 Inference Recommender", 
+    "💰 Cost Analysis Tools", 
+    "⚙️ Optimization Strategies",
+    "✅ Knowledge Checks"
+])
+
+# Tab 1: SageMaker ML Instance Options
+with tab1:
+    st.header("SageMaker ML Instance Options")
+    st.subheader("Balancing Cost and Performance")
+    
+    st.markdown("""
+    When deploying machine learning models in production, selecting the right instance type is crucial 
+    for balancing performance needs with budget constraints. AWS SageMaker offers multiple instance 
+    families optimized for different workloads:
+    """)
+    
+    # Create columns for different instance types
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("### 🖥️ CPU Instances")
+        st.markdown("""
+        **C5 instances**
+        - Best for: Cost-effective inference for CPU-bound models
+        - Use cases: Linear models, tree-based models, small neural networks
+        - Benefits: Lower cost, most flexible
+        - Example models: XGBoost, RandomForest, Linear Regression
+        """)
+        
+        # Sample code for CPU instances
+        st.code('''
+# Deploy model to CPU instance
+sagemaker.model.Model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.c5.xlarge',
+    endpoint_name='my-cpu-endpoint'
+)
+        ''', language='python')
+    
+    with col2:
+        st.markdown("### 🎮 GPU Instances")
+        st.markdown("""
+        **P3 & G4 instances**
+        - Best for: Deep learning with high computational needs
+        - Use cases: Computer vision, NLP, complex neural networks
+        - Benefits: High throughput, low latency access to CUDA
+        - Example models: BERT, ResNet, Transformer architectures
+        """)
+        
+        # Sample code for GPU instances
+        st.code('''
+# Deploy model to GPU instance
+sagemaker.model.Model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.g4dn.xlarge',
+    endpoint_name='my-gpu-endpoint'
+)
+        ''', language='python')
+    
+    with col3:
+        st.markdown("### 🧠 Custom Chips")
+        st.markdown("""
+        **Inf1 instances**
+        - Best for: Optimized inference at scale
+        - Use cases: Serving models that benefit from hardware acceleration
+        - Benefits: High throughput, high performance, lowest cost in cloud
+        - Example models: Optimized TensorFlow/PyTorch models
+        """)
+        
+        # Sample code for Inferentia instances
+        st.code('''
+# Deploy model to Inferentia instance
+sagemaker.model.Model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.inf1.xlarge',
+    endpoint_name='my-inferentia-endpoint'
+)
+        ''', language='python')
+    
+    # Performance comparison chart
+    st.subheader("Instance Performance Comparison")
+    
+    # Create dataframe for instance comparison
+    data = {
+        'Instance Type': ['ml.c5.xlarge', 'ml.g4dn.xlarge', 'ml.inf1.xlarge'],
+        'Relative Cost': [1.0, 2.5, 1.8],
+        'Relative Performance': [1.0, 4.0, 3.0],
+        'Performance/Cost Ratio': [1.0, 1.6, 1.67]
+    }
+    df = pd.DataFrame(data)
+    
+    # Display as a table
+    st.table(df)
+    
+    # Create interactive comparison chart
+    fig = px.bar(
+        df, 
+        x='Instance Type', 
+        y=['Relative Cost', 'Relative Performance', 'Performance/Cost Ratio'],
+        barmode='group',
+        title='Instance Type Comparison: Cost vs Performance',
+        color_discrete_sequence=['#FF9900', '#232F3E', '#1A73E8']
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Instance selection guidance
+    st.subheader("Instance Selection Guidance")
+    st.markdown("""
+    **Choosing the Right Instance:**
+    1. **For cost-sensitive applications:** Start with CPU instances if your model isn't computation-intensive.
+    2. **For deep learning inference:** GPU instances provide significant performance improvements.
+    3. **For optimized production:** Inf1 instances offer the best performance/cost ratio for suitable models.
+    
+    Remember that a smaller, optimized model on a less powerful instance might outperform a complex model on expensive hardware.
+    """)
+
+# Tab 2: SageMaker Inference Recommender
+with tab2:
+    st.header("SageMaker Inference Recommender")
+    
+    st.markdown("""
+    Choosing the optimal instance type for model deployment can be complex and time-consuming. 
+    **SageMaker Inference Recommender** automatically tests your model across various instance types 
+    to find the best configuration for your needs.
+    """)
+    
+    # How Inference Recommender works
+    st.subheader("How Inference Recommender Works")
+    
+    # Create columns for the workflow
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        # Flowchart explaining how Inference Recommender works
+        st.markdown("""
+        1. **Register your model** in the SageMaker Model Registry
+        2. **Create an Inference Recommender job**
+        3. **Automated testing** across multiple instances
+        4. **Receive recommendations** based on performance, latency, and cost
+        5. **Deploy** to the recommended configuration
+        """)
+        
+        # Job Types section
+        st.subheader("Job Types")
+        
+        job_type = st.radio(
+            "Select an Inference Recommender job type to learn more:",
+            ["Default Job (Instance Recommendations)", "Advanced Job (Endpoint Recommendations)"]
+        )
+        
+        if job_type == "Default Job (Instance Recommendations)":
+            st.markdown("""
+            ### Default Job: Instance Recommendations
+            
+            - **Duration**: Completes within 45 minutes
+            - **Requirements**: Only need a model package ARN
+            - **Process**: Runs a set of load tests on recommended instance types
+            - **Use when**: You want quick recommendations for instance selection
+            """)
+        else:
+            st.markdown("""
+            ### Advanced Job: Endpoint Recommendations
+            
+            - **Duration**: Takes ~2 hours (depends on job duration and instances tested)
+            - **Requirements**: You select ML instances, provide custom traffic pattern, and specify latency/throughput requirements
+            - **Process**: Performs extensive load testing based on your production requirements
+            - **Use when**: You need to fine-tune your endpoint configuration for specific workload patterns
+            """)
+    
+    with col2:
+        # Simplified visualization of Inference Recommender
+        st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/10/29/2-4.jpg", 
+                 caption="SageMaker Inference Recommender Workflow", 
+                 use_container_width=True)
+    
+    # Code example
+    st.subheader("Implementation Example")
+    
+    st.code('''
+# Step 1: Create an inference recommender job
+from sagemaker.model import Model
+from sagemaker.inference_recommender import InferenceRecommender
+
+# Create Model object and register in Model Registry
+model = Model(
+    image_uri=image_uri,
+    model_data=model_data_url,
+    role=role
+)
+
+# Create Inference Recommender object
+recommender = InferenceRecommender(
+    sagemaker_session=sagemaker_session,
+    model=model
+)
+
+# Start Default Job (Instance Recommendations)
+default_job = recommender.recommend(
+    job_name="my-inference-recommendation",
+    job_type="Default",
+    model_package_version_arn=model_package_arn
+)
+
+# Get results
+recommendations = default_job.get_recommendations()
+
+# Deploy using recommended instance
+recommended_instance = recommendations[0]["instance_type"]
+model.deploy(
+    initial_instance_count=1,
+    instance_type=recommended_instance
+)
+    ''', language='python')
+    
+    # Benefits of using Inference Recommender
+    st.subheader("Key Benefits")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("### ⏱️ Save Time")
+        st.markdown("""
+        - Eliminates weeks of manual testing
+        - Automatic testing of multiple instances
+        - Integrated with SageMaker Studio
+        """)
+    
+    with col2:
+        st.markdown("### 💰 Optimize Costs")
+        st.markdown("""
+        - Find lowest-cost instance that meets requirements
+        - Only pay for instances during testing
+        - Avoid over-provisioning resources
+        """)
+    
+    with col3:
+        st.markdown("### 📈 Maximize Performance")
+        st.markdown("""
+        - Fine-tune container parameters
+        - Identify optimal instance types
+        - Customize load tests for your workload
+        """)
+    
+    # Performance metrics
+    st.subheader("Understanding Performance Metrics")
+    
+    # Sample metrics data
+    metrics_data = {
+        'Instance Type': ['ml.c5.xlarge', 'ml.g4dn.xlarge', 'ml.inf1.xlarge', 'ml.m5.large', 'ml.r5.xlarge'],
+        'Avg. Latency (ms)': [120, 45, 55, 135, 110],
+        'Throughput (infer/sec)': [82, 220, 180, 74, 90],
+        'Cost per 1M inferences ($)': [2.10, 4.50, 2.80, 1.90, 3.20],
+        'CPU Utilization (%)': [85, 40, 35, 90, 75]
+    }
+    metrics_df = pd.DataFrame(metrics_data)
+    
+    # Interactive visualization of metrics
+    selected_metric = st.selectbox(
+        "Select a metric to visualize across instance types:",
+        ['Avg. Latency (ms)', 'Throughput (infer/sec)', 'Cost per 1M inferences ($)', 'CPU Utilization (%)']
+    )
+    
+    fig = px.bar(
+        metrics_df,
+        x='Instance Type',
+        y=selected_metric,
+        color='Instance Type',
+        title=f'Comparison of {selected_metric} across Instance Types',
+        color_discrete_sequence=px.colors.qualitative.Bold
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Best practices
+    st.subheader("Best Practices")
+    st.markdown("""
+    1. **Start with a Default job** to quickly identify candidate instance types
+    2. **Follow up with an Advanced job** for fine-tuning with real workload patterns
+    3. **Consider multiple metrics** - latency, throughput, and cost all matter
+    4. **Test with realistic payloads** that match your production data
+    5. **Periodically re-run** as your workload or model changes
+    """)
+
+# Tab 3: Cost Analysis Tools
+with tab3:
+    st.header("Cost Analysis Tools")
+    
+    st.markdown("""
+    AWS provides several tools to help you monitor, analyze, and optimize your SageMaker costs.
+    These tools give you visibility into your spending patterns and help you identify opportunities
+    for cost optimization.
+    """)
+    
+    # Create a tool selector
+    selected_tool = st.selectbox(
+        "Select a cost analysis tool to learn more:",
+        ["AWS Cost Explorer", "AWS Budgets", "AWS Cost & Usage Report", "AWS Trusted Advisor"]
+    )
+    
+    # Display information based on selected tool
+    if selected_tool == "AWS Cost Explorer":
+        st.subheader("AWS Cost Explorer")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            AWS Cost Explorer provides a visual interface to understand and analyze your AWS costs and usage over time.
+            
+            **Key Features:**
+            - **Visualize costs** - View costs by service, region, tag, and more
+            - **Filter and group** - Analyze SageMaker costs by endpoint, training job, or notebook instances
+            - **Forecasting** - Predict future costs based on historical spending
+            - **Savings recommendations** - Get suggestions for potential cost savings
+            
+            **Best for:**
+            - Historical cost analysis
+            - Identifying cost trends
+            - Service-level cost breakdowns
+            """)
+            
+            # Sample code for accessing Cost Explorer API
+            st.code('''
+# Using the AWS SDK for Python (Boto3) to access Cost Explorer
+import boto3
+
+ce_client = boto3.client('ce')
+
+# Get SageMaker costs for the last month
+response = ce_client.get_cost_and_usage(
+    TimePeriod={
+        'Start': '2023-01-01',
+        'End': '2023-01-31'
+    },
+    Granularity='DAILY',
+    Filter={
+        'Dimensions': {
+            'Key': 'SERVICE',
+            'Values': ['Amazon SageMaker']
+        }
+    },
+    Metrics=['UnblendedCost'],
+    GroupBy=[
+        {
+            'Type': 'DIMENSION',
+            'Key': 'USAGE_TYPE'
+        }
+    ]
+)
+
+# Process and analyze the results
+for result in response['ResultsByTime']:
+    date = result['TimePeriod']['Start']
+    for group in result['Groups']:
+        usage_type = group['Keys'][0]
+        cost = group['Metrics']['UnblendedCost']['Amount']
+        print(f"{date}: {usage_type} - ${cost}")
+            ''', language='python')
+        
+        with col2:
+            # Example Cost Explorer visualization
+            st.image("https://d1.awsstatic.com/products/costmanagement/ce-sample-dash.cc87ee2076b1b631f8a207804204bc728ae691b0.png", 
+                    caption="AWS Cost Explorer Dashboard", 
+                    use_container_width=True)
+    
+    elif selected_tool == "AWS Budgets":
+        st.subheader("AWS Budgets")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            AWS Budgets allows you to set custom cost and usage budgets with notifications when you exceed your thresholds.
+            
+            **Key Features:**
+            - **Cost budgets** - Set alerts for total SageMaker spending
+            - **Usage budgets** - Monitor specific resource usage like instance hours
+            - **Alert thresholds** - Configure notifications at different percentage thresholds
+            - **Actions** - Automatically trigger responses when thresholds are crossed
+            
+            **Best for:**
+            - Proactive cost management
+            - Budget enforcement
+            - Cost anomaly detection
+            """)
+            
+            # Sample code for creating a budget
+            st.code('''
+# Using the AWS SDK for Python (Boto3) to create a budget
+import boto3
+
+budgets_client = boto3.client('budgets')
+
+# Create a budget for SageMaker with monthly limit of $1000
+response = budgets_client.create_budget(
+    AccountId='123456789012',
+    Budget={
+        'BudgetName': 'SageMaker-Monthly-Budget',
+        'BudgetLimit': {
+            'Amount': '1000',
+            'Unit': 'USD'
+        },
+        'CostFilters': {
+            'Service': ['Amazon SageMaker']
+        },
+        'TimeUnit': 'MONTHLY',
+        'BudgetType': 'COST'
+    },
+    NotificationsWithSubscribers=[
+        {
+            'Notification': {
+                'NotificationType': 'ACTUAL',
+                'ComparisonOperator': 'GREATER_THAN',
+                'Threshold': 80.0,
+                'ThresholdType': 'PERCENTAGE'
+            },
+            'Subscribers': [
+                {
+                    'SubscriptionType': 'EMAIL',
+                    'Address': 'email@example.com'
+                }
+            ]
+        }
+    ]
+)
+            ''', language='python')
+        
+        with col2:
+            # Example Budgets visualization
+            st.image("https://docs.aws.amazon.com/images/cost-management/latest/userguide/images/AWSBudgets_Dashboard.png", 
+                    caption="AWS Budgets Dashboard", 
+                    use_container_width=True)
+            
+    elif selected_tool == "AWS Cost & Usage Report":
+        st.subheader("AWS Cost & Usage Report")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            AWS Cost & Usage Report provides the most comprehensive set of cost and usage data available for AWS services.
+            
+            **Key Features:**
+            - **Granular data** - Track costs down to hourly level with resource tags
+            - **Resource-level insights** - See costs for each SageMaker component (endpoints, training jobs, etc.)
+            - **Integration** - Load data into Amazon Athena, Amazon Redshift, or AWS QuickSight for analysis
+            - **Customization** - Configure report content, partitioning, and update frequency
+            
+            **Best for:**
+            - Detailed cost analysis
+            - Building custom cost dashboards
+            - Advanced cost allocation and chargeback
+            """)
+            
+            # Example of analyzing CUR data with Athena
+            st.code('''
+# Example SQL query for analyzing SageMaker costs in Athena
+SELECT
+    line_item_usage_start_date AS date,
+    product_instance_type,
+    line_item_usage_type,
+    SUM(line_item_unblended_cost) AS cost
+FROM
+    cost_and_usage_report
+WHERE
+    product_product_name = 'Amazon SageMaker'
+    AND line_item_usage_start_date BETWEEN '2023-01-01' AND '2023-01-31'
+GROUP BY
+    line_item_usage_start_date,
+    product_instance_type,
+    line_item_usage_type
+ORDER BY
+    date,
+    cost DESC
+            ''', language='sql')
+        
+        with col2:
+            # Example CUR visualization
+            st.image("https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2018/05/02/LakeFormationCosts-2_1.gif", 
+                    caption="AWS Cost & Usage Report Analysis", 
+                    use_container_width=True)
+            
+    elif selected_tool == "AWS Trusted Advisor":
+        st.subheader("AWS Trusted Advisor")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            AWS Trusted Advisor provides recommendations to help you optimize costs, improve performance, and enhance security.
+            
+            **Key Features:**
+            - **Cost Optimization** - Identify idle resources, oversized instances, and opportunities for Reserved Instances
+            - **Performance** - Get recommendations to improve service performance
+            - **Security** - Identify security vulnerabilities and compliance issues
+            - **Fault Tolerance** - Assess resilience of your architecture
+            
+            **Best for:**
+            - Quick cost optimization opportunities
+            - Real-time recommendations
+            - Cross-service optimizations
+            """)
+            
+            # Example of accessing Trusted Advisor recommendations
+            st.code('''
+# Using the AWS SDK for Python (Boto3) to access Trusted Advisor recommendations
+import boto3
+
+support_client = boto3.client('support')
+
+# Get cost optimization check results
+response = support_client.describe_trusted_advisor_check_result(
+    checkId='Qch7DwouX1',  # Cost Optimization check ID
+    language='en'
+)
+
+# Process the recommendations
+for resource in response['result']['flaggedResources']:
+    resource_id = resource['resourceId']
+    estimated_savings = resource['metadata'][3]
+    region = resource['region']
+    print(f"Resource: {resource_id} in {region} - Potential savings: ${estimated_savings}")
+            ''', language='python')
+        
+        with col2:
+            # Example Trusted Advisor dashboard
+            st.image("https://d1.awsstatic.com/product-marketing/AWS%20Support/Trusted-Advisor-screenshot.321d0a3a729b9d4468f24a005d53a0142998c952.png", 
+                    caption="AWS Trusted Advisor Dashboard", 
+                    use_container_width=True)
+    
+    # Cost monitoring best practices
+    st.subheader("Cost Monitoring Best Practices")
+    
+    st.markdown("""
+    1. **Implement tagging** - Use consistent resource tagging for cost allocation
+    2. **Set up budgets** - Create budget alerts to avoid unexpected spending
+    3. **Regular reviews** - Schedule weekly or monthly cost reviews
+    4. **Track per-model costs** - Allocate costs to specific ML models and projects
+    5. **Analyze trends** - Look for cost patterns and optimization opportunities
+    """)
+    
+    # Cost metrics to monitor
+    st.subheader("Key Cost Metrics to Monitor")
+    
+    metrics_data = {
+        'Metric': [
+            'Cost per training hour', 
+            'Cost per inference', 
+            'GPU utilization (%)', 
+            'Endpoint uptime cost',
+            'Data storage cost'
+        ],
+        'Target Range': [
+            '$1-5/hr', 
+            '$0.0001-0.001', 
+            '70-90%', 
+            'Varies by SLA',
+            'Optimize for access pattern'
+        ],
+        'Optimization Tip': [
+            'Use spot instances for non-critical training',
+            'Batch predictions when possible',
+            'Right-size instances based on model needs',
+            'Use auto-scaling for variable traffic',
+            'Lifecycle policies for older artifacts'
+        ]
+    }
+    
+    metrics_df = pd.DataFrame(metrics_data)
+    st.table(metrics_df)
+
+# Tab 4: Optimization Strategies
+with tab4:
+    st.header("SageMaker Cost Optimization Strategies")
+    
+    st.markdown("""
+    Optimizing costs for machine learning workloads requires a strategic approach to 
+    how models are deployed and managed. SageMaker offers several specialized deployment 
+    options that can significantly reduce costs while maintaining performance.
+    """)
+    
+    # Create a strategy selector
+    selected_strategy = st.selectbox(
+        "Select an optimization strategy to explore:",
+        ["Multi-Model Endpoints", "Multi-Container Endpoints", "Asynchronous/Serverless Inference", 
+         "AWS Inferentia", "SageMaker Neo"]
+    )
+    
+    # Display information based on selected strategy
+    if selected_strategy == "Multi-Model Endpoints":
+        st.subheader("Multi-Model Endpoints")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            **Multi-Model Endpoints** allow you to deploy multiple models to a single endpoint, sharing 
+            compute resources and reducing costs.
+            
+            **How it works:**
+            - Multiple models share the same container and instance
+            - Models are loaded into memory on-demand
+            - Inactive models are unloaded to free resources
+            
+            **Ideal for:**
+            - Serving many models with low to moderate traffic
+            - Models that share the same framework (PyTorch, TensorFlow, etc.)
+            - Personalization use cases with per-user models
+            
+            **Cost savings:** Up to 90% compared to deploying individual endpoints for each model
+            """)
+            
+            # Sample code for Multi-Model Endpoints
+            st.code('''
+# Deploy multiple models to a single endpoint
+from sagemaker.multidel_model import MultiModelPredictor
+
+# Create the multi-model endpoint
+mme = MultiModelPredictor(
+    endpoint_name='my-multi-model-endpoint',
+    model_path='s3://my-bucket/models/',  # Path to models
+    image_uri='<framework-container-uri>',
+    instance_type='ml.c5.xlarge',
+    instance_count=1,
+    role=role
+)
+
+# Invoke a specific model
+response = mme.predict(
+    target_model='customer-model-1.tar.gz',
+    data=my_payload
+)
+            ''', language='python')
+        
+        with col2:
+            # Visualization of Multi-Model Endpoints
+            st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2019/11/07/sagemaker-multimodel-2.gif", 
+                    caption="Multi-Model Endpoint Architecture", 
+                    use_container_width=True)
+            
+            # Cost comparison widget
+            st.subheader("Cost Comparison")
+            
+            # Create interactive slider for number of models
+            num_models = st.slider("Number of models", min_value=2, max_value=50, value=10)
+            avg_tps = st.slider("Average transactions per second", min_value=1, max_value=100, value=10)
+            
+            # Calculate costs
+            single_endpoint_cost = num_models * 0.298 * 24 * 30  # ml.c5.xlarge at $0.298/hour
+            # mme_cost = 0.298 * 24 * 30 * (num_models / 10).ceil()  # Assume each instance can handle ~10 models
+            mme_cost = 0.298 * 24 * 30 * math.ceil(num_models / 10)
+
+            
+            
+            # Display savings
+            savings = single_endpoint_cost - mme_cost
+            savings_percent = (savings / single_endpoint_cost) * 100
+            
+            st.metric(
+                "Monthly cost savings with MME", 
+                f"${savings:.2f}", 
+                f"{savings_percent:.0f}%"
+            )
+    
+    elif selected_strategy == "Multi-Container Endpoints":
+        st.subheader("Multi-Container Endpoints")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            **Multi-Container Endpoints** allow you to deploy up to 15 different containers on the same endpoint,
+            each potentially running a different framework or model.
+            
+            **How it works:**
+            - Multiple containers run simultaneously on the same instance
+            - Each container can use a different ML framework
+            - No cold start unlike Multi-Model Endpoints
+            
+            **Ideal for:**
+            - Deploying models with different frameworks
+            - Preprocessing and inference pipelines
+            - Ensemble models that require different frameworks
+            
+            **Cost savings:** Up to 85% compared to deploying separate endpoints
+            """)
+            
+            # Sample code for Multi-Container Endpoints
+            st.code('''
+# Deploy multiple containers to a single endpoint
+import sagemaker
+from sagemaker.multidel_container import MultiContainerModel
+
+# Define the containers
+containers = [
+    {
+        'Image': '<tensorflow-container-uri>',
+        'ModelDataUrl': 's3://my-bucket/model1.tar.gz'
+    },
+    {
+        'Image': '<pytorch-container-uri>',
+        'ModelDataUrl': 's3://my-bucket/model2.tar.gz'
+    }
+]
+
+# Create multi-container model
+multi_model = MultiContainerModel(
+    name='multi-container-model',
+    role=role,
+    containers=containers
+)
+
+# Deploy to endpoint
+predictor = multi_model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.c5.2xlarge'
+)
+
+# Make a prediction with container selection
+response = predictor.predict(
+    data=my_payload,
+    target_container=0  # Index of the container to use
+)
+            ''', language='python')
+        
+        with col2:
+            # Visualization of Multi-Container Endpoints
+            st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/10/13/Picture4-2.png", 
+                    caption="Multi-Container Endpoint Architecture", 
+                    use_container_width=True)
+            
+            # Key differences vs Multi-Model Endpoints
+            st.subheader("Comparing with Multi-Model Endpoints")
+            
+            comparison = {
+                'Feature': ['Max containers/models', 'Cold start', 'Different frameworks', 'Memory sharing', 'Model loading'],
+                'Multi-Container': ['15 containers', 'No', 'Yes', 'Limited', 'Always loaded'],
+                'Multi-Model': ['Thousands', 'Yes', 'No', 'Yes', 'On-demand']
+            }
+            st.table(pd.DataFrame(comparison))
+    
+    elif selected_strategy == "Asynchronous/Serverless Inference":
+        st.subheader("Asynchronous & Serverless Inference")
+        
+        strategy_type = st.radio(
+            "Select an inference type:",
+            ["Asynchronous Inference", "Serverless Inference"]
+        )
+        
+        if strategy_type == "Asynchronous Inference":
+            col1, col2 = st.columns([3, 2])
+            
+            with col1:
+                st.markdown("""
+                **Asynchronous Inference** enables processing requests with large payloads or long processing times
+                without maintaining a persistent connection.
+                
+                **How it works:**
+                - Requests are queued for processing
+                - Results are stored in S3
+                - No timeout constraints for long-running inference
+                
+                **Ideal for:**
+                - Large input payloads (up to 1GB)
+                - Long processing times (minutes or hours)
+                - Batch-like workloads that don't need immediate results
+                
+                **Cost savings:** Pay only for compute time used for processing requests
+                """)
+                
+                # Sample code for Asynchronous Inference
+                st.code('''
+# Deploy model for asynchronous inference
+from sagemaker.model import Model
+
+model = Model(
+    image_uri=image_uri,
+    model_data=model_data,
+    role=role
+)
+
+# Deploy as asynchronous endpoint
+async_predictor = model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.m5.xlarge',
+    endpoint_name='my-async-endpoint',
+    async_inference_config={
+        "OutputConfig": {
+            "S3OutputPath": "s3://my-bucket/async-results/"
+        },
+        "ClientConfig": {
+            "MaxConcurrentInvocationsPerInstance": 4
+        }
+    }
+)
+
+# Invoke asynchronously
+response = async_predictor.predict_async(
+    data=my_payload,
+    input_path='s3://my-bucket/input/my-data.csv',
+    wait=False
+)
+
+# Get result when ready
+output_path = response["OutputPath"]
+                ''', language='python')
+            
+            with col2:
+                # Visualization of Asynchronous Inference
+                st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/01/05/1-Architecture.jpg", 
+                        caption="Asynchronous Inference Architecture", 
+                        use_container_width=True)
+                
+                # Benefits list
+                st.subheader("Key Benefits")
+                st.markdown("""
+                - **Cost efficiency** - No need to provision for peak capacity
+                - **Handle large payloads** - Process inputs up to 1GB
+                - **Queue management** - Built-in request queuing and scaling
+                - **No timeout constraints** - Process long-running inferences
+                """)
+        
+        else:  # Serverless Inference
+            col1, col2 = st.columns([3, 2])
+            
+            with col1:
+                st.markdown("""
+                **Serverless Inference** provides on-demand ML inference without having to configure or manage the 
+                underlying infrastructure.
+                
+                **How it works:**
+                - Auto-scales from zero to thousands of instances
+                - Pay only for compute used during inference
+                - No instance configuration required
+                
+                **Ideal for:**
+                - Unpredictable or variable workloads
+                - Applications with idle periods
+                - Development and testing environments
+                
+                **Cost savings:** Up to 70% for variable workloads compared to provisioned endpoints
+                """)
+                
+                # Sample code for Serverless Inference
+                st.code('''
+# Deploy model for serverless inference
+from sagemaker.model import Model
+
+model = Model(
+    image_uri=image_uri,
+    model_data=model_data,
+    role=role
+)
+
+# Deploy as serverless endpoint
+serverless_predictor = model.deploy(
+    endpoint_name='my-serverless-endpoint',
+    serverless_inference_config={
+        "MemorySizeInMB": 2048,
+        "MaxConcurrency": 5
+    }
+)
+
+# Invoke the endpoint
+response = serverless_predictor.predict(
+    data=my_payload
+)
+                ''', language='python')
+            
+            with col2:
+                # Visualization of Serverless Inference
+                st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/12/08/ML-4337-image001.png", 
+                        caption="Serverless Inference Architecture", 
+                        use_container_width=True)
+                
+                # Cost comparison widget
+                st.subheader("Cost Comparison")
+                
+                # Create interactive slider for usage pattern
+                usage_hours = st.slider("Hours of active usage per day", min_value=1, max_value=24, value=8)
+                
+                # Calculate costs
+                provisioned_cost = 0.298 * 24 * 30  # ml.c5.xlarge at $0.298/hour
+                serverless_cost = 0.0000021 * 3600 * usage_hours * 30  # $0.0000021 per second of compute time
+                
+                # Display savings
+                savings = provisioned_cost - serverless_cost
+                savings_percent = (savings / provisioned_cost) * 100
+                
+                st.metric(
+                    "Monthly cost savings with Serverless", 
+                    f"${savings:.2f}", 
+                    f"{savings_percent:.0f}%"
+                )
+    
+    elif selected_strategy == "AWS Inferentia":
+        st.subheader("AWS Inferentia")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            **AWS Inferentia** is a custom silicon chip designed by AWS specifically for machine learning inference workloads.
+            
+            **How it works:**
+            - Purpose-built for ML inference
+            - Optimized for TensorFlow, PyTorch, and MXNet
+            - Uses AWS Neuron SDK for model compilation
+            
+            **Ideal for:**
+            - High-throughput inference workloads
+            - Cost-sensitive production deployments
+            - Models that can be compiled with Neuron SDK
+            
+            **Performance:** Up to 2.3x higher throughput and up to 70% lower cost per inference than comparable EC2 instances
+            """)
+            
+            # Sample code for AWS Inferentia
+            st.code('''
+# Compile model for Inferentia
+import sagemaker
+from sagemaker.tensorflow import TensorFlowModel
+
+# First compile the model for Inferentia
+sagemaker_session = sagemaker.Session()
+
+# Define the compilation job
+compile_job_name = "compile-inferentia-" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+output_path = f"s3://{sagemaker_session.default_bucket()}/{compile_job_name}/output"
+
+# Create the compilation job
+sagemaker_session.compile_model(
+    target_instance_family="ml_inf1",
+    input_model_s3_uri="s3://my-bucket/model.tar.gz",
+    output_model_s3_uri=output_path,
+    role=role,
+    framework="TENSORFLOW",
+    framework_version="2.5.0",
+    job_name=compile_job_name
+)
+
+# Deploy the compiled model
+model = TensorFlowModel(
+    model_data=output_path,
+    role=role
+)
+
+# Deploy to Inferentia instance
+predictor = model.deploy(
+    initial_instance_count=1,
+    instance_type="ml.inf1.xlarge"
+)
+            ''', language='python')
+        
+        with col2:
+            # Visualization of AWS Inferentia
+            st.image("https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2019/12/03/Untitled-5.png", 
+                    caption="AWS Inferentia Workflow", 
+                    use_container_width=True)
+            
+            # Performance comparison
+            st.subheader("Performance Comparison")
+            
+            perf_data = {
+                'Metric': ['Throughput (images/sec)', 'Latency (ms)', 'Cost per 1M inferences ($)'],
+                'ml.c5.xlarge': [100, 125, 10.00],
+                'ml.g4dn.xlarge': [170, 75, 15.00],
+                'ml.inf1.xlarge': [220, 60, 6.00]
+            }
+            
+            perf_df = pd.DataFrame(perf_data)
+            st.table(perf_df)
+            
+            # Highlight requirements
+            st.subheader("Requirements")
+            st.markdown("""
+            - Model must be compilable with AWS Neuron SDK
+            - Supported frameworks: TensorFlow, PyTorch, MXNet
+            - Model must use supported operators
+            - Additional compilation step required
+            """)
+    
+    elif selected_strategy == "SageMaker Neo":
+        st.subheader("SageMaker Neo")
+        
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("""
+            **SageMaker Neo** automatically optimizes machine learning models for inference on SageMaker,
+            edge devices, and a variety of hardware platforms.
+            
+            **How it works:**
+            - Analyzes models and optimizes for target hardware
+            - Creates optimized binaries that use less compute resources
+            - Supports multiple frameworks and hardware targets
+            
+            **Ideal for:**
+            - Optimizing models for any deployment target
+            - Edge deployments with resource constraints
+            - Maximizing performance across different hardware
+            
+            **Performance:** Up to 25% improved performance at no additional cost
+            """)
+            
+            # Sample code for SageMaker Neo
+            st.code('''
+# Compile a model with SageMaker Neo
+import sagemaker
+from sagemaker.tensorflow import TensorFlowModel
+
+# Create a compilation job
+sagemaker_session = sagemaker.Session()
+
+# Define the compilation job
+compile_job_name = "neo-optimized-" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+output_path = f"s3://{sagemaker_session.default_bucket()}/{compile_job_name}/output"
+
+# Compile the model with Neo
+sagemaker_session.compile_model(
+    target_instance_family="ml_c5",  # Target hardware 
+    input_model_s3_uri="s3://my-bucket/model.tar.gz",
+    output_model_s3_uri=output_path,
+    framework="TENSORFLOW",
+    framework_version="2.5.0",
+    data_shape={"inputs": [1, 224, 224, 3]},  # Input shape
+    role=role
+)
+
+# Deploy the Neo-optimized model
+model = TensorFlowModel(
+    model_data=output_path,
+    framework_version="2.5.0",
+    role=role
+)
+
+predictor = model.deploy(
+    initial_instance_count=1,
+    instance_type="ml.c5.xlarge"
+)
+            ''', language='python')
+        
+        with col2:
+            # Visualization of SageMaker Neo
+            st.image("https://d1.awsstatic.com/diagrams/product-page-diagrams_Amazon-Sagemaker-Neo_How-it-Works.4a484c26d8712b2a25a7fe1c17f02e01197c8dd9.png", 
+                    caption="SageMaker Neo Workflow", 
+                    use_container_width=True)
+            
+            # Supported frameworks and targets
+            st.subheader("Supported Platforms")
+            
+            col_a, col_b = st.columns(2)
+            
+            with col_a:
+                st.markdown("**Frameworks:**")
+                st.markdown("""
+                - TensorFlow
+                - PyTorch
+                - MXNet
+                - XGBoost
+                - ONNX
+                - Darknet
+                """)
+            
+            with col_b:
+                st.markdown("**Hardware Targets:**")
+                st.markdown("""
+                - EC2 CPU/GPU instances
+                - AWS Inferentia
+                - NVIDIA Jetson
+                - Raspberry Pi
+                - Intel devices
+                - Qualcomm devices
+                """)
+    
+    # Overall cost optimization best practices
+    st.subheader("Overall Cost Optimization Best Practices")
+    
+    best_practices = [
+        {
+            "title": "Right-size your instances",
+            "description": "Select the smallest instance type that meets your performance requirements. Run load tests to determine the optimal configuration."
+        },
+        {
+            "title": "Use auto-scaling",
+            "description": "Configure auto-scaling to dynamically adjust resources based on traffic patterns. This prevents over-provisioning during low-traffic periods."
+        },
+        {
+            "title": "Implement batch transformations",
+            "description": "For non-real-time needs, use batch transform jobs instead of maintaining always-on endpoints."
+        },
+        {
+            "title": "Optimize input data",
+            "description": "Reduce payload sizes and optimize preprocessing to reduce compute requirements and inference time."
+        },
+        {
+            "title": "Monitor and analyze costs",
+            "description": "Regularly review usage patterns and costs to identify optimization opportunities."
+        }
+    ]
+    
+    for i, practice in enumerate(best_practices):
+        with st.expander(f"{i+1}. {practice['title']}"):
+            st.markdown(practice["description"])
+    
+    # Decision tree for choosing optimization strategy
+    st.subheader("Choosing the Right Optimization Strategy")
+    
+    st.markdown("""
+    Use this decision flow to determine the best deployment strategy for your model:
+    
+    1. **Do you have many similar models with low individual traffic?**
+       - Yes → Consider Multi-Model Endpoints
+       - No → Continue
+    
+    2. **Do you need to deploy models with different frameworks together?**
+       - Yes → Consider Multi-Container Endpoints
+       - No → Continue
+    
+    3. **Is your workload variable or unpredictable?**
+       - Yes → Consider Serverless Inference
+       - No → Continue
+    
+    4. **Do you have large payloads or long processing times?**
+       - Yes → Consider Asynchronous Inference
+       - No → Continue
+    
+    5. **Are you looking for maximum cost-performance ratio?**
+       - Yes → Consider AWS Inferentia or SageMaker Neo optimization
+       - No → Use standard SageMaker endpoints with right-sized instances
+    """)
+
+# Tab 5: Knowledge Checks
+with tab5:
+    st.header("Knowledge Checks")
+    
+    # Reset button for knowledge check
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        if st.button("Reset Knowledge Check"):
+            # Clear knowledge check answers and progress
+            st.session_state["knowledge_check_answers"] = {}
+            st.session_state["knowledge_check_progress"] = {}
+            st.session_state["knowledge_check_submitted"] = False
+            st.rerun()
+    
+    # Knowledge check questions
+    questions = {
+        "q1": {
+            "question": "Which SageMaker instance type would be most cost-effective for CPU-bound models with modest computational requirements?",
+            "options": {
+                "a": "ml.g4dn.xlarge",
+                "b": "ml.p3.2xlarge",
+                "c": "ml.c5.xlarge",
+                "d": "ml.inf1.xlarge"
+            },
+            "correct": "c",
+            "explanation": "The ml.c5.xlarge instance is optimized for CPU workloads and is more cost-effective for models that don't require GPU acceleration.",
+            "wrong_explanation": "This instance type is not the most cost-effective for CPU-bound models with modest requirements."
+        },
+        "q2": {
+            "question": "What is the primary benefit of SageMaker Inference Recommender?",
+            "options": {
+                "a": "It automatically optimizes your model code",
+                "b": "It tests your model across different instance types to find the best configuration",
+                "c": "It reduces the size of your model for faster inference",
+                "d": "It provides training data recommendations"
+            },
+            "correct": "b",
+            "explanation": "SageMaker Inference Recommender automatically tests your model across various instance types and configurations to find the optimal balance of performance and cost.",
+            "wrong_explanation": "While valuable, this is not the primary benefit of SageMaker Inference Recommender."
+        },
+        "q3": {
+            "question": "Which SageMaker deployment option allows you to deploy multiple models that share the same framework to a single endpoint? (Choose the best answer)",
+            "options": {
+                "a": "Multi-Container Endpoints",
+                "b": "Multi-Model Endpoints",
+                "c": "Serverless Inference",
+                "d": "Asynchronous Inference"
+            },
+            "correct": "b",
+            "explanation": "Multi-Model Endpoints allow you to deploy multiple models that share the same framework to a single endpoint, loading and unloading them dynamically as needed.",
+            "wrong_explanation": "This is not the deployment option designed specifically for hosting multiple models that share the same framework on a single endpoint."
+        },
+        "q4": {
+            "question": "Which AWS tools can help you analyze and optimize SageMaker costs? (Select all that apply)",
+            "options": {
+                "a": "AWS Cost Explorer",
+                "b": "AWS Budgets",
+                "c": "AWS CloudFormation",
+                "d": "AWS Trusted Advisor"
+            },
+            "correct": ["a", "b", "d"],
+            "explanation": "AWS Cost Explorer provides visualization of costs, AWS Budgets allows setting cost thresholds and alerts, and AWS Trusted Advisor provides recommendations for optimizing costs. AWS CloudFormation is an infrastructure-as-code service and not primarily a cost analysis tool.",
+            "wrong_explanation": "Not all selected options are tools specifically designed for cost analysis and optimization."
+        },
+        "q5": {
+            "question": "What is the maximum number of distinct containers that can be deployed on a SageMaker Multi-Container Endpoint?",
+            "options": {
+                "a": "5",
+                "b": "10",
+                "c": "15",
+                "d": "Unlimited"
+            },
+            "correct": "c",
+            "explanation": "SageMaker Multi-Container Endpoints support up to 15 distinct containers on a single endpoint.",
+            "wrong_explanation": "This is not the correct limit for containers on a Multi-Container Endpoint."
+        }
+    }
+    
+    # Process knowledge check
+    submit_enabled = True
+    for qid, q in questions.items():
+        st.subheader(q["question"])
+        
+        # Initialize question in progress tracker if not already there
+        if qid not in st.session_state["knowledge_check_progress"]:
+            st.session_state["knowledge_check_progress"][qid] = False
+        
+        # Multiple choice or single choice
+        if isinstance(q["correct"], list):
+            # Multi-answer question using checkboxes
+            selected = []
+            for option_id, option_text in q["options"].items():
+                key = f"{qid}_{option_id}"
+                if st.checkbox(f"{option_id.upper()}. {option_text}", key=key, 
+                              value=st.session_state["knowledge_check_answers"].get(key, False)):
+                    selected.append(option_id)
+            
+            # Store answer in session state
+            for option_id in q["options"]:
+                st.session_state["knowledge_check_answers"][f"{qid}_{option_id}"] = option_id in selected
+            
+            # Update progress
+            st.session_state["knowledge_check_progress"][qid] = len(selected) > 0
+        else:
+            # Single-answer question using radio buttons
+            options_list = [f"{option_id.upper()}. {option_text}" for option_id, option_text in q["options"].items()]
+            
+            # Use session state to preserve selection
+            if qid not in st.session_state["knowledge_check_answers"]:
+                st.session_state["knowledge_check_answers"][qid] = ""
+            
+            selected = st.radio("Select one:", options_list, key=qid, index=None)
+            
+            if selected:
+                option_id = selected[0].lower()  # Extract the option ID (a, b, c, d)
+                st.session_state["knowledge_check_answers"][qid] = option_id
+                st.session_state["knowledge_check_progress"][qid] = True
+            else:
+                st.session_state["knowledge_check_progress"][qid] = False
+        
+        # Disable submit if any question is unanswered
+        if not st.session_state["knowledge_check_progress"][qid]:
+            submit_enabled = False
+        
+        st.markdown("---")
+    
+    # Submit button
+    if submit_enabled:
+        if st.button("Submit Answers"):
+            st.session_state["knowledge_check_submitted"] = True
+    else:
+        st.warning("Please answer all questions before submitting.")
+    
+    # Show results if submitted
+    if st.session_state["knowledge_check_submitted"]:
+        st.header("Results")
+        
+        score = 0
+        for qid, q in questions.items():
+            st.subheader(q["question"])
+            
+            # Check answer for multiple choice questions
+            if isinstance(q["correct"], list):
+                selected = []
+                for option_id in q["options"]:
+                    key = f"{qid}_{option_id}"
+                    if st.session_state["knowledge_check_answers"].get(key, False):
+                        selected.append(option_id)
+                
+                is_correct = sorted(selected) == sorted(q["correct"])
+                
+                # List what the user selected
+                st.write("You selected: " + ", ".join([f"{opt.upper()}" for opt in selected]))
+                
+                if is_correct:
+                    st.success("✅ Correct!")
+                    st.markdown(q["explanation"])
+                    score += 1
+                else:
+                    st.error("❌ Incorrect")
+                    st.markdown(q["wrong_explanation"])
+                    st.markdown("Correct answer: " + ", ".join([f"{opt.upper()}" for opt in q["correct"]]))
+                    st.markdown(q["explanation"])
+            
+            # Check answer for single choice questions
+            else:
+                selected = st.session_state["knowledge_check_answers"][qid]
+                
+                # List what the user selected
+                st.write(f"You selected: {selected.upper()}")
+                
+                if selected == q["correct"]:
+                    st.success("✅ Correct!")
+                    st.markdown(q["explanation"])
+                    score += 1
+                else:
+                    st.error("❌ Incorrect")
+                    st.markdown(q["wrong_explanation"])
+                    st.markdown(f"Correct answer: {q['correct'].upper()}")
+                    st.markdown(q["explanation"])
+            
+            st.markdown("---")
+        
+        # Display final score
+        st.subheader(f"Your Score: {score}/{len(questions)}")
+        
+        if score == len(questions):
+            st.balloons()
+            st.success("🏆 Perfect score! You've mastered SageMaker performance and optimization concepts.")
+        elif score >= len(questions) * 0.8:
+            st.success("🌟 Great job! You have a strong understanding of SageMaker performance and optimization.")
+        elif score >= len(questions) * 0.6:
+            st.info("👍 Good effort! Review the explanations to strengthen your knowledge.")
+        else:
+            st.warning("📚 You might want to review the material again and retry the knowledge check.")
