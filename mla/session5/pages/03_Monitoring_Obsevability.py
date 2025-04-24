@@ -37,6 +37,14 @@ def init_session_state():
     if 'correct_answers' not in st.session_state:
         st.session_state.correct_answers = 0
 
+    if 'quiz_attempted' not in st.session_state:
+        st.session_state['quiz_attempted'] = False
+    if 'quiz_score' not in st.session_state:
+        st.session_state['quiz_score'] = 0
+    if 'quiz_answers' not in st.session_state:
+        st.session_state['quiz_answers'] = []
+
+
 # Reset session state
 def reset_session():
     st.session_state.knowledge_check_responses = {}
@@ -60,24 +68,26 @@ def apply_aws_style():
     
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background-color: #FFFFFF;
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
+        height: 60px;
         white-space: pre-wrap;
-        background-color: #EAEDED;
-        border-radius: 5px 5px 0 0;
-        gap: 1px;
-        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        background-color: #FFFFFF;
         color: #232F3E;
+        border: 1px solid #E9ECEF;
+        padding: 5px 15px;
     }
     .stTabs [aria-selected="true"] {
         background-color: #FF9900 !important;
-        color: #232F3E !important;
-        font-weight: bold;
-    }
-    .stTabs [data-baseweb="tab-highlight"] {
-        display: none;
+        color: #FFFFFF !important;
+        border: 1px solid #FF9900 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -494,143 +504,147 @@ def create_quicksight_mockup():
 
 # Function to render knowledge check
 def render_knowledge_check():
-    st.markdown("## Knowledge Check")
-    st.markdown("Test your understanding of AWS monitoring and observability tools.")
+    # Apply the custom CSS styling
+    st.markdown("""
+    <style>
+        .main-header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FF9900;
+            margin-bottom: 1rem;
+        }
+        .sub-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
+    # Function to display custom header
+    def custom_header(text, level="main"):
+        if level == "main":
+            st.markdown(f'<div class="main-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "sub":
+            st.markdown(f'<div class="sub-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "section":
+            st.markdown(f'<div class="section-header">{text}</div>', unsafe_allow_html=True)
+    
+    # Display main header
+    custom_header("Test Your Knowledge")
+    
+    st.markdown("""
+    This quiz will test your understanding of the key concepts covered in AWS Monitoring and Observability Tools.
+    Answer the following questions to evaluate your knowledge of monitoring ML systems in AWS.
+    """)
+    
+    # Define quiz questions
     questions = [
         {
-            "id": "q1",
-            "type": "radio",
             "question": "Which AWS service provides end-to-end tracing for distributed applications?",
             "options": ["AWS CloudWatch", "AWS X-Ray", "AWS CloudTrail", "AWS EventBridge"],
             "correct": "AWS X-Ray",
-            "explanation": "AWS X-Ray provides end-to-end tracing for distributed applications, enabling you to analyze and debug production applications.",
-            "incorrect_explanation": "This is not the correct service for end-to-end tracing of distributed applications."
+            "explanation": "AWS X-Ray provides end-to-end tracing for distributed applications, enabling you to analyze and debug production applications."
         },
         {
-            "id": "q2",
-            "type": "radio",
             "question": "Which tool would you use to monitor for model drift in SageMaker?",
             "options": ["SageMaker Model Monitor", "CloudWatch Events", "AWS X-Ray", "SageMaker Neo"],
             "correct": "SageMaker Model Monitor",
-            "explanation": "SageMaker Model Monitor allows you to detect drift in model quality, data quality, bias, and feature attribution.",
-            "incorrect_explanation": "This service doesn't provide model drift detection capabilities."
+            "explanation": "SageMaker Model Monitor allows you to detect drift in model quality, data quality, bias, and feature attribution."
         },
         {
-            "id": "q3",
-            "type": "checkbox",
-            "question": "Which types of drift can SageMaker Model Monitor detect? (Select all that apply)",
-            "options": ["Data Quality Drift", "Model Quality Drift", "Bias Drift", "Feature Attribution Drift", "API Performance Drift"],
-            "correct": ["Data Quality Drift", "Model Quality Drift", "Bias Drift", "Feature Attribution Drift"],
-            "explanation": "SageMaker Model Monitor can detect data quality drift, model quality drift, bias drift, and feature attribution drift.",
-            "incorrect_explanation": "Not all selected options are types of drift that SageMaker Model Monitor can detect."
-        },
-        {
-            "id": "q4",
-            "type": "radio",
             "question": "Which service would you use to audit API calls made to SageMaker?",
             "options": ["AWS CloudWatch", "AWS CloudTrail", "AWS Config", "Amazon Inspector"],
             "correct": "AWS CloudTrail",
-            "explanation": "AWS CloudTrail logs, monitors, and retains account activity related to actions across your AWS infrastructure, including API calls to SageMaker.",
-            "incorrect_explanation": "This service doesn't provide comprehensive API call auditing across AWS services."
+            "explanation": "AWS CloudTrail logs, monitors, and retains account activity related to actions across your AWS infrastructure, including API calls to SageMaker."
         },
         {
-            "id": "q5",
-            "type": "radio",
             "question": "Which strategy allows you to compare a new model against your current production model?",
             "options": ["A/B Testing", "Canary Deployment", "Blue/Green Deployment", "Shadow Mode"],
             "correct": "A/B Testing",
-            "explanation": "A/B testing allows you to test different variants of your models by distributing traffic between them and comparing their performance.",
-            "incorrect_explanation": "While this is a deployment strategy, it's not specifically designed for comparing model performance."
+            "explanation": "A/B testing allows you to test different variants of your models by distributing traffic between them and comparing their performance."
+        },
+        {
+            "question": "Which type of drift occurs when the contribution of individual features to model predictions differs from what was observed during training?",
+            "options": ["Data Quality Drift", "Model Quality Drift", "Bias Drift", "Feature Attribution Drift"],
+            "correct": "Feature Attribution Drift",
+            "explanation": "Feature Attribution Drift occurs when the contribution of individual features to model predictions differs from what was observed during training. This can happen when the relationship between features shifts or the model begins using different patterns to make predictions."
         }
     ]
     
-    all_answered = True
-    
-    for i, q in enumerate(questions):
-        st.markdown(f"### Question {i+1}: {q['question']}")
-        
-        if q['type'] == 'radio':
-            response = st.radio(
-                "Select one answer:",
-                q['options'],
-                key=f"kc_{q['id']}",
-                index=None
-            )
+    # Check if the quiz has been attempted
+    if not st.session_state['quiz_attempted']:
+        # Create a form for the quiz
+        with st.form("quiz_form"):
+            st.markdown("### Answer the following questions:")
             
-            if response:
-                st.session_state.knowledge_check_responses[q['id']] = response
-            else:
-                all_answered = False
-                
-        elif q['type'] == 'checkbox':
-            options_state = []
-            selected_options = []
+            # Track user answers
+            user_answers = []
             
-            for option in q['options']:
-                checked = st.checkbox(option, key=f"kc_{q['id']}_{option}")
-                options_state.append(checked)
-                if checked:
-                    selected_options.append(option)
+            # Display 5 questions
+            np.random.seed(42)  # For reproducibility
+            selected_questions = np.random.choice(questions, size=5, replace=False)
             
-            if any(options_state):
-                st.session_state.knowledge_check_responses[q['id']] = selected_options
-            else:
-                all_answered = False
-        
-        st.markdown("---")
-    
-    st.session_state.knowledge_check_completed = all_answered
-    
-    if st.session_state.knowledge_check_completed:
-        if st.button("Submit Answers"):
-            st.session_state.knowledge_check_submitted = True
+            # Display each question
+            for i, q in enumerate(selected_questions):
+                st.markdown(f"**Question {i+1}:** {q['question']}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
+                user_answers.append((answer, q['correct'], q['explanation']))
+            
+            # Submit button
+            submitted = st.form_submit_button("Submit Quiz")
+            
+            if submitted:
+                # Calculate score
+                score = sum([1 for ua, corr, _ in user_answers if ua == corr])
+                st.session_state['quiz_score'] = score
+                st.session_state['quiz_attempted'] = True
+                st.session_state['quiz_answers'] = user_answers
+                st.rerun()
     else:
-        st.warning("Please answer all questions before submitting.")
-    
-    if st.session_state.knowledge_check_submitted:
-        st.success("Thank you for completing the knowledge check!")
+        # Display results
+        score = st.session_state['quiz_score']
+        user_answers = st.session_state.get('quiz_answers', [])
         
-        # Calculate score
-        correct_count = 0
+        st.markdown(f"### Your Score: {score}/5")
         
-        for q in questions:
-            st.markdown(f"### Question: {q['question']}")
-            
-            user_answer = st.session_state.knowledge_check_responses.get(q['id'], None)
-            
-            if q['type'] == 'radio':
-                if user_answer == q['correct']:
-                    correct_count += 1
-                    st.success(f"Your answer: {user_answer} - Correct! {q['explanation']}")
-                else:
-                    st.error(f"Your answer: {user_answer} - {q['incorrect_explanation']}")
-                    st.info(f"Correct answer: {q['correct']} - {q['explanation']}")
-            
-            elif q['type'] == 'checkbox':
-                # For checkbox, check if selected options match exactly with correct answers
-                if set(user_answer) == set(q['correct']):
-                    correct_count += 1
-                    st.success(f"Your answer: {', '.join(user_answer)} - Correct! {q['explanation']}")
-                else:
-                    st.error(f"Your answer: {', '.join(user_answer)} - {q['incorrect_explanation']}")
-                    st.info(f"Correct answer: {', '.join(q['correct'])} - {q['explanation']}")
-            
-            st.markdown("---")
-        
-        # Show final score
-        st.session_state.correct_answers = correct_count
-        st.subheader(f"Your score: {correct_count}/{len(questions)}")
-        
-        if correct_count == len(questions):
-            st.balloons()
-            st.success("Perfect score! You have mastered the monitoring and observability tools!")
-        elif correct_count >= len(questions) * 0.8:
-            st.success("Great job! You have a strong understanding of monitoring and observability tools!")
-        elif correct_count >= len(questions) * 0.6:
-            st.info("Good effort! Review the areas where you missed questions to improve your understanding.")
+        if score == 5:
+            st.success("🎉 Perfect score! You've mastered the concepts of AWS Monitoring and Observability Tools!")
+        elif score >= 3:
+            st.success("👍 Good job! You have a solid understanding of the concepts.")
         else:
-            st.warning("You might need to review the material again to strengthen your understanding of monitoring and observability tools.")
+            st.warning("📚 You might want to review the content again to strengthen your understanding.")
+        
+        # Show correct answers
+        st.markdown("### Review Questions and Answers:")
+        
+        for i, (user_answer, correct_answer, explanation) in enumerate(user_answers):
+            st.markdown(f"**Question {i+1}**")
+            st.markdown(f"**Your answer:** {user_answer}")
+            
+            if user_answer == correct_answer:
+                st.markdown(f"**✅ Correct!**")
+            else:
+                st.markdown(f"**❌ Incorrect. The correct answer is:** {correct_answer}")
+            
+            st.markdown(f"**Explanation:** {explanation}")
+            
+            if i < len(user_answers) - 1:
+                st.markdown("---")
+        
+        # Option to retake the quiz
+        if st.button("Retake Quiz"):
+            st.session_state['quiz_attempted'] = False
+            st.rerun()
 
 # Function to render CloudWatch tab content
 def render_cloudwatch_tab():
@@ -1766,7 +1780,7 @@ def main():
             
         if st.button("Reset Session"):
                 reset_session()
-        
+        st.divider()
         # About this App (collapsible)
         with st.expander("About this App"):
             st.markdown("""

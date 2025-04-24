@@ -1,17 +1,4 @@
-# # SageMaker Performance & Optimization Learning App
 
-# ## requirements.txt
-# ```
-# streamlit==1.30.0
-# matplotlib==3.7.2
-# pandas==2.0.3
-# plotly==5.18.0
-# uuid==1.30
-# pillow==10.1.0
-# ```
-
-# ## app.py
-# ```python
 import streamlit as st
 import uuid
 import pandas as pd
@@ -23,6 +10,7 @@ import base64
 import io
 import json
 import math
+import numpy as np
 
 # Set page configuration
 st.set_page_config(
@@ -37,37 +25,69 @@ def init_session_state():
     if "session_id" not in st.session_state:
         st.session_state["session_id"] = str(uuid.uuid4())
     
-    if "knowledge_check_progress" not in st.session_state:
-        st.session_state["knowledge_check_progress"] = {}
+    if "quiz_attempted" not in st.session_state:
+        st.session_state["quiz_attempted"] = False
     
-    if "knowledge_check_answers" not in st.session_state:
-        st.session_state["knowledge_check_answers"] = {}
+    if "quiz_score" not in st.session_state:
+        st.session_state["quiz_score"] = 0
     
-    if "knowledge_check_submitted" not in st.session_state:
-        st.session_state["knowledge_check_submitted"] = False
+    if "quiz_answers" not in st.session_state:
+        st.session_state["quiz_answers"] = []
 
 # Initialize session state
 init_session_state()
 
+# Apply AWS Style
+def apply_aws_style():
+    st.markdown("""
+    <style>
+    .main {background-color: #F8F8F8;}
+    h1 {color: #232F3E;}
+    h2 {color: #FF9900;}
+    h3 {color: #232F3E;}
+    .stButton>button {background-color: #FF9900; color: white;}
+    .stTextInput>div>div>input {border-color: #FF9900;}
+    .css-1aumxhk {background-color: #232F3E;}
+    
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 60px;
+        white-space: pre-wrap;
+        border-radius: 6px;
+        font-weight: 600;
+        background-color: #FFFFFF;
+        color: #232F3E;
+        border: 1px solid #E9ECEF;
+        padding: 5px 15px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #FF9900 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #FF9900 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+apply_aws_style()
+
+
+
+
+
 # Sidebar
 with st.sidebar:
-    st.image("https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png", width=200)
-    st.title("Navigation")
-    
-    # About this App (collapsible)
-    with st.expander("About this App", expanded=False):
-        st.write("""
-        This interactive e-learning application focuses on AWS SageMaker Performance & Optimization.
+
+    st.subheader("Session Management")
+    st.info(f"User ID: {st.session_state.session_id}")
         
-        Learn about:
-        - SageMaker ML instance options
-        - Inference Recommender
-        - Cost analysis tools
-        - Cost optimization strategies
-        
-        Complete knowledge checks to test your understanding!
-        """)
-    
     # Reset session
     if st.button("Reset Session"):
         # Clear all session state
@@ -76,299 +96,34 @@ with st.sidebar:
         init_session_state()
         st.rerun()
 
+    st.divider()
+    # About this App (collapsible)
+    with st.expander("About this App", expanded=False):
+        st.write("""
+        This interactive e-learning application focuses on AWS SageMaker Performance & Optimization.
+        
+        Learn about:
+        - Cost analysis tools
+        - Cost optimization strategies
+        
+        Complete knowledge checks to test your understanding!
+        """)
+    
+
+
 # Main content area
 st.title("🚀 SageMaker Performance & Optimization")
 st.markdown("---")
 
 # Create tabs for navigation
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "💻 ML Instance Options", 
-    "🔍 Inference Recommender", 
+tabs = st.tabs([
     "💰 Cost Analysis Tools", 
     "⚙️ Optimization Strategies",
-    "✅ Knowledge Checks"
+    "✅ Knowledge Check"
 ])
 
-# Tab 1: SageMaker ML Instance Options
-with tab1:
-    st.header("SageMaker ML Instance Options")
-    st.subheader("Balancing Cost and Performance")
-    
-    st.markdown("""
-    When deploying machine learning models in production, selecting the right instance type is crucial 
-    for balancing performance needs with budget constraints. AWS SageMaker offers multiple instance 
-    families optimized for different workloads:
-    """)
-    
-    # Create columns for different instance types
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("### 🖥️ CPU Instances")
-        st.markdown("""
-        **C5 instances**
-        - Best for: Cost-effective inference for CPU-bound models
-        - Use cases: Linear models, tree-based models, small neural networks
-        - Benefits: Lower cost, most flexible
-        - Example models: XGBoost, RandomForest, Linear Regression
-        """)
-        
-        # Sample code for CPU instances
-        st.code('''
-# Deploy model to CPU instance
-sagemaker.model.Model.deploy(
-    initial_instance_count=1,
-    instance_type='ml.c5.xlarge',
-    endpoint_name='my-cpu-endpoint'
-)
-        ''', language='python')
-    
-    with col2:
-        st.markdown("### 🎮 GPU Instances")
-        st.markdown("""
-        **P3 & G4 instances**
-        - Best for: Deep learning with high computational needs
-        - Use cases: Computer vision, NLP, complex neural networks
-        - Benefits: High throughput, low latency access to CUDA
-        - Example models: BERT, ResNet, Transformer architectures
-        """)
-        
-        # Sample code for GPU instances
-        st.code('''
-# Deploy model to GPU instance
-sagemaker.model.Model.deploy(
-    initial_instance_count=1,
-    instance_type='ml.g4dn.xlarge',
-    endpoint_name='my-gpu-endpoint'
-)
-        ''', language='python')
-    
-    with col3:
-        st.markdown("### 🧠 Custom Chips")
-        st.markdown("""
-        **Inf1 instances**
-        - Best for: Optimized inference at scale
-        - Use cases: Serving models that benefit from hardware acceleration
-        - Benefits: High throughput, high performance, lowest cost in cloud
-        - Example models: Optimized TensorFlow/PyTorch models
-        """)
-        
-        # Sample code for Inferentia instances
-        st.code('''
-# Deploy model to Inferentia instance
-sagemaker.model.Model.deploy(
-    initial_instance_count=1,
-    instance_type='ml.inf1.xlarge',
-    endpoint_name='my-inferentia-endpoint'
-)
-        ''', language='python')
-    
-    # Performance comparison chart
-    st.subheader("Instance Performance Comparison")
-    
-    # Create dataframe for instance comparison
-    data = {
-        'Instance Type': ['ml.c5.xlarge', 'ml.g4dn.xlarge', 'ml.inf1.xlarge'],
-        'Relative Cost': [1.0, 2.5, 1.8],
-        'Relative Performance': [1.0, 4.0, 3.0],
-        'Performance/Cost Ratio': [1.0, 1.6, 1.67]
-    }
-    df = pd.DataFrame(data)
-    
-    # Display as a table
-    st.table(df)
-    
-    # Create interactive comparison chart
-    fig = px.bar(
-        df, 
-        x='Instance Type', 
-        y=['Relative Cost', 'Relative Performance', 'Performance/Cost Ratio'],
-        barmode='group',
-        title='Instance Type Comparison: Cost vs Performance',
-        color_discrete_sequence=['#FF9900', '#232F3E', '#1A73E8']
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Instance selection guidance
-    st.subheader("Instance Selection Guidance")
-    st.markdown("""
-    **Choosing the Right Instance:**
-    1. **For cost-sensitive applications:** Start with CPU instances if your model isn't computation-intensive.
-    2. **For deep learning inference:** GPU instances provide significant performance improvements.
-    3. **For optimized production:** Inf1 instances offer the best performance/cost ratio for suitable models.
-    
-    Remember that a smaller, optimized model on a less powerful instance might outperform a complex model on expensive hardware.
-    """)
-
-# Tab 2: SageMaker Inference Recommender
-with tab2:
-    st.header("SageMaker Inference Recommender")
-    
-    st.markdown("""
-    Choosing the optimal instance type for model deployment can be complex and time-consuming. 
-    **SageMaker Inference Recommender** automatically tests your model across various instance types 
-    to find the best configuration for your needs.
-    """)
-    
-    # How Inference Recommender works
-    st.subheader("How Inference Recommender Works")
-    
-    # Create columns for the workflow
-    col1, col2 = st.columns([3, 2])
-    
-    with col1:
-        # Flowchart explaining how Inference Recommender works
-        st.markdown("""
-        1. **Register your model** in the SageMaker Model Registry
-        2. **Create an Inference Recommender job**
-        3. **Automated testing** across multiple instances
-        4. **Receive recommendations** based on performance, latency, and cost
-        5. **Deploy** to the recommended configuration
-        """)
-        
-        # Job Types section
-        st.subheader("Job Types")
-        
-        job_type = st.radio(
-            "Select an Inference Recommender job type to learn more:",
-            ["Default Job (Instance Recommendations)", "Advanced Job (Endpoint Recommendations)"]
-        )
-        
-        if job_type == "Default Job (Instance Recommendations)":
-            st.markdown("""
-            ### Default Job: Instance Recommendations
-            
-            - **Duration**: Completes within 45 minutes
-            - **Requirements**: Only need a model package ARN
-            - **Process**: Runs a set of load tests on recommended instance types
-            - **Use when**: You want quick recommendations for instance selection
-            """)
-        else:
-            st.markdown("""
-            ### Advanced Job: Endpoint Recommendations
-            
-            - **Duration**: Takes ~2 hours (depends on job duration and instances tested)
-            - **Requirements**: You select ML instances, provide custom traffic pattern, and specify latency/throughput requirements
-            - **Process**: Performs extensive load testing based on your production requirements
-            - **Use when**: You need to fine-tune your endpoint configuration for specific workload patterns
-            """)
-    
-    with col2:
-        # Simplified visualization of Inference Recommender
-        st.image("https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2021/10/29/2-4.jpg", 
-                 caption="SageMaker Inference Recommender Workflow", 
-                 use_container_width=True)
-    
-    # Code example
-    st.subheader("Implementation Example")
-    
-    st.code('''
-# Step 1: Create an inference recommender job
-from sagemaker.model import Model
-from sagemaker.inference_recommender import InferenceRecommender
-
-# Create Model object and register in Model Registry
-model = Model(
-    image_uri=image_uri,
-    model_data=model_data_url,
-    role=role
-)
-
-# Create Inference Recommender object
-recommender = InferenceRecommender(
-    sagemaker_session=sagemaker_session,
-    model=model
-)
-
-# Start Default Job (Instance Recommendations)
-default_job = recommender.recommend(
-    job_name="my-inference-recommendation",
-    job_type="Default",
-    model_package_version_arn=model_package_arn
-)
-
-# Get results
-recommendations = default_job.get_recommendations()
-
-# Deploy using recommended instance
-recommended_instance = recommendations[0]["instance_type"]
-model.deploy(
-    initial_instance_count=1,
-    instance_type=recommended_instance
-)
-    ''', language='python')
-    
-    # Benefits of using Inference Recommender
-    st.subheader("Key Benefits")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("### ⏱️ Save Time")
-        st.markdown("""
-        - Eliminates weeks of manual testing
-        - Automatic testing of multiple instances
-        - Integrated with SageMaker Studio
-        """)
-    
-    with col2:
-        st.markdown("### 💰 Optimize Costs")
-        st.markdown("""
-        - Find lowest-cost instance that meets requirements
-        - Only pay for instances during testing
-        - Avoid over-provisioning resources
-        """)
-    
-    with col3:
-        st.markdown("### 📈 Maximize Performance")
-        st.markdown("""
-        - Fine-tune container parameters
-        - Identify optimal instance types
-        - Customize load tests for your workload
-        """)
-    
-    # Performance metrics
-    st.subheader("Understanding Performance Metrics")
-    
-    # Sample metrics data
-    metrics_data = {
-        'Instance Type': ['ml.c5.xlarge', 'ml.g4dn.xlarge', 'ml.inf1.xlarge', 'ml.m5.large', 'ml.r5.xlarge'],
-        'Avg. Latency (ms)': [120, 45, 55, 135, 110],
-        'Throughput (infer/sec)': [82, 220, 180, 74, 90],
-        'Cost per 1M inferences ($)': [2.10, 4.50, 2.80, 1.90, 3.20],
-        'CPU Utilization (%)': [85, 40, 35, 90, 75]
-    }
-    metrics_df = pd.DataFrame(metrics_data)
-    
-    # Interactive visualization of metrics
-    selected_metric = st.selectbox(
-        "Select a metric to visualize across instance types:",
-        ['Avg. Latency (ms)', 'Throughput (infer/sec)', 'Cost per 1M inferences ($)', 'CPU Utilization (%)']
-    )
-    
-    fig = px.bar(
-        metrics_df,
-        x='Instance Type',
-        y=selected_metric,
-        color='Instance Type',
-        title=f'Comparison of {selected_metric} across Instance Types',
-        color_discrete_sequence=px.colors.qualitative.Bold
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Best practices
-    st.subheader("Best Practices")
-    st.markdown("""
-    1. **Start with a Default job** to quickly identify candidate instance types
-    2. **Follow up with an Advanced job** for fine-tuning with real workload patterns
-    3. **Consider multiple metrics** - latency, throughput, and cost all matter
-    4. **Test with realistic payloads** that match your production data
-    5. **Periodically re-run** as your workload or model changes
-    """)
-
-# Tab 3: Cost Analysis Tools
-with tab3:
+# Tab 1: Cost Analysis Tools
+with tabs[0]:
     st.header("Cost Analysis Tools")
     
     st.markdown("""
@@ -655,8 +410,8 @@ for resource in response['result']['flaggedResources']:
     metrics_df = pd.DataFrame(metrics_data)
     st.table(metrics_df)
 
-# Tab 4: Optimization Strategies
-with tab4:
+# Tab 2: Optimization Strategies
+with tabs[1]:
     st.header("SageMaker Cost Optimization Strategies")
     
     st.markdown("""
@@ -733,10 +488,7 @@ response = mme.predict(
             
             # Calculate costs
             single_endpoint_cost = num_models * 0.298 * 24 * 30  # ml.c5.xlarge at $0.298/hour
-            # mme_cost = 0.298 * 24 * 30 * (num_models / 10).ceil()  # Assume each instance can handle ~10 models
             mme_cost = 0.298 * 24 * 30 * math.ceil(num_models / 10)
-
-            
             
             # Display savings
             savings = single_endpoint_cost - mme_cost
@@ -1216,198 +968,156 @@ predictor = model.deploy(
        - No → Use standard SageMaker endpoints with right-sized instances
     """)
 
-# Tab 5: Knowledge Checks
-with tab5:
-    st.header("Knowledge Checks")
-    
-    # Reset button for knowledge check
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        if st.button("Reset Knowledge Check"):
-            # Clear knowledge check answers and progress
-            st.session_state["knowledge_check_answers"] = {}
-            st.session_state["knowledge_check_progress"] = {}
-            st.session_state["knowledge_check_submitted"] = False
-            st.rerun()
-    
-    # Knowledge check questions
-    questions = {
-        "q1": {
-            "question": "Which SageMaker instance type would be most cost-effective for CPU-bound models with modest computational requirements?",
-            "options": {
-                "a": "ml.g4dn.xlarge",
-                "b": "ml.p3.2xlarge",
-                "c": "ml.c5.xlarge",
-                "d": "ml.inf1.xlarge"
-            },
-            "correct": "c",
-            "explanation": "The ml.c5.xlarge instance is optimized for CPU workloads and is more cost-effective for models that don't require GPU acceleration.",
-            "wrong_explanation": "This instance type is not the most cost-effective for CPU-bound models with modest requirements."
-        },
-        "q2": {
-            "question": "What is the primary benefit of SageMaker Inference Recommender?",
-            "options": {
-                "a": "It automatically optimizes your model code",
-                "b": "It tests your model across different instance types to find the best configuration",
-                "c": "It reduces the size of your model for faster inference",
-                "d": "It provides training data recommendations"
-            },
-            "correct": "b",
-            "explanation": "SageMaker Inference Recommender automatically tests your model across various instance types and configurations to find the optimal balance of performance and cost.",
-            "wrong_explanation": "While valuable, this is not the primary benefit of SageMaker Inference Recommender."
-        },
-        "q3": {
-            "question": "Which SageMaker deployment option allows you to deploy multiple models that share the same framework to a single endpoint? (Choose the best answer)",
-            "options": {
-                "a": "Multi-Container Endpoints",
-                "b": "Multi-Model Endpoints",
-                "c": "Serverless Inference",
-                "d": "Asynchronous Inference"
-            },
-            "correct": "b",
-            "explanation": "Multi-Model Endpoints allow you to deploy multiple models that share the same framework to a single endpoint, loading and unloading them dynamically as needed.",
-            "wrong_explanation": "This is not the deployment option designed specifically for hosting multiple models that share the same framework on a single endpoint."
-        },
-        "q4": {
-            "question": "Which AWS tools can help you analyze and optimize SageMaker costs? (Select all that apply)",
-            "options": {
-                "a": "AWS Cost Explorer",
-                "b": "AWS Budgets",
-                "c": "AWS CloudFormation",
-                "d": "AWS Trusted Advisor"
-            },
-            "correct": ["a", "b", "d"],
-            "explanation": "AWS Cost Explorer provides visualization of costs, AWS Budgets allows setting cost thresholds and alerts, and AWS Trusted Advisor provides recommendations for optimizing costs. AWS CloudFormation is an infrastructure-as-code service and not primarily a cost analysis tool.",
-            "wrong_explanation": "Not all selected options are tools specifically designed for cost analysis and optimization."
-        },
-        "q5": {
-            "question": "What is the maximum number of distinct containers that can be deployed on a SageMaker Multi-Container Endpoint?",
-            "options": {
-                "a": "5",
-                "b": "10",
-                "c": "15",
-                "d": "Unlimited"
-            },
-            "correct": "c",
-            "explanation": "SageMaker Multi-Container Endpoints support up to 15 distinct containers on a single endpoint.",
-            "wrong_explanation": "This is not the correct limit for containers on a Multi-Container Endpoint."
+# Tab 3: Knowledge Check
+with tabs[2]:
+    st.markdown("""
+    <style>
+        .main-header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FF9900;
+            margin-bottom: 1rem;
         }
-    }
+        .sub-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Process knowledge check
-    submit_enabled = True
-    for qid, q in questions.items():
-        st.subheader(q["question"])
-        
-        # Initialize question in progress tracker if not already there
-        if qid not in st.session_state["knowledge_check_progress"]:
-            st.session_state["knowledge_check_progress"][qid] = False
-        
-        # Multiple choice or single choice
-        if isinstance(q["correct"], list):
-            # Multi-answer question using checkboxes
-            selected = []
-            for option_id, option_text in q["options"].items():
-                key = f"{qid}_{option_id}"
-                if st.checkbox(f"{option_id.upper()}. {option_text}", key=key, 
-                              value=st.session_state["knowledge_check_answers"].get(key, False)):
-                    selected.append(option_id)
-            
-            # Store answer in session state
-            for option_id in q["options"]:
-                st.session_state["knowledge_check_answers"][f"{qid}_{option_id}"] = option_id in selected
-            
-            # Update progress
-            st.session_state["knowledge_check_progress"][qid] = len(selected) > 0
-        else:
-            # Single-answer question using radio buttons
-            options_list = [f"{option_id.upper()}. {option_text}" for option_id, option_text in q["options"].items()]
-            
-            # Use session state to preserve selection
-            if qid not in st.session_state["knowledge_check_answers"]:
-                st.session_state["knowledge_check_answers"][qid] = ""
-            
-            selected = st.radio("Select one:", options_list, key=qid, index=None)
-            
-            if selected:
-                option_id = selected[0].lower()  # Extract the option ID (a, b, c, d)
-                st.session_state["knowledge_check_answers"][qid] = option_id
-                st.session_state["knowledge_check_progress"][qid] = True
-            else:
-                st.session_state["knowledge_check_progress"][qid] = False
-        
-        # Disable submit if any question is unanswered
-        if not st.session_state["knowledge_check_progress"][qid]:
-            submit_enabled = False
-        
-        st.markdown("---")
+    # Function to display custom header
+    def custom_header(text, level="main"):
+        if level == "main":
+            st.markdown(f'<div class="main-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "sub":
+            st.markdown(f'<div class="sub-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "section":
+            st.markdown(f'<div class="section-header">{text}</div>', unsafe_allow_html=True)
     
-    # Submit button
-    if submit_enabled:
-        if st.button("Submit Answers"):
-            st.session_state["knowledge_check_submitted"] = True
+    custom_header("Test Your Knowledge")
+    
+    st.markdown("""
+    This quiz will test your understanding of the key concepts covered in SageMaker Performance & Optimization.
+    Answer the following questions to evaluate your knowledge of cost analysis tools and optimization strategies.
+    """)
+    
+    # Define quiz questions
+    questions = [
+        {
+            "question": "Which AWS tool provides a visual interface to understand and analyze your AWS costs and usage over time?",
+            "options": ["AWS Cost Explorer", "AWS CloudFormation", "AWS Budgets", "AWS Trusted Advisor"],
+            "correct": "AWS Cost Explorer",
+            "explanation": "AWS Cost Explorer provides a visual interface to understand and analyze your AWS costs and usage over time, allowing you to visualize costs by service, region, tag, and more."
+        },
+        {
+            "question": "Which SageMaker deployment option allows you to deploy multiple models to a single endpoint, sharing compute resources?",
+            "options": ["Multi-Model Endpoints", "Multi-Container Endpoints", "Serverless Inference", "Asynchronous Inference"],
+            "correct": "Multi-Model Endpoints",
+            "explanation": "Multi-Model Endpoints allow you to deploy multiple models to a single endpoint, sharing compute resources and reducing costs. Models are loaded into memory on-demand and inactive models are unloaded to free resources."
+        },
+        {
+            "question": "What is the main advantage of using Serverless Inference?",
+            "options": ["Handles large payloads up to 1GB", "Auto-scales from zero with no instance management", "Supports different ML frameworks on the same endpoint", "Optimizes model execution for specific hardware"],
+            "correct": "Auto-scales from zero with no instance management",
+            "explanation": "Serverless Inference provides on-demand ML inference without having to configure or manage the underlying infrastructure. It auto-scales from zero to thousands of instances and you only pay for compute used during inference."
+        },
+        {
+            "question": "Which AWS service allows you to set custom cost and usage budgets with notifications when you exceed your thresholds?",
+            "options": ["AWS Cost Explorer", "AWS Budgets", "AWS Cost & Usage Report", "AWS CloudWatch"],
+            "correct": "AWS Budgets",
+            "explanation": "AWS Budgets allows you to set custom cost and usage budgets with notifications when you exceed your thresholds. You can configure cost budgets, usage budgets, and alert thresholds at different percentage levels."
+        },
+        {
+            "question": "What is the maximum number of different containers that can be deployed on a SageMaker Multi-Container Endpoint?",
+            "options": ["5", "10", "15", "Unlimited"],
+            "correct": "15",
+            "explanation": "SageMaker Multi-Container Endpoints support up to 15 distinct containers on a single endpoint. Each container can use a different ML framework."
+        },
+        {
+            "question": "Which specialized AWS hardware is custom-designed for machine learning inference workloads?",
+            "options": ["AWS Graviton", "AWS Inferentia", "AWS Trainium", "AWS Nitro"],
+            "correct": "AWS Inferentia",
+            "explanation": "AWS Inferentia is a custom silicon chip designed by AWS specifically for machine learning inference workloads. It's optimized for TensorFlow, PyTorch, and MXNet and offers up to 2.3x higher throughput and 70% lower cost per inference than comparable instances."
+        },
+        {
+            "question": "Which SageMaker feature automatically optimizes machine learning models for inference on various hardware platforms?",
+            "options": ["SageMaker Pipelines", "SageMaker Neo", "SageMaker Clarify", "SageMaker Feature Store"],
+            "correct": "SageMaker Neo",
+            "explanation": "SageMaker Neo automatically optimizes machine learning models for inference on SageMaker, edge devices, and a variety of hardware platforms. It analyzes models and optimizes them for target hardware, creating optimized binaries that use less compute resources."
+        }
+    ]
+    
+    # Check if the quiz has been attempted
+    if not st.session_state['quiz_attempted']:
+        # Create a form for the quiz
+        with st.form("quiz_form"):
+            st.markdown("### Answer the following questions:")
+            
+            # Track user answers
+            user_answers = []
+            
+            # Display 5 random questions
+            np.random.seed(42)  # For reproducibility
+            selected_questions = np.random.choice(questions, size=5, replace=False)
+            
+            # Display each question
+            for i, q in enumerate(selected_questions):
+                st.markdown(f"**Question {i+1}:** {q['question']}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
+                user_answers.append((answer, q['correct'], q['explanation']))
+            
+            # Submit button
+            submitted = st.form_submit_button("Submit Quiz")
+            
+            if submitted:
+                # Calculate score
+                score = sum([1 for ua, corr, _ in user_answers if ua == corr])
+                st.session_state['quiz_score'] = score
+                st.session_state['quiz_attempted'] = True
+                st.session_state['quiz_answers'] = user_answers
+                st.rerun()
     else:
-        st.warning("Please answer all questions before submitting.")
-    
-    # Show results if submitted
-    if st.session_state["knowledge_check_submitted"]:
-        st.header("Results")
+        # Display results
+        score = st.session_state['quiz_score']
+        user_answers = st.session_state.get('quiz_answers', [])
         
-        score = 0
-        for qid, q in questions.items():
-            st.subheader(q["question"])
-            
-            # Check answer for multiple choice questions
-            if isinstance(q["correct"], list):
-                selected = []
-                for option_id in q["options"]:
-                    key = f"{qid}_{option_id}"
-                    if st.session_state["knowledge_check_answers"].get(key, False):
-                        selected.append(option_id)
-                
-                is_correct = sorted(selected) == sorted(q["correct"])
-                
-                # List what the user selected
-                st.write("You selected: " + ", ".join([f"{opt.upper()}" for opt in selected]))
-                
-                if is_correct:
-                    st.success("✅ Correct!")
-                    st.markdown(q["explanation"])
-                    score += 1
-                else:
-                    st.error("❌ Incorrect")
-                    st.markdown(q["wrong_explanation"])
-                    st.markdown("Correct answer: " + ", ".join([f"{opt.upper()}" for opt in q["correct"]]))
-                    st.markdown(q["explanation"])
-            
-            # Check answer for single choice questions
-            else:
-                selected = st.session_state["knowledge_check_answers"][qid]
-                
-                # List what the user selected
-                st.write(f"You selected: {selected.upper()}")
-                
-                if selected == q["correct"]:
-                    st.success("✅ Correct!")
-                    st.markdown(q["explanation"])
-                    score += 1
-                else:
-                    st.error("❌ Incorrect")
-                    st.markdown(q["wrong_explanation"])
-                    st.markdown(f"Correct answer: {q['correct'].upper()}")
-                    st.markdown(q["explanation"])
-            
-            st.markdown("---")
+        st.markdown(f"### Your Score: {score}/5")
         
-        # Display final score
-        st.subheader(f"Your Score: {score}/{len(questions)}")
-        
-        if score == len(questions):
-            st.balloons()
-            st.success("🏆 Perfect score! You've mastered SageMaker performance and optimization concepts.")
-        elif score >= len(questions) * 0.8:
-            st.success("🌟 Great job! You have a strong understanding of SageMaker performance and optimization.")
-        elif score >= len(questions) * 0.6:
-            st.info("👍 Good effort! Review the explanations to strengthen your knowledge.")
+        if score == 5:
+            st.success("🎉 Perfect score! You've mastered the concepts of SageMaker Performance & Optimization")
+        elif score >= 3:
+            st.success("👍 Good job! You have a solid understanding of the concepts.")
         else:
-            st.warning("📚 You might want to review the material again and retry the knowledge check.")
+            st.warning("📚 You might want to review the content again to strengthen your understanding.")
+        
+        # Show correct answers
+        st.markdown("### Review Questions and Answers:")
+        
+        for i, (user_answer, correct_answer, explanation) in enumerate(user_answers):
+            st.markdown(f"**Question {i+1}**")
+            st.markdown(f"**Your answer:** {user_answer}")
+            
+            if user_answer == correct_answer:
+                st.markdown(f"**✅ Correct!**")
+            else:
+                st.markdown(f"**❌ Incorrect. The correct answer is:** {correct_answer}")
+            
+            st.markdown(f"**Explanation:** {explanation}")
+            
+            if i < len(user_answers) - 1:
+                st.markdown("---")
+        
+        # Option to retake the quiz
+        if st.button("Retake Quiz"):
+            st.session_state['quiz_attempted'] = False
+            st.rerun()

@@ -45,6 +45,10 @@ def initialize_session_state():
     if 'traffic_distribution' not in st.session_state:
         st.session_state.traffic_distribution = [70, 30]
 
+    if 'quiz_attempted' not in st.session_state:
+        st.session_state['quiz_attempted'] = False
+    if 'quiz_score' not in st.session_state:
+        st.session_state['quiz_score'] = 0
 
 def reset_session():
     """
@@ -937,9 +941,38 @@ def main():
             color: #00A1C9;
             cursor: help;
         }
+        .main-header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FF9900;
+            margin-bottom: 1rem;
+        }
+        .sub-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #232F3E;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
     </style>
     """, unsafe_allow_html=True)
-    
+
+    # Function to display custom header
+    def custom_header(text, level="main"):
+        if level == "main":
+            st.markdown(f'<div class="main-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "sub":
+            st.markdown(f'<div class="sub-header">{text}</div>', unsafe_allow_html=True)
+        elif level == "section":
+            st.markdown(f'<div class="section-header">{text}</div>', unsafe_allow_html=True)
+
     # Sidebar content
     with st.sidebar:
         st.title("Session Management")
@@ -949,8 +982,7 @@ def main():
             reset_session()
             st.rerun()
         
-        st.divider()
-        
+        st.divider()     
         # Information about the application
         with st.expander("About this application", expanded=False):
             st.markdown("""
@@ -980,11 +1012,12 @@ def main():
     st.markdown("Explore how to detect, visualize, and mitigate model drift in production machine learning models.")
     
     # Tab-based navigation with emoji
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 SageMaker Model Monitor", 
         "🔍 Types of Model Drift",
         "🛠️ Model Testing Strategies",
-        "🚦 Test Models with Traffic Distribution"
+        "🚦 Test Models with Traffic Distribution",
+        "📝 Knowledge Check"
     ])
     
     # TAB 1: SAGEMAKER MODEL MONITOR
@@ -2375,7 +2408,129 @@ processor.run(
         else:
             # Show instructions if no test has been run
             st.info("Configure the traffic distribution between models and click 'Run Model Test' to see results.")
-    
+
+    # TAB 5: KNOWLEDGE CHECK
+    with tab5:
+        custom_header("Test Your Knowledge")
+        
+        st.markdown("""
+        This quiz will test your understanding of the key concepts covered in Amazon SageMaker Model Monitor.
+        Answer the following questions to evaluate your knowledge of model drift and monitoring strategies.
+        """)
+        
+        # Define quiz questions
+        questions = [
+            {
+                "question": "Which type of drift occurs when the statistical properties of the input data change over time?",
+                "options": ["Concept Drift", "Data Drift", "Prediction Drift", "Feature Importance Drift"],
+                "correct": "Data Drift",
+                "explanation": "Data drift occurs when the statistical properties of the input data change over time, causing the model's predictions to become less accurate. This is also known as covariate shift."
+            },
+            {
+                "question": "Which SageMaker Model Monitor capability is used to detect changes in how features contribute to model predictions?",
+                "options": ["Data Quality Monitoring", "Model Quality Monitoring", "Bias Drift Monitoring", "Feature Attribution Monitoring"],
+                "correct": "Feature Attribution Monitoring",
+                "explanation": "Feature Attribution Monitoring in SageMaker is used to track changes in feature importance over time, detecting when the contribution of individual features to model predictions differs from what was observed during training."
+            },
+            {
+                "question": "Which testing strategy involves deploying a new model alongside the production model without affecting users?",
+                "options": ["A/B Testing", "Canary Deployment", "Shadow Deployment", "Champion/Challenger"],
+                "correct": "Shadow Deployment",
+                "explanation": "Shadow Deployment involves deploying a new model version alongside the production model to compare performance without affecting users. The shadow model receives a copy of the production traffic but its predictions are not returned to users."
+            },
+            {
+                "question": "Which type of drift occurs when the relationship between input features and the target variable changes over time?",
+                "options": ["Concept Drift", "Data Drift", "Prediction Drift", "Feature Importance Drift"],
+                "correct": "Concept Drift",
+                "explanation": "Concept drift occurs when the relationship between input features and the target variable changes over time. This means the very concept that the model is trying to predict has changed."
+            },
+            {
+                "question": "Which of the following is a key step in setting up SageMaker Model Monitor?",
+                "options": ["Creating a data baseline", "Changing the model architecture", "Implementing A/B testing", "Designing a new UI"],
+                "correct": "Creating a data baseline",
+                "explanation": "Creating a data baseline is a key step in setting up SageMaker Model Monitor. The baseline statistics are generated from training data and used to define constraints against which future data will be validated."
+            },
+            {
+                "question": "What is a common method for detecting data drift in model inputs?",
+                "options": ["LSTM networks", "Kolmogorov-Smirnov (K-S) test", "Regularization", "Hyperparameter tuning"],
+                "correct": "Kolmogorov-Smirnov (K-S) test",
+                "explanation": "The Kolmogorov-Smirnov (K-S) test is a statistical method commonly used to detect data drift by measuring the maximum difference between two cumulative distribution functions, comparing baseline and current data distributions."
+            },
+            {
+                "question": "Which deployment strategy routes a small percentage of traffic to a new model before full rollout?",
+                "options": ["Blue-Green Deployment", "Canary Deployment", "Shadow Deployment", "Rolling Deployment"],
+                "correct": "Canary Deployment",
+                "explanation": "Canary Deployment involves routing a small percentage of traffic (e.g., 5%) to a new model before full rollout. This allows monitoring performance with limited user impact and easy rollback if issues arise."
+            }
+        ]
+        
+        # Check if the quiz has been attempted
+        if not st.session_state['quiz_attempted']:
+            # Create a form for the quiz
+            with st.form("quiz_form"):
+                st.markdown("### Answer the following questions:")
+                
+                # Track user answers
+                user_answers = []
+                
+                # Display 5 random questions
+                np.random.seed(42)  # For reproducibility
+                selected_questions = np.random.choice(questions, size=5, replace=False)
+                
+                # Display each question
+                for i, q in enumerate(selected_questions):
+                    st.markdown(f"**Question {i+1}:** {q['question']}")
+                    answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
+                    user_answers.append((answer, q['correct'], q['explanation']))
+                
+                # Submit button
+                submitted = st.form_submit_button("Submit Quiz")
+                
+                if submitted:
+                    # Calculate score
+                    score = sum([1 for ua, corr, _ in user_answers if ua == corr])
+                    st.session_state['quiz_score'] = score
+                    st.session_state['quiz_attempted'] = True
+                    st.session_state['quiz_answers'] = user_answers
+                    st.rerun()
+        else:
+            # Display results
+            score = st.session_state['quiz_score']
+            user_answers = st.session_state.get('quiz_answers', [])
+            
+            st.markdown(f"### Your Score: {score}/5")
+            
+            if score == 5:
+                st.success("🎉 Perfect score! You've mastered the concepts of SageMaker Model Monitor!")
+            elif score >= 3:
+                st.success("👍 Good job! You have a solid understanding of model monitoring concepts.")
+            else:
+                st.warning("📚 You might want to review the content again to strengthen your understanding of model monitoring.")
+            
+            # Show correct answers
+            st.markdown("### Review Questions and Answers:")
+            
+            for i, (user_answer, correct_answer, explanation) in enumerate(user_answers):
+                st.markdown(f"**Question {i+1}**")
+                st.markdown(f"**Your answer:** {user_answer}")
+                
+                if user_answer == correct_answer:
+                    st.markdown(f"**✅ Correct!**")
+                else:
+                    st.markdown(f"**❌ Incorrect. The correct answer is:** {correct_answer}")
+                
+                st.markdown(f"**Explanation:** {explanation}")
+                
+                if i < len(user_answers) - 1:
+                    st.markdown("---")
+            
+            # Option to retake the quiz
+            if st.button("Retake Quiz"):
+                st.session_state['quiz_attempted'] = False
+                st.rerun()
+
+
+
     # Add footer
     st.markdown("""
     <div class="footer">

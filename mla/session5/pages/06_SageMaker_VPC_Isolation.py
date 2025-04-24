@@ -1093,7 +1093,7 @@ def main():
     if st.sidebar.button("Reset Session"):
         reset_session()
     
-    
+    st.sidebar.divider()
     # Resources section
     with st.sidebar.expander("About this application", expanded=False):
         st.subheader("Additional Resources")

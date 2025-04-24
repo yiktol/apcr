@@ -1300,7 +1300,6 @@ def main():
             st.rerun()
         
         st.divider()
-        
         # Information about the application
         with st.expander("About this application", expanded=False):
             st.markdown("""

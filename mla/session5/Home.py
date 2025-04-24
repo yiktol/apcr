@@ -272,12 +272,10 @@ def security_card(title, description, link=None):
 
 # Function to create drift type card
 def drift_type_card(title, description):
-    st.markdown(f"""
-    <div class="drift-type">
+    st.markdown(f"""<div class="drift-type">
         <h4>{title}</h4>
         <p>{description}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
 # Function to reset session - same as Domain 1
 def reset_session():
@@ -524,39 +522,47 @@ with tabs[1]:
     with col1:
         drift_type_card("Data Quality Drift", """
         Changes in the distribution of input data that can degrade model accuracy. This occurs when production data differs significantly from training data, such as:
-        
-        - Missing values appear in previously complete features
-        - New categories emerge in categorical features
-        - Numerical features shift in range or distribution
-        - Data formats or types change
+        <br>
+        <ul>
+            <li>Missing values appear in previously complete features</li>
+            <li>New categories emerge in categorical features</li>
+            <li>Numerical features shift in range or distribution</li>
+            <li>Data formats or types change</li>
+        </ul>
         """)
         
         drift_type_card("Model Quality Drift", """
         Changes in the relationship between input features and target predictions. This happens when:
-        
-        - Model predictions deviate from ground truth labels
-        - Performance metrics like accuracy, precision, or recall decline
-        - Error patterns change over time
-        - The underlying real-world relationship the model learned has changed
+        <br>
+        <ul>
+            <li>Model predictions deviate from ground truth labels</li>
+            <li>Performance metrics like accuracy, precision, or recall decline</li>
+            <li>Error patterns change over time</li>
+            <li>The underlying real-world relationship the model learned has changed</li>
+        </ul>
         """)
     
     with col2:
         drift_type_card("Bias Drift", """
         Occurs when bias in model predictions increases over time, affecting specific segments:
-        
-        - The fairness of predictions across different demographic groups changes
-        - Disparate impact or treatment emerges for protected classes
-        - Model performance differs significantly across demographic groups
-        - Previously balanced predictions become unbalanced
+                                <br>
+        <ul>
+            <li>The fairness of predictions across different demographic groups changes</li>
+            <li>Disparate impact or treatment emerges for protected classes</li>
+            <li>Model performance differs significantly across demographic groups</li>
+            <li>Previously balanced predictions become unbalanced</li>
+        </ul>
         """)
         
         drift_type_card("Feature Attribution Drift", """
         Changes in how much individual features contribute to model predictions:
-        
-        - Features that were important become less important
-        - Previously unimportant features gain influence
-        - The relationship between features shifts
-        - The model uses different patterns to make predictions
+                <br>
+        <ul>
+            <li>Features that were important become less important</li>
+            <li>Previously unimportant features gain influence</li>
+            <li>The relationship between features shifts</li>
+            <li>The model uses different patterns to make predictions</li>
+                        </ul>
         """)
     
     custom_header("Amazon SageMaker Model Monitor", "section")
@@ -570,7 +576,7 @@ with tabs[1]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.image("images/sagemaker_model_monitor.png", caption="SageMaker Model Monitor Workflow", width=600)
+        st.image("images/sagemaker_model_monitor.png", caption="SageMaker Model Monitor Workflow", width=900)
         
         st.markdown("""
         SageMaker Model Monitor works by establishing a baseline from training data, then comparing
@@ -1332,7 +1338,7 @@ with tabs[4]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.image("images/sagemaker_security.png", caption="SageMaker Security Features", width=600)
+        # st.image("images/sagemaker_security.png", caption="SageMaker Security Features", width=600)
         
         st.markdown("""
         Amazon SageMaker offers a comprehensive set of security features to help you build secure ML workflows:
@@ -1476,7 +1482,7 @@ with tabs[4]:
     
     custom_header("SageMaker Studio in a Private VPC", "section")
     
-    st.image("images/sagemaker_studio_vpc.png", caption="SageMaker Studio in Private VPC", width=800)
+    # st.image("images/sagemaker_studio_vpc.png", caption="SageMaker Studio in Private VPC", width=800)
     
     col1, col2 = st.columns(2)
     
@@ -1535,7 +1541,7 @@ with tabs[5]:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.image("images/iam_policies.png", caption="Identity-Based Policies in AWS", width=600)
+        # st.image("images/iam_policies.png", caption="Identity-Based Policies in AWS", width=600)
         
         st.markdown("""
         AWS Identity and Access Management (IAM) enables you to securely control access to AWS services and resources.
@@ -1566,7 +1572,7 @@ with tabs[5]:
         - Useful for cross-account access
         """)
         
-        st.image("images/permissions_evaluation.png", caption="Permissions Evaluation Logic", width=400)
+        # st.image("images/permissions_evaluation.png", caption="Permissions Evaluation Logic", width=400)
         
         st.markdown("""
         AWS evaluates all permissions granted by policies for at least one Allow within the same account. 
@@ -1674,7 +1680,7 @@ with tabs[5]:
     
     with col1:
         st.markdown("### SageMaker Role Manager")
-        st.image("images/role_manager.png", width=300)
+        # st.image("images/role_manager.png", width=300)
         st.markdown("""
         Amazon SageMaker Role Manager helps define least-privileged user permissions quickly:
         
@@ -1688,7 +1694,7 @@ with tabs[5]:
     
     with col2:
         st.markdown("### SageMaker Model Cards")
-        st.image("images/model_cards.png", width=300)
+        # st.image("images/model_cards.png", width=300)
         st.markdown("""
         Easily document, retrieve, and share model information:
         
@@ -1703,7 +1709,7 @@ with tabs[5]:
     
     with col3:
         st.markdown("### SageMaker Model Dashboard")
-        st.image("images/model_dashboard.png", width=300)
+        # st.image("images/model_dashboard.png", width=300)
         st.markdown("""
         Unified view across all your models for auditing:
         
@@ -1718,7 +1724,7 @@ with tabs[5]:
     
     custom_header("Model Cards Workflow", "section")
     
-    st.image("images/model_cards_workflow.png", caption="SageMaker Model Cards Workflow", width=800)
+    # st.image("images/model_cards_workflow.png", caption="SageMaker Model Cards Workflow", width=800)
     
     st.markdown("""
     Amazon SageMaker Model Cards provide a structured way to document ML models throughout their lifecycle:
@@ -1874,7 +1880,7 @@ with tabs[6]:
             # Display each question
             for i, q in enumerate(selected_questions):
                 st.markdown(f"**Question {i+1}:** {q['question']}")
-                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}")
+                answer = st.radio(f"Select your answer for question {i+1}:", q['options'], key=f"q{i}", index=None)
                 user_answers.append((answer, q['correct'], q['explanation']))
             
             # Submit button
