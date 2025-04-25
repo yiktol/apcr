@@ -4,5 +4,9 @@
 # This can be one of the following: "light" or "dark".
 base = "light"
 
-[ui] 
-hideTopBar = true
+[client]
+toolbarMode = "minimal"
+
+[server]
+enableCORS = false
+enableXsrfProtection = false
