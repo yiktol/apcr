@@ -21,5 +21,5 @@ if [ -d $directory/.env ];
         
 fi
 
-$directory/.env/bin/streamlit run $directory/Home.py --server.port 8094 &
+$directory/.env/bin/streamlit run $directory/Home.py --server.port 8081 &
 deactivate
