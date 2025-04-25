@@ -9,3 +9,5 @@ seaborn
 tensorflow
 requests
 tabulate
+networkx
+plotly
