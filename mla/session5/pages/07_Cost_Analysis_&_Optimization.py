@@ -1,4 +1,3 @@
-
 import streamlit as st
 import uuid
 import pandas as pd
@@ -132,14 +131,16 @@ with tabs[0]:
     for cost optimization.
     """)
     
-    # Create a tool selector
-    selected_tool = st.selectbox(
-        "Select a cost analysis tool to learn more:",
-        ["AWS Cost Explorer", "AWS Budgets", "AWS Cost & Usage Report", "AWS Trusted Advisor"]
-    )
+    # Create subtabs for cost analysis tools
+    cost_tools_tabs = st.tabs([
+        "AWS Cost Explorer", 
+        "AWS Budgets", 
+        "AWS Cost & Usage Report", 
+        "AWS Trusted Advisor"
+    ])
     
-    # Display information based on selected tool
-    if selected_tool == "AWS Cost Explorer":
+    # AWS Cost Explorer tab
+    with cost_tools_tabs[0]:
         st.subheader("AWS Cost Explorer")
         
         col1, col2 = st.columns([3, 2])
@@ -204,7 +205,8 @@ for result in response['ResultsByTime']:
                     caption="AWS Cost Explorer Dashboard", 
                     use_container_width=True)
     
-    elif selected_tool == "AWS Budgets":
+    # AWS Budgets tab
+    with cost_tools_tabs[1]:
         st.subheader("AWS Budgets")
         
         col1, col2 = st.columns([3, 2])
@@ -271,8 +273,9 @@ response = budgets_client.create_budget(
             st.image("https://docs.aws.amazon.com/images/cost-management/latest/userguide/images/AWSBudgets_Dashboard.png", 
                     caption="AWS Budgets Dashboard", 
                     use_container_width=True)
-            
-    elif selected_tool == "AWS Cost & Usage Report":
+    
+    # AWS Cost & Usage Report tab            
+    with cost_tools_tabs[2]:
         st.subheader("AWS Cost & Usage Report")
         
         col1, col2 = st.columns([3, 2])
@@ -320,8 +323,9 @@ ORDER BY
             st.image("https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2018/05/02/LakeFormationCosts-2_1.gif", 
                     caption="AWS Cost & Usage Report Analysis", 
                     use_container_width=True)
-            
-    elif selected_tool == "AWS Trusted Advisor":
+    
+    # AWS Trusted Advisor tab            
+    with cost_tools_tabs[3]:
         st.subheader("AWS Trusted Advisor")
         
         col1, col2 = st.columns([3, 2])
@@ -420,15 +424,17 @@ with tabs[1]:
     options that can significantly reduce costs while maintaining performance.
     """)
     
-    # Create a strategy selector
-    selected_strategy = st.selectbox(
-        "Select an optimization strategy to explore:",
-        ["Multi-Model Endpoints", "Multi-Container Endpoints", "Asynchronous/Serverless Inference", 
-         "AWS Inferentia", "SageMaker Neo"]
-    )
+    # Create subtabs for optimization strategies
+    optimization_tabs = st.tabs([
+        "Multi-Model Endpoints", 
+        "Multi-Container Endpoints", 
+        "Asynchronous/Serverless Inference", 
+        "AWS Inferentia", 
+        "SageMaker Neo"
+    ])
     
-    # Display information based on selected strategy
-    if selected_strategy == "Multi-Model Endpoints":
+    # Multi-Model Endpoints tab
+    with optimization_tabs[0]:
         st.subheader("Multi-Model Endpoints")
         
         col1, col2 = st.columns([3, 2])
@@ -500,7 +506,8 @@ response = mme.predict(
                 f"{savings_percent:.0f}%"
             )
     
-    elif selected_strategy == "Multi-Container Endpoints":
+    # Multi-Container Endpoints tab
+    with optimization_tabs[1]:
         st.subheader("Multi-Container Endpoints")
         
         col1, col2 = st.columns([3, 2])
@@ -577,15 +584,15 @@ response = predictor.predict(
             }
             st.table(pd.DataFrame(comparison))
     
-    elif selected_strategy == "Asynchronous/Serverless Inference":
+    # Asynchronous/Serverless Inference tab
+    with optimization_tabs[2]:
         st.subheader("Asynchronous & Serverless Inference")
         
-        strategy_type = st.radio(
-            "Select an inference type:",
-            ["Asynchronous Inference", "Serverless Inference"]
-        )
+        # Create nested tabs for Asynchronous and Serverless Inference
+        async_serverless_tabs = st.tabs(["Asynchronous Inference", "Serverless Inference"])
         
-        if strategy_type == "Asynchronous Inference":
+        # Asynchronous Inference subtab
+        with async_serverless_tabs[0]:
             col1, col2 = st.columns([3, 2])
             
             with col1:
@@ -658,7 +665,8 @@ output_path = response["OutputPath"]
                 - **No timeout constraints** - Process long-running inferences
                 """)
         
-        else:  # Serverless Inference
+        # Serverless Inference subtab
+        with async_serverless_tabs[1]:
             col1, col2 = st.columns([3, 2])
             
             with col1:
@@ -731,7 +739,8 @@ response = serverless_predictor.predict(
                     f"{savings_percent:.0f}%"
                 )
     
-    elif selected_strategy == "AWS Inferentia":
+    # AWS Inferentia tab
+    with optimization_tabs[3]:
         st.subheader("AWS Inferentia")
         
         col1, col2 = st.columns([3, 2])
@@ -818,7 +827,8 @@ predictor = model.deploy(
             - Additional compilation step required
             """)
     
-    elif selected_strategy == "SageMaker Neo":
+    # SageMaker Neo tab
+    with optimization_tabs[4]:
         st.subheader("SageMaker Neo")
         
         col1, col2 = st.columns([3, 2])
@@ -914,32 +924,17 @@ predictor = model.deploy(
     # Overall cost optimization best practices
     st.subheader("Overall Cost Optimization Best Practices")
     
-    best_practices = [
-        {
-            "title": "Right-size your instances",
-            "description": "Select the smallest instance type that meets your performance requirements. Run load tests to determine the optimal configuration."
-        },
-        {
-            "title": "Use auto-scaling",
-            "description": "Configure auto-scaling to dynamically adjust resources based on traffic patterns. This prevents over-provisioning during low-traffic periods."
-        },
-        {
-            "title": "Implement batch transformations",
-            "description": "For non-real-time needs, use batch transform jobs instead of maintaining always-on endpoints."
-        },
-        {
-            "title": "Optimize input data",
-            "description": "Reduce payload sizes and optimize preprocessing to reduce compute requirements and inference time."
-        },
-        {
-            "title": "Monitor and analyze costs",
-            "description": "Regularly review usage patterns and costs to identify optimization opportunities."
-        }
-    ]
+    st.markdown("""
+    1. **Right-size your instances** - Select the smallest instance type that meets your performance requirements. Run load tests to determine the optimal configuration.
     
-    for i, practice in enumerate(best_practices):
-        with st.expander(f"{i+1}. {practice['title']}"):
-            st.markdown(practice["description"])
+    2. **Use auto-scaling** - Configure auto-scaling to dynamically adjust resources based on traffic patterns. This prevents over-provisioning during low-traffic periods.
+    
+    3. **Implement batch transformations** - For non-real-time needs, use batch transform jobs instead of maintaining always-on endpoints.
+    
+    4. **Optimize input data** - Reduce payload sizes and optimize preprocessing to reduce compute requirements and inference time.
+    
+    5. **Monitor and analyze costs** - Regularly review usage patterns and costs to identify optimization opportunities.
+    """)
     
     # Decision tree for choosing optimization strategy
     st.subheader("Choosing the Right Optimization Strategy")
