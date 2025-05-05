@@ -1,12 +1,12 @@
 #!/usr/bin/bash
 
 # Default values for parameters
-DEFAULT_DIRECTORY=/home/ubuntu/environment/apcr/mla/session4
+DEFAULT_DIRECTORY="/home/ubuntu/environment/apcr/mla/session4"
 DEFAULT_PORT=8074
 DEFAULT_APP_FILE="Home.py"
 DEFAULT_REQUIREMENTS_FILE="requirements.txt"
 DEFAULT_APP_NAME="apcr-mla-session-4"  # Will be derived from APP_FILE if not provided
-DEFAULT_APP_USER="ubuntu"  # Current user by default
+DEFAULT_APP_USER=""  # Current user by default
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
